@@ -454,3 +454,5 @@ mark { background: #ffe58a; color: #111826; border-radius: 2px; padding: 0 1px; 
 .edit-box textarea { min-height: 64px; }
 .tag.note { background: var(--note-soft); color: var(--note); }
 .copied { color: var(--good) !important; border-color: var(--good) !important; }
+.tbl tbody tr.row-cur { background: var(--accent-soft); }
+.tbl tbody tr.row-cur td:first-child { box-shadow: inset 3px 0 0 var(--accent); }

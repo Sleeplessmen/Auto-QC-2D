@@ -645,13 +645,17 @@ $("#htable tbody").addEventListener("click", e => { const tr = e.target.closest(
 // ============================================================ guideline
 async function loadGuides() {
   await loadGuideOptions();
-  $("#gtable tbody").innerHTML = GUIDES.map(g => `<tr data-id="${g.id}"><td class="strong">${esc(g.name)}</td><td>${esc(g.file_name)}</td>
+  $("#gtable tbody").innerHTML = GUIDES.map(g => `<tr data-id="${g.id}" class="${CUR_G?.id === g.id ? "row-cur" : ""}"><td class="strong">${esc(g.name)}</td><td>${esc(g.file_name)}</td>
     <td>${g.tasks.length ? g.tasks.join(", ") : '<span class="meta">chưa gán</span>'}</td>
     <td>${g.n_labels ? `<span class="pill pass">${g.n_labels} nhãn</span>` : '<span class="pill">Chưa có luật</span>'}${g.warnings?.length ? ' <span class="pill fail" title="' + esc(g.warnings.join(" · ")) + '">cần xem lại</span>' : ""}</td>
-    <td class="r">${canQc() ? `<button class="link-danger" data-del="${g.id}">Xoá</button>` : ""}</td></tr>`).join("")
-    || `<tr><td colspan="5" class="empty-row">Chưa có guideline nào. Tải file lên ở trên.</td></tr>`;
+    <td class="r"><div class="row-btns"><button class="btn sm" data-open="${g.id}">${canQc() ? "Mở · soạn luật" : "Mở"}</button>${canQc() ? `<button class="link-danger" data-del="${g.id}">Xoá</button>` : ""}</div></td></tr>`).join("")
+    || `<tr><td colspan="5" class="empty-row">Chưa có guideline nào. Tải file guideline của dự án lên ở trên: web sẽ đọc file, chia mục để tra cứu, rồi bạn soạn luật kiểm tra ngay bên dưới.</td></tr>`;
+  // tu mo san guideline dang xem (hoac cai dau tien) de khong ai nghi trang chi co danh sach
+  const keep = CUR_G && GUIDES.find(g => g.id === CUR_G.id);
+  if (GUIDES.length) openGuide((keep || GUIDES[0]).id, false); else $("#gDetail").classList.add("hidden");
 }
 $("#gtable tbody").addEventListener("click", async e => {
+  if (e.target.dataset.open) { openGuide(+e.target.dataset.open); return; }
   if (e.target.dataset.del) {
     e.stopPropagation();
     if (await askConfirm("Xoá guideline này? File gốc và luật sẽ bị xoá.", "Xoá", "Xoá guideline?")) {
@@ -672,23 +676,27 @@ $("#gUpload").onsubmit = async e => {
   } catch (err) { $("#gUpErr").innerHTML = bad(err.message); }
 };
 
-async function openGuide(id) {
+async function openGuide(id, scroll = true) {
   const g = await api(`/api/guidelines/${id}`);
-  CUR_G = g; RULE_ATTRS = {};
+  const same = CUR_G?.id === id;
+  CUR_G = g; if (!same) RULE_ATTRS = {};
   $("#gDetail").classList.remove("hidden");
   $("#gName").textContent = g.name;
   $("#gFile").href = `/api/guidelines/${id}/file`;
   $("#gTasks").textContent = g.tasks.length ? `Đang gán cho task ${g.tasks.join(", ")}: review các task này sẽ tự dùng guideline này.` : "Chưa gán cho task nào: nhập số task ở dưới rồi bấm Gán.";
   $("#gTask").value = $("#gTask").value || $("#fTask").value || CFG.env_task_id || "";
   $("#gRules").value = g.rules;
-  $("#ruleMsg").innerHTML = g.warnings?.length ? bad("Cần xem lại: " + g.warnings.join(" · ")) : "";
-  $("#gMsg").textContent = "";
+  if (!same) {
+    $("#ruleMsg").innerHTML = g.warnings?.length ? bad("Cần xem lại: " + g.warnings.join(" · ")) : "";
+    $("#gMsg").textContent = "";
+  }
   renderRuleTable(g.rules_obj || {});
   renderSections(g.sections);
   const ro = !canQc();
   ["#gRules", "#gSave", "#gTemplate", "#gAssign", "#ruleAdd", "#ruleSave"].forEach(s => $(s).disabled = ro);
   setGTab("rules");
-  $("#gDetail").scrollIntoView({ behavior: "smooth", block: "start" });
+  $$("#gtable tbody tr").forEach(tr => tr.classList.toggle("row-cur", +tr.dataset.id === id));
+  if (scroll) $("#gDetail").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 $$(".gtabs button").forEach(b => b.onclick = () => setGTab(b.dataset.g));
 function setGTab(t) {
