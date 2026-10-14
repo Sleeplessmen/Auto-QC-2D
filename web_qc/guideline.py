@@ -296,3 +296,20 @@ class apply_to_core:
 def rider_rule(rules, default=True):
     v = (rules or {}).get("quy_tac", {}).get("nguoi_lai_co_box_rieng")
     return default if v is None else bool(v)
+
+
+def rules_to_yaml(obj):
+    """Doi tuong tu trinh soan luat dang bang -> YAML gon (bo cac o de trong)."""
+    def clean(v):
+        if isinstance(v, dict):
+            return {k: clean(x) for k, x in v.items() if x not in (None, "", [], {}) and not (isinstance(x, (int, float)) and not isinstance(x, bool) and x == 0)}
+        if isinstance(v, list):
+            return [clean(x) for x in v if x not in (None, "")]
+        return v
+    obj = obj or {}
+    out = {"nhan": {name: clean(spec or {}) for name, spec in (obj.get("nhan") or {}).items()},
+           "quy_tac": clean(obj.get("quy_tac") or {})}
+    for name in out["nhan"]:
+        if out["nhan"][name] == {}:
+            out["nhan"][name] = None
+    return yaml.safe_dump(out, allow_unicode=True, sort_keys=False)

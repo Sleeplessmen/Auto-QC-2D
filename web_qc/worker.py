@@ -1,6 +1,7 @@
 """
-worker.py — Hang doi review: 1 GPU chay lan luot tung job. Giu ket qua trong bo nho de day Issue,
-tat web roi mo lai van day duoc (dung lai tu file trong review_out/).
+worker.py — Hang doi review: 1 GPU chay lan luot tung job. Moi lan review dung 1 KET NOI CVAT (URL + token + to chuc)
+chon tren web; khong chon thi dung ket noi mac dinh. Giu ket qua trong bo nho de day Issue; tat web roi mo lai
+van day duoc (dung lai tu file trong review_out/).
 """
 import json
 import os
@@ -18,12 +19,26 @@ import store
 ENV_PATH = os.path.join(R.HERE, ".env")
 
 
-def cvat_config():
-    """Doc lai .env moi lan goi: doi CVAT_URL / TOKEN / TASK / JOB trong .env la web dung ngay."""
+def env_config():
+    """Gia tri trong cvat_2d/.env (doc lai moi lan) — dung de nhap san lam 1 ket noi va dien san so job/task."""
     e = dotenv_values(ENV_PATH) if os.path.exists(ENV_PATH) else {}
     num = lambda v: int(v) if str(v or "").strip().isdigit() else None
     return dict(url=(e.get("CVAT_URL") or "").strip(), token=(e.get("CVAT_TOKEN") or "").strip(),
-                task_id=num(e.get("CVAT_TASK_ID")), job_id=num(e.get("CVAT_JOB_ID")))
+                org=(e.get("CVAT_ORG") or "").strip(), task_id=num(e.get("CVAT_TASK_ID")), job_id=num(e.get("CVAT_JOB_ID")))
+
+
+def connection_for(cid):
+    """Ket noi (url, token, org) theo id; khong co -> ket noi mac dinh."""
+    c = store.get_connection(cid) if cid else None
+    c = c or store.default_connection()
+    if not c or not c.get("url") or not c.get("token"):
+        raise RuntimeError("Chưa có kết nối CVAT nào. Vào trang Kết nối CVAT để thêm.")
+    return c
+
+
+def cvat_client(cid):
+    c = connection_for(cid)
+    return R.Cvat(c["url"], c["token"], c.get("org") or None), c
 
 
 class Worker:
@@ -46,7 +61,7 @@ class Worker:
     def position(self, run_id):
         return self.waiting.index(run_id) + 1 if run_id in self.waiting else 0
 
-    def log_tail(self, run_id, n=80):
+    def log_tail(self, run_id, n=120):
         lines = self.logs.get(run_id)
         if lines is None:
             r = store.get_run(run_id)
@@ -63,7 +78,7 @@ class Worker:
             try:
                 self._run(run_id)
             except Exception as e:
-                self.logs[run_id].append(f"❌ LỖI: {e}")
+                self.logs.setdefault(run_id, []).append(f"❌ LỖI: {e}")
                 print(traceback.format_exc(), flush=True)
                 store.update_run(run_id, status="loi", error=str(e), finished=time.time())
             finally:
@@ -77,13 +92,18 @@ class Worker:
     def _run(self, run_id):
         run = store.get_run(run_id)
         p = run["params"] or {}
-        cb = self.logs[run_id].append
+        cb = self.logs.setdefault(run_id, []).append
         store.update_run(run_id, status="dang_chay", started=time.time())
-        cfg = cvat_config()
+        conn = connection_for(run.get("connection_id")) if run["job_id"] else None
+        if conn:
+            cb(f"Kết nối: {conn['name']} ({conn['url']}{' · tổ chức ' + conn['org'] if conn.get('org') else ''})")
         g = store.get_guideline(run["guideline_id"])
         rules, warn = G.parse_rules(g["rules"]) if g and g.get("rules") else ({}, [])
         if g:
-            cb(f"Guideline: {g['name']}" + ("" if rules else " (chưa có file luật — chỉ dùng để tra cứu)"))
+            n_rules = len(rules.get("nhan") or {})
+            cb(f"Guideline: {g['name']}" + (f" · file luật {n_rules} nhãn" if rules else " · chưa có file luật (chỉ dùng để tra cứu)"))
+        else:
+            cb("Không dùng guideline: chỉ chạy tầng 2 (so với model).")
         for w in warn:
             cb(f"  Cảnh báo file luật: {w}")
         mode = p.get("mode", "chinh_xac")
@@ -91,11 +111,27 @@ class Worker:
             self.runners[mode] = R.ToolRunner(mode, cb)
         rv = R.Review()
         with G.apply_to_core(rules, R):
-            rv.run(url=cfg["url"] if run["job_id"] else None, token=cfg["token"] if run["job_id"] else None,
+            rv.run(url=conn["url"] if conn else None, token=conn["token"] if conn else None, org=(conn or {}).get("org") or None,
                    task_id=run["task_id"], job_id=run["job_id"], zip_path=p.get("file"),
                    mode=mode, rider_person=G.rider_rule(rules, p.get("rider", True)), cb=cb,
                    runner=self.runners[mode], max_frames=p.get("max_frames"))
         store.update_run(run_id, out_dir=rv.out_dir)
+
+        # thong tin job de thong ke theo labeler
+        if rv.cvat:
+            try:
+                job = rv.cvat.job(rv.job_id)
+                a = job.get("assignee") or {}
+                meta = dict(task_id=job.get("task_id"), job_stage=job.get("stage"), job_state=job.get("state"),
+                            assignee=(a.get("username") or "") + (f" ({a['first_name']})" if a.get("first_name") else ""))
+                try:
+                    t = rv.cvat.get(f"/api/tasks/{job['task_id']}").json()
+                    meta.update(task_name=t.get("name"), project_name=(t.get("project") or {}).get("name") if isinstance(t.get("project"), dict) else None)
+                except Exception:
+                    pass
+                store.update_run(run_id, **{k: v for k, v in meta.items() if v is not None})
+            except Exception as e:
+                cb(f"  (Không lấy được thông tin job: {e})")
 
         # tang 1: kiem tra theo luat guideline (can annotation goc tu CVAT)
         if rules and rv.cvat:
@@ -118,6 +154,10 @@ class Worker:
         bad = {(f["frame"], f["ref"]) for f in rv.findings if f["sure"] and f.get("ref")}
         st.update(sure=sum(f["sure"] for f in rv.findings), unsure=sum(not f["sure"] for f in rv.findings),
                   ok=max(0, st["boxes"] - len(bad)))
+        kinds = {}
+        for f in rv.findings:
+            kinds[f["kind"]] = kinds.get(f["kind"], 0) + 1
+        st["kinds"] = kinds
         rv.stats = st
         rv.save_report()
         self.reviews[run_id] = rv
@@ -141,7 +181,8 @@ class Worker:
         rv.out_dir, rv.job_id, rv.stats = run["out_dir"], run["job_id"], res["stats"]
         rv.findings = res["findings"]
         rv.skipped_labels = res.get("skipped_labels", [])
-        pv = sorted(os.listdir(os.path.join(run["out_dir"], "preview"))) if os.path.isdir(os.path.join(run["out_dir"], "preview")) else []
+        pdir = os.path.join(run["out_dir"], "preview")
+        pv = sorted(os.listdir(pdir)) if os.path.isdir(pdir) else []
         names = {}
         for f in rv.findings:
             names.setdefault((f["frame"], f["name"]), []).append(f)
@@ -149,7 +190,7 @@ class Worker:
         for fn in pv:                         # ten preview: 0001_<ten anh>.jpg
             stem = fn.split("_", 1)[1].rsplit(".", 1)[0] if "_" in fn else fn
             key = next((k for k in names if os.path.splitext(k[1])[0][:40] == stem), (None, stem))
-            rv.frames.append((key[0], key[1], None, os.path.join(run["out_dir"], "preview", fn), names.get(key, [])))
+            rv.frames.append((key[0], key[1], None, os.path.join(pdir, fn), names.get(key, [])))
         self.reviews[run_id] = rv
         return rv
 
@@ -159,20 +200,37 @@ class Worker:
             raise RuntimeError("Không tìm thấy kết quả review này.")
         if not rv.job_id:
             raise RuntimeError("Lần review này chỉ đánh giá file, không gắn với job CVAT nên không đẩy được.")
-        cfg = cvat_config()
+        run = store.get_run(run_id)
         cb = self.logs.setdefault(run_id, []).append
         with self.push_lock:
             if rv.cvat is None:
-                rv.cvat = R.Cvat(cfg["url"], cfg["token"])
+                rv.cvat, _ = cvat_client(run.get("connection_id"))
                 rv.before = json.load(open(os.path.join(rv.out_dir, "annotations_truoc_review.json"), encoding="utf-8"))
             keep = rv.findings
-            pick = [keep[i] for i in sorted(set(ids)) if 0 <= i < len(keep)]
+            skip = {fid for fid, fb in store.get_feedback(run_id).items() if fb["verdict"] == "tool_nham"}
+            pick = [keep[i] for i in sorted(set(ids)) if 0 <= i < len(keep) and i not in skip]
             try:
                 rv.findings = pick
                 res = rv.push(include_unsure=True, replace_old=replace_old, cb=cb)
             finally:
                 rv.findings = keep
-        res["ids"] = sorted(set(ids))
+        res["ids"] = sorted(set(ids) - skip)
         res["time"] = time.time()
         store.update_run(run_id, pushed=res)
         return res
+
+    def job_issues(self, run_id):
+        """Issue do tool tao tren job cua lan review nay (de theo doi da sua hay chua)."""
+        run = store.get_run(run_id)
+        if not run or not run["job_id"]:
+            return []
+        cv, _ = cvat_client(run.get("connection_id"))
+        out = []
+        for it in cv.issues(run["job_id"]):
+            first = cv.first_comment(it["id"])
+            if not first.startswith(R.PREFIX):
+                continue
+            out.append(dict(id=it["id"], frame=it.get("frame"), resolved=bool(it.get("resolved")),
+                            message=first[len(R.PREFIX):].split(" [qc:")[0].strip(), comments=cv.comment_count(it["id"]),
+                            updated=it.get("updated_date")))
+        return out

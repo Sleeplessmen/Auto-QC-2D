@@ -362,9 +362,11 @@ def _fmt(b):
 # ---------------------------------------------------------------------------
 
 class Cvat:
-    def __init__(self, url, token):
+    def __init__(self, url, token, org=None):
         self.url = url.rstrip("/")
         self.s = requests.Session()
+        if org:                                    # CVAT co to chuc: thieu header nay se bi 401/403 hoac khong thay job
+            self.s.headers["X-Organization"] = org
         self.s.headers["Authorization"] = f"Bearer {token}"
         r = self.s.get(f"{self.url}/api/users/self", timeout=20)
         if r.status_code == 401:                   # token kieu cu (Token ...)
@@ -456,6 +458,14 @@ class Cvat:
         if not r.ok:
             raise RuntimeError(f"Tạo Issue lỗi {r.status_code}: {r.text[:300]}")
         return r.json()
+
+    def comment_count(self, issue_id):
+        return self.get("/api/comments", issue_id=issue_id, page_size=1).json().get("count", 0)
+
+    def resolve_issue(self, issue_id):
+        r = self.s.patch(f"{self.url}/api/issues/{issue_id}", json=dict(resolved=True), timeout=60)
+        if not r.ok:
+            raise RuntimeError(f"Đóng Issue {issue_id} lỗi {r.status_code}: {r.text[:200]}")
 
     def delete_issue(self, issue_id):
         r = self.s.delete(f"{self.url}/api/issues/{issue_id}", timeout=60)
@@ -622,7 +632,7 @@ class Review:
         self.out_dir = None
         self.skipped_labels = []
 
-    def run(self, url=None, token=None, task_id=None, job_id=None, zip_path=None, mode="chinh_xac",
+    def run(self, url=None, token=None, task_id=None, job_id=None, zip_path=None, mode="chinh_xac", org=None,
             rider_person=True, cb=None, runner=None, max_frames=None):
         t0 = time.time()
         ts = time.strftime("%Y%m%d_%H%M%S")
@@ -637,7 +647,7 @@ class Review:
         if self.job_id:
             if not (url and token):
                 raise RuntimeError("Có số job thì phải có CVAT_URL và CVAT_TOKEN.")
-            self.cvat = Cvat(url, token)
+            self.cvat = Cvat(url, token, org)
             log(f"Đã kết nối CVAT {url} (tài khoản {self.cvat.user.get('username')})", cb)
             job = self.cvat.job(self.job_id)
             if task_id and int(task_id) != job["task_id"]:
@@ -741,34 +751,63 @@ class Review:
                        findings=[dict(x, box=[round(v, 1) for v in x["box"]]) for x in self.findings]),
                   open(os.path.join(self.out_dir, "ket_qua_review.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
+    @staticmethod
+    def fingerprint(f):
+        """Ma on dinh cua 1 loi giua cac lan chay: frame + loai + box nguoi gan (hoac vi tri vat bi thieu)."""
+        if f.get("ref"):
+            return f"{f['frame']}|{f['kind']}|{f['ref']}"
+        x1, y1, x2, y2 = f["box"]
+        return f"{f['frame']}|{f['kind']}|@{round((x1 + x2) / 40)},{round((y1 + y2) / 40)}"
+
     def push(self, include_unsure=True, replace_old=True, cb=None):
-        """Day ghi chu len CVAT bang Issue. KHONG dung toi annotation. Tra ve dict ket qua kiem tra."""
+        """Day ghi chu len CVAT bang Issue. KHONG dung toi annotation.
+        replace_old: doi chieu voi Issue tu dong lan truoc theo dau van tay:
+          - loi van con + Issue cu dang mo -> giu Issue cu, khong tao trung
+          - loi da het -> Issue cu chua ai tra loi thi xoa, da co tra loi thi danh dau resolved (giu lich su)
+          - Issue cu da resolved, hoac do nguoi that tao -> khong dung toi."""
         if not self.cvat or not self.job_id:
             raise RuntimeError("Lần review này không gắn với job CVAT nào (chỉ đánh giá file).")
         todo = [f for f in self.findings if f["frame"] is not None and (f["sure"] or include_unsure)]
-        removed = 0
-        if replace_old:       # chi xoa Issue do CHINH tool nay tao truoc do (dung tien to + cung tai khoan)
+        want = {self.fingerprint(f): f for f in todo}
+        removed = resolved = kept = 0
+        keep_fp = set()
+        if replace_old:
             me = self.cvat.user.get("id")
             for it in self.cvat.issues(self.job_id):
                 owner = (it.get("owner") or {}).get("id")
-                if owner == me and self.cvat.first_comment(it["id"]).startswith(PREFIX):
+                if owner != me or it.get("resolved"):
+                    continue
+                first = self.cvat.first_comment(it["id"])
+                if not first.startswith(PREFIX):
+                    continue
+                m = re.search(r"\[qc:([^\]]+)\]\s*$", first)
+                fp = m.group(1) if m else None
+                if fp and fp in want:
+                    keep_fp.add(fp)
+                    kept += 1
+                    continue
+                if self.cvat.comment_count(it["id"]) > 1:
+                    self.cvat.resolve_issue(it["id"])
+                    resolved += 1
+                else:
                     self.cvat.delete_issue(it["id"])
                     removed += 1
-            if removed:
-                log(f"Đã xoá {removed} Issue review tự động cũ của lần trước.", cb)
+            log(f"Issue tự động cũ: giữ {kept} (lỗi vẫn còn), đóng {resolved} (đã có trả lời), xoá {removed}.", cb)
         made = []
-        for k, f in enumerate(todo, 1):
+        new = [f for fp, f in want.items() if fp not in keep_fp]
+        for k, f in enumerate(new, 1):
             msg = f"{PREFIX} {f['msg']}" + ("" if f["sure"] else " (không chắc — nên kiểm tra lại)")
             if f["ref"]:
                 msg += f" [{f['ref']}]"
+            msg += f" [qc:{self.fingerprint(f)}]"
             r = self.cvat.create_issue(self.job_id, f["frame"], f["box"], msg)
             made.append(r["id"])
             if k % 20 == 0:
-                log(f"  đã tạo {k}/{len(todo)} Issue", cb)
+                log(f"  đã tạo {k}/{len(new)} Issue", cb)
         json.dump(made, open(os.path.join(self.out_dir, "issue_ids.json"), "w"))
         after = self.cvat.annotations(self.job_id)
         json.dump(after, open(os.path.join(self.out_dir, "annotations_sau_review.json"), "w", encoding="utf-8"), ensure_ascii=False)
         same = canon(after) == canon(self.before)
-        log(f"Đã tạo {len(made)} Issue trên job {self.job_id}. Kiểm tra nhãn gốc: "
+        log(f"Đã tạo {len(made)} Issue mới trên job {self.job_id}. Kiểm tra nhãn gốc: "
             f"{'KHÔNG thay đổi ✔' if same else 'CÓ THAY ĐỔI ✘ (có người đang sửa job?) — xem annotations_truoc/sau_review.json'}", cb)
-        return dict(created=len(made), removed=removed, unchanged=same)
+        return dict(created=len(made), removed=removed, resolved=resolved, kept=kept, unchanged=same)

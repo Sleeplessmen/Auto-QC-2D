@@ -1,6 +1,6 @@
 # Web QC nhãn 2D — tài liệu cho nhóm
 
-Cập nhật: 2026-10-14 · Thư mục code: `sam2/cvat_2d/web_qc/` · Chạy bằng: `cvat_2d/web_qc.bat`
+Cập nhật: 2026-10-14 (bản 6: kết nối CVAT trên web, chọn job, tool nhầm, tổng quan, webhook) · Thư mục code: `sam2/cvat_2d/web_qc/` · Chạy bằng: `cvat_2d/web_qc.bat`
 
 ---
 
@@ -9,7 +9,7 @@ Cập nhật: 2026-10-14 · Thư mục code: `sam2/cvat_2d/web_qc/` · Chạy b�
 1. [Tóm tắt](#1-tóm-tắt)
 2. [Ai dùng, làm gì](#2-ai-dùng-làm-gì)
 3. [Cài đặt và chạy trên máy chủ](#3-cài-đặt-và-chạy-trên-máy-chủ)
-4. [Cấu hình `.env`](#4-cấu-hình-env)
+4. [Kết nối CVAT](#4-kết-nối-cvat)
 5. [Hướng dẫn review một job](#5-hướng-dẫn-review-một-job)
 6. [Các trang của web](#6-các-trang-của-web)
 7. [Guideline và file luật](#7-guideline-và-file-luật)
@@ -51,13 +51,17 @@ Mục 1–7 là hướng dẫn dùng. Mục 8–14 giải thích cách tool làm
 
 | Phần | Trạng thái |
 | --- | --- |
-| Web đầy đủ: đăng nhập, 3 vai trò, hàng đợi, lịch sử, guideline, cài đặt | Đã dựng, đã chạy thử |
+| Web đầy đủ: 6 trang (Tổng quan, Review job, Lịch sử, Guideline, Kết nối CVAT, Cài đặt), 3 vai trò, hàng đợi | Đã dựng, đã chạy thử |
+| Nhiều kết nối CVAT thêm trên web (URL, token mã hoá, tổ chức), chọn job từ danh sách CVAT | Đã có, đã thử với CVAT thật (bản 2.77.1) |
+| Đánh dấu "Tool nhầm", xem theo khung hình, theo dõi Issue đã đẩy, trang Tổng quan theo labeler | Đã có |
+| Chống đẩy trùng: giữ Issue cũ khi lỗi còn, đóng hoặc xoá khi lỗi hết | Đã có, đã thử với CVAT giả |
+| Webhook CVAT: job hoàn thành thì tự review | Đã có, đã thử chữ ký và lọc sự kiện, chưa thử với CVAT thật |
 | Tầng 2: so với model (4 detector + SAM2 + CLIP) | Đã có, đã đo trên 123 ảnh có đáp án (GT) |
 | Tầng 1: kiểm tra theo file luật guideline | Đã có, mới thử trên dữ liệu giả |
 | Đọc guideline PDF / DOCX / TXT / MD, tra cứu đoạn liên quan theo nhãn | Đã có, đã thử |
 | Đổi job chỉ bằng file `.env` | Đã có |
 | Review job 2D qua API và đẩy Issue thật lên CVAT | Có code, **chưa thử trên job thật** vì chưa có job 2D để thử |
-| Chống đẩy trùng thông minh, báo cáo HTML, thống kê theo labeler, kiểm tra track, webhook | Chưa làm (xem [Lộ trình](#16-lộ-trình)) |
+| Báo cáo HTML, kiểm tra track, hỏi LLM cho ca khó | Chưa làm (xem [Lộ trình](#16-lộ-trình)) |
 
 Tool không cần Claude hay dịch vụ AI trả phí nào: mọi model đều chạy trên máy chủ.
 
@@ -67,13 +71,13 @@ Tool không cần Claude hay dịch vụ AI trả phí nào: mọi model đều 
 
 Mỗi người có một tài khoản web riêng, do admin tạo. Vai trò quyết định người đó được làm gì.
 
-Tài khoản web khác với tài khoản CVAT. Mọi Issue đều được tạo bằng **một tài khoản CVAT chung** khai báo trong `.env`, nên người dùng không cần token.
+Tài khoản web khác với tài khoản CVAT. Issue được tạo bằng tài khoản CVAT của **kết nối** được chọn khi review (trang Kết nối CVAT), nên labeler không cần token.
 
 | Vai trò | Làm được | Thường là |
 | --- | --- | --- |
 | **labeler** | Chạy review, xem kết quả và lịch sử, đẩy Issue, đọc guideline, đổi mật khẩu của mình | Người gán nhãn tự kiểm tra job của mình |
-| **qc** | Mọi việc của labeler, thêm: tải lên / sửa / xoá guideline và file luật, gán guideline cho task, kiểm tra kết nối CVAT | Người review, trưởng nhóm gán nhãn |
-| **admin** | Mọi việc của qc, thêm: tạo, sửa, xoá tài khoản và đặt vai trò | Người quản lý máy chủ |
+| **qc** | Mọi việc của labeler, thêm: quản lý guideline và luật, gán guideline cho task, thêm / sửa / xoá kết nối CVAT | Người review, trưởng nhóm gán nhãn |
+| **admin** | Mọi việc của qc, thêm: quản lý tài khoản, cài đặt chung (ngưỡng đạt, webhook) | Người quản lý máy chủ |
 
 ---
 
@@ -98,9 +102,10 @@ Chỉ cần cài trên **một máy chủ**. Người dùng chỉ mở trình du
    venv\Scripts\pip install -r cvat_2d\requirements.txt
    ```
    File này đã gồm `pypdf` để đọc guideline PDF.
-2. **Tạo file cấu hình:** chép `cvat_2d\.env.example` thành `cvat_2d\.env`, rồi điền 4 biến (xem [mục 4](#4-cấu-hình-env)).
+2. **Kết nối CVAT:** sau khi đăng nhập, vào trang **Kết nối CVAT** → **Thêm kết nối**, nhập địa chỉ, token và tổ chức (nếu có), bấm **Thử kết nối** rồi **Lưu** (xem [mục 4](#4-kết-nối-cvat)).
    - Token tạo trên CVAT ở **Profile → Security → Personal Access Tokens**.
    - Nên dùng một tài khoản CVAT riêng cho tool, ví dụ `qc-bot`, và gán tài khoản này vào các task cần QC.
+   - Nếu đã có `cvat_2d\.env` (4 biến `CVAT_URL`, `CVAT_TOKEN`, `CVAT_TASK_ID`, `CVAT_JOB_ID`), web tự nhập nó thành một kết nối tên ".env trên máy chủ" khi khởi động.
 3. **Chạy web:** chạy `cvat_2d\web_qc.bat`, rồi mở `http://localhost:8000`.
 4. **Mở cho cả nhóm:**
    - Chạy `web_qc.bat --lan`. Cửa sổ sẽ in ra địa chỉ `http://<IP máy chủ>:8000` để gửi cho nhóm.
@@ -125,111 +130,94 @@ Chỉ cần cài trên **một máy chủ**. Người dùng chỉ mở trình du
 
 ---
 
-## 4. Cấu hình `.env`
+## 4. Kết nối CVAT
 
-Muốn review job nào thì sửa 4 biến trong `cvat_2d/.env`, không phải sửa code:
+Muốn review CVAT nào thì thêm một **kết nối** trên trang **Kết nối CVAT**, không phải sửa file. Có thể có nhiều kết nối cùng lúc (CVAT công ty, CVAT test, CVAT khách hàng…); khi review chỉ cần chọn kết nối ở ô đầu tiên của thanh công cụ.
 
-```
-CVAT_URL=https://cvat.ten-cong-ty.vn
-CVAT_TOKEN=<token của tài khoản qc-bot>
-CVAT_TASK_ID=123
-CVAT_JOB_ID=456
-```
-
-| Biến | Ý nghĩa |
+| Trường | Ý nghĩa |
 | --- | --- |
-| `CVAT_URL` | Địa chỉ máy CVAT (online hoặc `http://localhost:8080`) |
-| `CVAT_TOKEN` | Personal Access Token của tài khoản CVAT dùng để đọc nhãn và tạo Issue. Không bao giờ hiện lên trình duyệt |
-| `CVAT_TASK_ID` | Số task mặc định. Dùng để kiểm tra job thuộc đúng task, và để tự chọn guideline đã gán cho task đó |
-| `CVAT_JOB_ID` | Số job mặc định, được điền sẵn trên trang Review |
+| Tên gợi nhớ | Tên hiện trong danh sách, ví dụ "CVAT công ty" |
+| Địa chỉ CVAT | Ví dụ `https://cvat.ten-cong-ty.vn`. Có thừa `/api` ở cuối cũng được, web tự bỏ |
+| Token | Personal Access Token của tài khoản CVAT dùng để đọc nhãn và tạo Issue. Được **mã hoá khi lưu** bằng khoá riêng của máy chủ (`data/secret.key`) và **không bao giờ gửi xuống trình duyệt**; trên web chỉ hiện 4 ký tự cuối. Khi sửa kết nối, để trống ô token là giữ token cũ |
+| Tổ chức | Slug tổ chức trên CVAT (gửi bằng header `X-Organization`). Bấm **Thử kết nối** để thấy danh sách tổ chức của tài khoản. Để trống nếu không dùng tổ chức. Thiếu tổ chức là lý do hay gặp khiến không thấy job |
+| Mặc định | Kết nối được chọn sẵn khi mở trang Review và dùng cho webhook (nếu không chọn kết nối khác) |
 
-- **Web** đọc lại `.env` mỗi lần cần. Sửa xong chỉ cần tải lại trang (F5), không phải tắt web.
-- **Dòng lệnh:**
-  - `review.bat` không tham số thì đọc đủ 4 biến.
-  - `review.bat --job 99` chạy job khác mà không sửa file.
-  - `review.bat --env .env.class` dùng một file cấu hình khác, ví dụ cho CVAT localhost.
-- `.env` và `.env.class` đã nằm trong `.gitignore`. `.env.example` chỉ là mẫu, không chứa token thật.
+- **Thử kết nối** báo tài khoản, phiên bản CVAT, số job tài khoản thấy được và các tổ chức. Nút **Thử** trên từng dòng kiểm tra lại kết nối đã lưu.
+- File `cvat_2d/.env` vẫn dùng được: lúc khởi động, web tự nhập nó thành kết nối ".env trên máy chủ" (nếu chưa có kết nối trùng URL + token), và lấy `CVAT_JOB_ID` / `CVAT_TASK_ID` điền sẵn vào trang Review. Có thể thêm biến `CVAT_ORG` cho tổ chức.
+- **Dòng lệnh** (`review.bat`) vẫn đọc trực tiếp `.env` như trước.
+- `.env`, `.env.class` và `web_qc/data/` (chứa cơ sở dữ liệu và khoá) nằm trong `.gitignore`.
 
 ---
 
 ## 5. Hướng dẫn review một job
 
-Mỗi lần review chỉ cần số job. Toàn bộ quy trình diễn ra trên tab **Review job**.
+Toàn bộ diễn ra trên trang **Review job**.
 
 ### Chạy review
 
-1. Mở địa chỉ web nhóm được gửi và đăng nhập.
-2. Ô **CVAT_JOB_ID** và **CVAT_TASK_ID** đã điền sẵn từ `.env`.
-   - Muốn review job khác trên cùng máy CVAT thì sửa hai ô này.
-   - Task ID có thể để trống. Nếu nhập sai, tool báo lỗi và không chạy.
-3. **Guideline:** nếu task đã được gán guideline thì web tự chọn. Chọn "không dùng" thì chỉ chạy tầng so với model.
-4. **Chế độ:** "Chính xác" là mặc định. "Nhanh" chỉ dùng khi máy yếu, kém chính xác hơn.
-5. **Tuỳ chọn thêm:**
-   - **File export .zip** (CVAT for images 1.1 / COCO / YOLO): dùng khi muốn chấm từ file thay vì đọc trên CVAT. Nếu không nhập số job thì chỉ đánh giá được, không đẩy Issue được.
-   - **Chỉ chạy N frame đầu:** để thử nhanh.
-   - **Người lái xe máy có box person riêng:** nếu file luật có quy định thì theo file luật.
-   - **Xong tự đẩy lỗi chắc chắn:** chạy xong tự đẩy các lỗi chắc chắn, không chờ duyệt.
-6. Bấm **Đánh giá**. Trạng thái chuyển lần lượt:
-   - *Đang chờ (thứ N trong hàng đợi)*
-   - *Đang chạy*: khung tiến độ ghi từng frame và thời gian còn lại.
-   - *Xong* hoặc *Lỗi*.
-
-   Có thể đóng trang rồi mở lại kết quả sau ở tab Lịch sử.
+1. **Kết nối CVAT:** chọn máy CVAT ở ô đầu tiên (mặc định đã chọn sẵn).
+2. **Chọn job:** bấm **Chọn** cạnh ô Job để mở danh sách job lấy trực tiếp từ CVAT.
+   - Tìm theo tên task hoặc người gán, lọc theo giai đoạn / trạng thái, tick "Chỉ job 2D".
+   - Mỗi dòng có người được giao, số frame và **kết quả review gần nhất** của job đó.
+   - Job 3D bị khoá vì web này chỉ review 2D.
+   - Biết số job thì gõ thẳng vào ô cũng được; ô Task tự điền.
+3. **Đọc dòng ngữ cảnh** ngay dưới thanh công cụ. Nó cho biết trước khi chạy:
+   - Job nào, task nào, 2D hay 3D, giai đoạn / trạng thái, labeler.
+   - **Guideline nào sẽ được dùng và có bao nhiêu nhãn có luật** (có luật thì chạy cả tầng 1). Nếu task chưa gán guideline, dòng này báo màu vàng kèm link sang trang Guideline.
+4. **Guideline:** để "Tự chọn theo task" là dùng guideline đã gán cho task. Có thể chọn tay một guideline khác, hoặc "Không dùng guideline".
+5. **Chế độ:** "Chính xác" (mặc định do admin đặt) hoặc "Nhanh".
+6. **Tuỳ chọn:** file export .zip (khi không đọc được từ CVAT), chạy N frame đầu, người lái xe máy, tự đẩy lỗi chắc chắn.
+7. Bấm **Đánh giá**. Trạng thái: *Đang chờ (thứ N)* → *Đang chạy · ảnh 3/5* → *Xong · Đạt* hoặc *Xong · Chưa đạt*.
 
 ### Đọc kết quả
 
-- **Thẻ số liệu:** số ảnh, số box, % box không có lỗi chắc chắn (xanh khi ≥ 97%, đỏ khi thấp hơn), số lỗi, số không chắc, thời gian chạy.
-- **Bảng ghi chú:** mỗi dòng là một lỗi, gồm frame, tên ảnh, loại lỗi, mức (Lỗi / Không chắc), nhãn và nội dung. Lọc được theo loại, mức và tầng (1 = luật guideline, 2 = so với model).
-- **Bấm vào một dòng** để xem ảnh vẽ đè bên cạnh:
-  - Khung đỏ là lỗi, khung vàng là không chắc.
-  - Nét đứt là vật bị thiếu, khung xám mảnh là box của người gán.
-  - Số trên khung là thứ tự lỗi trong ảnh. Bấm vào ảnh để phóng to.
-  - Dưới ảnh là các đoạn guideline nói về nhãn đó, để so ngay.
+- **Đầu kết quả:** % box không có lỗi chắc chắn kèm nhãn Đạt / Chưa đạt, số lỗi chắc, số không chắc, số box, thời gian. Có nút **Mở job trên CVAT**, **Chạy lại**, **CSV**.
+- **Danh sách lỗi** (bên trái): lọc Tất cả / Lỗi / Không chắc / Tool nhầm, theo loại lỗi và tầng. Bấm một lỗi để xem ảnh lớn, chi tiết và **đoạn guideline nói về nhãn đó** ở bên phải.
+- **Theo khung hình:** lưới ảnh của mọi frame kèm số lỗi; bấm một ảnh để lọc danh sách theo frame đó.
+- **Issue trên CVAT:** các Issue tool đã tạo trên job, số trả lời và trạng thái *Còn mở* / *Đã xử lý* (labeler bấm Resolve trên CVAT).
 
 ### Duyệt và đẩy Issue
 
-1. **Chọn lỗi cần đẩy:**
-   - Lỗi chắc chắn được tick sẵn.
-   - Lỗi "không chắc" để trống: xem ảnh, đúng là lỗi thì tick.
-   - Thấy tool báo nhầm thì bỏ tick.
-   - Nút chọn nhanh *Chọn lỗi chắc*, *Chọn tất cả*, *Bỏ chọn* áp dụng cho các dòng đang lọc.
-2. Ô **Xoá Issue tự động của lần trước** bật sẵn. Issue do tool tạo lần trước sẽ bị xoá và thay bằng kết quả mới. Issue do người thật tạo không bị đụng tới.
-3. Bấm **Đẩy N Issue lên CVAT** rồi xác nhận. Web báo số Issue đã tạo, số Issue cũ đã xoá, và dòng **"Nhãn gốc không thay đổi ✔"**.
-4. Bấm **Tải CSV** nếu cần danh sách lỗi để lưu hoặc gửi đi.
+1. Lỗi chắc chắn được tick sẵn. Lỗi "không chắc" xem ảnh rồi tự tick.
+2. Tool báo sai thì bấm **Tool nhầm** (phím **X**), có thể ghi lý do. Lỗi bị đánh dấu sẽ bỏ tick, **không bao giờ được đẩy**, và được đếm vào tỉ lệ tool nhầm trên trang Tổng quan.
+3. Phím tắt: **↑ ↓** chuyển lỗi, **Space** chọn / bỏ, **X** tool nhầm.
+4. Ô **Đồng bộ với Issue tự động lần trước** (bật sẵn): lỗi vẫn còn thì giữ Issue cũ, không tạo trùng; lỗi đã hết thì xoá Issue cũ, hoặc đóng lại nếu labeler đã trả lời bên dưới. Issue của người review thật không bị đụng tới.
+5. Bấm **Đẩy N Issue lên CVAT** → xác nhận. Kết quả báo số Issue mới, số giữ lại, số đóng, số xoá và dòng "Nhãn gốc không đổi ✔".
 
 ### Labeler sửa trên CVAT
 
-1. Mở job. Issue hiện ghim tại đúng vị trí lỗi ở đúng frame, nội dung bắt đầu bằng `[Review tự động]`.
-2. Tự sửa nhãn rồi Resolve Issue.
-3. Chạy review lại để kiểm tra.
+1. Mở job (nút **Mở job trên CVAT**). Issue ghim tại đúng vị trí lỗi, nội dung bắt đầu bằng `[Review tự động]`.
+2. Sửa nhãn rồi Resolve Issue. Nếu thấy tool sai, trả lời ngay dưới Issue: lần chạy sau tool sẽ đóng Issue đó thay vì xoá.
+3. Chạy review lại (nút **Chạy lại**).
 
 ### Quy trình nhóm khuyến nghị
 
-1. Labeler gán xong thì tự chạy review, đọc ghi chú, sửa cho tới khi không còn lỗi chắc chắn, rồi mới nộp.
-2. Người QC chạy review lại, rồi:
-   - Xem tay tất cả lỗi "không chắc".
-   - Xem thêm ngẫu nhiên 10–20% số ảnh còn lại, vì tool bỏ sót khoảng 1/4 số lỗi.
-   - Ưu tiên ảnh ban đêm, trời mưa và cảnh đông xe.
-3. Job đạt ngưỡng (mặc định ≥ 97% box đúng) thì đạt. Chưa đạt thì đẩy Issue và trả lại cho labeler.
-
-**Vì sao nên dùng số job thay vì tải file:** với số job, tool đọc nhãn mới nhất ngay trên CVAT. Nếu labeler tải file lúc 9h nhưng sửa tiếp đến 10h rồi mới QC, Issue sẽ chỉ vào những box đã không còn. Tải file chỉ nên dùng khi không kết nối được tới CVAT.
+1. Labeler gán xong thì tự chạy review, sửa tới khi không còn lỗi chắc chắn rồi mới nộp.
+2. Người QC chạy lại, xem tay mọi lỗi "không chắc", đánh dấu Tool nhầm những chỗ tool sai, và xem thêm ngẫu nhiên 10–20% số ảnh (tool bỏ sót khoảng 1/4 số lỗi), ưu tiên ảnh đêm, mưa, đông xe.
+3. Job đạt ngưỡng (mặc định ≥ 97%, admin đổi được) thì đạt. Chưa đạt thì đẩy Issue và trả lại cho labeler.
+4. Bật webhook (mục 6) để bước 2 tự chạy ngay khi labeler chuyển job sang "completed".
 
 ---
 
 ## 6. Các trang của web
 
-Web có trang đăng nhập và 4 tab. Việc nào vượt quyền thì nút tương ứng bị khoá hoặc ẩn.
-
-| Tab | Ai dùng | Chức năng |
+| Trang | Ai dùng | Chức năng |
 | --- | --- | --- |
-| **Review job** | Mọi vai trò | Form chạy review (job, task, guideline, chế độ, file export, N frame, người lái, tự đẩy). Khung trạng thái có vị trí hàng chờ và tiến độ. Kết quả gồm: thẻ số liệu, bảng lỗi có bộ lọc và ô tick, ảnh vẽ đè, đoạn guideline liên quan, nút đẩy Issue, nút tải CSV |
-| **Lịch sử** | Mọi vai trò | Các lần review, mới nhất trên cùng: số thứ tự, job, task, người chạy, thời gian, trạng thái, % box đúng, số lỗi / không chắc, số Issue đã đẩy. Lọc được theo job. Bấm một dòng để mở lại kết quả, xem và đẩy tiếp |
-| **Guideline** | Xem: mọi vai trò. Sửa: qc, admin | Tải guideline lên. Danh sách gồm tên, file, task đang gán, có file luật hay chưa. Bấm vào một guideline để xem nội dung theo mục, ô tìm kiếm, nút mở file gốc, ô soạn file luật, nút tạo mẫu từ nhãn của task, nút gán guideline cho task |
-| **Cài đặt** | Mọi vai trò, phần tài khoản chỉ admin | Giá trị hiện tại của `.env` (token được ẩn), máy chạy GPU hay CPU, nút kiểm tra kết nối CVAT (qc trở lên), đổi mật khẩu, quản lý tài khoản (admin) |
+| **Tổng quan** | Mọi vai trò | Trong 7 / 30 / 90 ngày: số lần review, tỉ lệ đạt, % box đúng trung bình, số lỗi, Issue đã đẩy, **tỉ lệ tool nhầm**; biểu đồ loại lỗi hay gặp; xu hướng theo ngày; bảng **theo labeler** (người được giao job trên CVAT) xếp từ thấp đến cao |
+| **Review job** | Mọi vai trò | Thanh công cụ (kết nối, job + hộp chọn job, task, guideline, chế độ, tuỳ chọn), dòng ngữ cảnh, kết quả với 3 chế độ xem (danh sách lỗi + ảnh, theo khung hình, Issue trên CVAT), Tool nhầm, đẩy Issue |
+| **Lịch sử** | Mọi vai trò | Mọi lần review: job, task, labeler, người chạy (hoặc "tự động" nếu qua webhook), kết quả, % box đúng, lỗi, số tool nhầm, số Issue. Lọc theo job và theo tên |
+| **Guideline** | Xem: mọi vai trò. Sửa: qc, admin | Tải guideline lên; mỗi guideline có 3 tab: **Luật kiểm tra** (trình soạn dạng bảng), **Nội dung guideline** (tra cứu), **YAML** (nâng cao) |
+| **Kết nối CVAT** | Xem, thử: mọi vai trò. Thêm/sửa/xoá: qc, admin | Danh sách kết nối, thử kết nối, đặt mặc định, thêm / sửa |
+| **Cài đặt** | Đổi mật khẩu: mọi vai trò. Còn lại: admin | Ngưỡng đạt, chế độ mặc định, **webhook CVAT** (bật, chọn kết nối, tự đẩy, địa chỉ và secret để dán vào CVAT), tài khoản |
 
-Link của một lần review có dạng `http://<máy chủ>:8000/#run=12`, gửi cho người khác được. Họ đăng nhập xong sẽ thấy đúng kết quả đó.
+Thanh bên trái luôn hiện trạng thái: máy CVAT đang chọn, tổ chức, GPU, webhook. Link một lần review dạng `http://<máy chủ>:8000/#run=12` gửi cho người khác được.
 
-Phiên đăng nhập giữ trong 14 ngày. Mật khẩu cần ít nhất 6 ký tự.
+### Webhook CVAT (tự review khi job hoàn thành)
+
+1. Admin vào **Cài đặt** → tick **Bật webhook** → chọn kết nối → **Lưu**. Web hiện **Target URL** và **Secret**.
+2. Trên CVAT: mở Project hoặc Task → **Actions → Setup webhooks → Create** → dán Target URL và Secret, chọn sự kiện **job** (update), content type `application/json`.
+3. Khi labeler chuyển job sang **completed**, CVAT gọi sang web QC; web tự xếp một lần review vào hàng đợi (người chạy hiện là "webhook"). Nếu bật "tự đẩy", lỗi chắc chắn được đẩy luôn, không chờ người duyệt.
+4. Điều kiện: máy CVAT phải truy cập được máy chủ QC (chạy `web_qc.bat --lan`, mở tường lửa). Web kiểm chữ ký `X-Signature-256` của CVAT, sai chữ ký thì từ chối. Job 3D bị bỏ qua.
 
 ---
 
@@ -253,13 +241,14 @@ Mỗi dự án tải guideline lên **một lần**. Guideline được dùng th
 - **Tìm kiếm:** không phân biệt dấu và hoa thường ("xe may" tìm ra "Xe máy"). Có thể tìm nhiều từ cùng lúc, cách nhau dấu phẩy: `car, ô tô, occluded`.
 - **Đoạn liên quan tới một nhãn:** web tìm theo tên nhãn và các tên trong `dong_nghia` của file luật. Mục có từ đó ở tiêu đề được xếp trước.
 
-### Các bước cho trưởng nhóm (vai trò qc hoặc admin)
+### Các bước cho trưởng nhóm (vai trò qc hoặc admin) — trên tab Luật kiểm tra, không cần viết YAML
 
 1. Vào tab **Guideline**, nhập tên (ví dụ "GreenSM 2D v3"), chọn file, bấm **Tải lên**.
 2. Bấm vào tên guideline để xem nội dung theo mục và thử ô tìm kiếm.
-3. Nhập số **Task**, bấm **Tạo mẫu từ nhãn của task**. Web đọc danh sách nhãn và thuộc tính của task trên CVAT rồi tạo sẵn file luật. Tool cũng tự đoán `loai_tool` cho các nhãn quen như car, pedestrian, two-wheels.
-4. Sửa các giá trị theo guideline rồi bấm **Lưu file luật**. Nếu sai cú pháp, web báo dòng lỗi và không lưu. Nếu giá trị lạ, web lưu nhưng cảnh báo.
-5. Bấm **Gán guideline cho task**. Từ đó review job thuộc task này sẽ tự chọn guideline này.
+3. Nhập số **Task**, bấm **Lấy nhãn từ task**. Web đọc danh sách nhãn và thuộc tính của task (qua kết nối đang chọn) và điền sẵn bảng: mỗi nhãn một dòng, tự đoán cột "Tool hiểu là" cho nhãn quen (car, pedestrian, two-wheels…), thuộc tính của nhãn hiện mờ trong ô để điền cho nhanh.
+4. Điền từng cột theo guideline: kích thước tối thiểu, tỉ lệ rộng/cao, thuộc tính bắt buộc, không để mặc định, tên gọi khác, số mục; và phần **Quy tắc chung**. Bấm **Lưu luật**. Web báo nếu có giá trị lạ.
+5. Bấm **Gán guideline cho task**. Từ đó review job thuộc task này tự dùng guideline này, và dòng ngữ cảnh trên trang Review báo "Guideline: … · N nhãn có luật".
+6. Tab **YAML** cho người quen viết file luật trực tiếp; hai tab luôn đồng bộ khi lưu.
 
 ### Các khoá trong file luật
 
@@ -417,14 +406,19 @@ Mã box giúp labeler tìm đúng box. Ví dụ:
 - `[Review tự động] Box 'car' chưa khít: cạnh dưới thiếu 40px (IoU 0.78). Box đúng khoảng [...]. [shape 1234]`
 - `[Review tự động] Có thể thiếu 1 'motorcycle' ở đây. (không chắc — nên kiểm tra lại)`
 
-### Issue của lần trước
+### Đồng bộ với Issue của lần trước (chống đẩy trùng)
 
-- Khi bật "Xoá Issue tự động của lần trước", tool chỉ xoá Issue thoả **cả hai** điều kiện: do chính tài khoản trong `.env` tạo, và nội dung bắt đầu bằng `[Review tự động]`.
-- Issue của người review thật không bao giờ bị xoá.
-- **Hạn chế hiện tại:** tool xoá cả những Issue tự động mà labeler đã trả lời bên dưới. Bản sau sẽ sửa:
-  - Lỗi vẫn còn thì giữ Issue cũ.
-  - Lỗi đã hết thì resolve Issue thay vì xoá.
-  - Chỉ tạo Issue cho lỗi mới.
+Mỗi Issue tool tạo có một "dấu vân tay" ở cuối nội dung, dạng `[qc:<frame>|<loại lỗi>|<box>]` (box = mã shape/track, hoặc vị trí làm tròn với vật bị thiếu). Khi bật ô **Đồng bộ với Issue tự động lần trước**:
+
+| Tình huống | Tool làm gì |
+| --- | --- |
+| Lỗi vẫn còn và đã có Issue đang mở | Giữ Issue cũ, **không tạo trùng** |
+| Lỗi đã hết, Issue cũ chưa ai trả lời | Xoá Issue cũ |
+| Lỗi đã hết, Issue cũ đã có trả lời | **Đóng (resolved)** để giữ lịch sử trao đổi |
+| Lỗi mới | Tạo Issue mới |
+| Issue đã resolved, hoặc do người review thật / tài khoản khác tạo | Không đụng tới |
+
+Logic này đã được kiểm với một CVAT giả qua 3 lần chạy liên tiếp; chưa kiểm trên job 2D thật.
 
 ### Chứng minh không sửa nhãn
 
@@ -461,7 +455,9 @@ Mã box giúp labeler tìm đúng box. Ví dụ:
 
 **Cách đọc con số "% box không có lỗi chắc chắn"** = (số box − số box có ít nhất một lỗi chắc chắn) ÷ số box. Box chỉ có lỗi "không chắc" vẫn được tính là đúng. Lỗi "thiếu vật" không làm giảm con số này vì không gắn với box nào, nên luôn xem cả số lỗi.
 
-**Chưa làm:** báo cáo HTML để gửi, thống kê theo từng labeler (% đúng theo thời gian, loại lỗi hay gặp). Khi có thống kê, nên dùng để hướng dẫn lại đúng chỗ yếu, không dùng để phạt, vì tool vẫn còn báo nhầm.
+**Trang Tổng quan** tổng hợp các lần review theo labeler (người được giao job trên CVAT), loại lỗi hay gặp, xu hướng theo ngày và **tỉ lệ tool nhầm** (từ các đánh dấu Tool nhầm). Nên dùng để hướng dẫn lại đúng chỗ yếu, không dùng để phạt, vì tool vẫn còn báo nhầm.
+
+**Chưa làm:** báo cáo HTML để gửi.
 
 ---
 
@@ -499,7 +495,8 @@ Tool đủ tin để thay phần lớn công kiểm tra thô, nhưng **chưa tha
 
 **Đã làm:**
 
-- `CVAT_TOKEN` chỉ nằm trong `.env` trên máy chủ. Web không có ô nhập token, không bao giờ gửi token xuống trình duyệt.
+- Token CVAT nhập trên trang Kết nối được **mã hoá khi lưu** (khoá riêng `data/secret.key`, mã hoá luồng HMAC-SHA256 kèm nonce ngẫu nhiên) và không bao giờ gửi xuống trình duyệt; web chỉ hiện 4 ký tự cuối. Ai có cả file cơ sở dữ liệu **và** `secret.key` thì vẫn giải mã được, nên giữ kín thư mục `web_qc/data/`.
+- Chỉ qc và admin thêm / sửa kết nối; webhook kiểm chữ ký `X-Signature-256` của CVAT.
 - Đăng nhập bắt buộc, có 3 vai trò.
   - Mật khẩu được lưu dạng băm (PBKDF2-SHA256), không lưu mật khẩu gốc.
   - Đăng nhập sai bị chậm lại 1 giây mỗi lần.
@@ -520,14 +517,16 @@ Tool đủ tin để thay phần lớn công kiểm tra thô, nhưng **chưa tha
 
 | Thông báo hoặc hiện tượng | Nguyên nhân | Cách xử lý |
 | --- | --- | --- |
-| "Token sai hoặc đã hết hạn (CVAT trả 401)" | Token sai, hết hạn hoặc bị thu hồi | Tạo token mới trên CVAT, sửa `CVAT_TOKEN` trong `.env`, tải lại trang |
+| "Token sai hoặc đã hết hạn (CVAT trả 401)" | Token sai, hết hạn hoặc bị thu hồi | Tạo token mới trên CVAT, vào Kết nối CVAT → Sửa → dán token mới → Lưu |
+| Hộp chọn job trống / "Không có job nào" | Thiếu tổ chức, hoặc tài khoản chưa được giao job | Sửa kết nối, điền tổ chức (bấm Thử kết nối để xem tên tổ chức) |
+| "Chưa có kết nối CVAT nào" | Chưa thêm kết nối | Vào trang Kết nối CVAT → Thêm kết nối |
+| Webhook không chạy | CVAT không gọi tới được máy chủ, webhook đang tắt, hoặc sai secret | Chạy `--lan`, mở tường lửa, bật webhook trong Cài đặt, dán đúng Secret vào CVAT |
 | "Tài khoản '…' không có quyền vào …" | Tài khoản của token chưa được gán vào task/job đó | Nhờ admin CVAT thêm tài khoản vào task |
 | "Không tìm thấy … trên CVAT (sai số job/task?)" | Sai số job, hoặc job ở máy CVAT khác | Kiểm tra số job và `CVAT_URL` |
 | "Job X thuộc task Y, không phải task Z" | `CVAT_TASK_ID` không khớp với job | Sửa số task, hoặc để trống ô task |
 | "Đây là job 3D…" | Web này chỉ review job 2D | Dùng bộ tool 3D trong `cvat_3d/` |
 | "Không nhãn nào của job khớp với loại tool nhận ra" | Tên nhãn của task lạ với tool | Trong file luật, khai `loai_tool` (và `dong_nghia`) cho từng nhãn |
 | "Tool KHÔNG đánh giá được các nhãn: …" | Nhãn ngoài 7 loại tool hiểu (Animal, Obstacle…) | Bình thường. Các nhãn này chỉ được kiểm ở tầng 1 |
-| "Máy chủ chưa có CVAT_TOKEN trong file .env" | Chưa điền token | Điền `CVAT_TOKEN` vào `.env` |
 | "Lần review này chỉ đánh giá file…" khi bấm đẩy | Review từ file export mà không nhập số job | Chạy lại review theo số job |
 | "File gần như không có chữ" khi tải guideline | PDF dạng ảnh scan | Xuất lại PDF có chữ, hoặc dùng DOCX |
 | "File luật sai cú pháp YAML…" | Thụt lề sai, thiếu dấu `:` hoặc ngoặc | Sửa đúng dòng được báo. Dùng dấu cách, không dùng Tab |
@@ -595,13 +594,21 @@ Mọi API (trừ đăng nhập) cần cookie phiên. Lỗi trả về dạng `{"
 | --- | --- | --- |
 | `POST /api/login`, `POST /api/logout`, `GET /api/me` | — | Đăng nhập, đăng xuất, xem mình là ai |
 | `POST /api/password` | Mọi vai trò | Đổi mật khẩu của mình |
-| `GET /api/config` | Mọi vai trò | Giá trị `.env` (không có token), máy chạy, guideline của task mặc định |
-| `GET /api/cvat/test` | qc | Thử kết nối CVAT và job mặc định |
+| `GET /api/config` | Mọi vai trò | Danh sách kết nối (token che), kết nối mặc định, job/task trong `.env`, máy chạy, ngưỡng đạt |
+| `GET/POST /api/connections`, `PUT/DELETE /api/connections/{id}`, `POST /api/connections/{id}/default` | Xem: mọi vai trò. Sửa: qc | Quản lý kết nối CVAT |
+| `POST /api/connections/test` | qc | Thử kết nối theo id hoặc theo URL + token vừa nhập |
+| `GET /api/connections/{id}/jobs?page&search&stage&state&dimension`, `GET /api/connections/{id}/jobs/{jid}` | Mọi vai trò | Danh sách job trên CVAT (kèm review gần nhất), thông tin một job |
+| `GET /api/dashboard?days=` | Mọi vai trò | Số liệu trang Tổng quan |
+| `GET/PUT /api/settings` | admin | Ngưỡng đạt, chế độ mặc định, webhook |
+| `POST /api/webhook/cvat` | CVAT (chữ ký) | Nhận sự kiện job hoàn thành → tự xếp review |
 | `POST /api/runs` | Mọi vai trò | Tạo lần review (form: job_id, task_id, guideline_id, mode, rider, max_frames, auto_push, file) |
 | `GET /api/runs?job_id=` | Mọi vai trò | Lịch sử |
 | `GET /api/runs/{id}` | Mọi vai trò | Trạng thái, vị trí chờ, log, lỗi, frame, đoạn guideline |
 | `GET /api/runs/{id}/preview/{file}`, `GET /api/runs/{id}/report.csv` | Mọi vai trò | Ảnh xem trước, file CSV |
-| `POST /api/runs/{id}/push` | Mọi vai trò | Đẩy các lỗi được chọn (`ids`, `replace_old`) |
+| `POST /api/runs/{id}/push` | Mọi vai trò | Đẩy các lỗi được chọn (`ids`, `replace_old`), bỏ qua lỗi đã đánh dấu tool nhầm |
+| `POST /api/runs/{id}/feedback` | Mọi vai trò | Đánh dấu / bỏ đánh dấu "tool nhầm" (`finding_id`, `verdict`, `note`) |
+| `GET /api/runs/{id}/issues` | Mọi vai trò | Issue tool đã tạo trên job, trạng thái resolved, số trả lời |
+| `POST /api/runs/{id}/rerun` | Mọi vai trò | Chạy lại với cùng thiết lập |
 | `GET/POST /api/guidelines`, `GET/DELETE /api/guidelines/{id}` | Xem: mọi vai trò. Tải lên, xoá: qc | Danh sách, tải lên, chi tiết, xoá |
 | `GET /api/guidelines/{id}/file`, `GET /api/guidelines/{id}/search?q=` | Mọi vai trò | File gốc, tìm kiếm |
 | `PUT /api/guidelines/{id}/rules`, `POST …/template`, `POST …/tasks` | qc | Lưu file luật, tạo mẫu từ nhãn task, gán cho task |
@@ -648,13 +655,13 @@ Mọi API (trừ đăng nhập) cần cookie phiên. Lỗi trả về dạng `{"
 | --- | --- | --- | --- |
 | 1. Web + guideline | Web đầy đủ, 3 vai trò, hàng đợi, lịch sử, đọc và tra cứu guideline, tầng 1 theo file luật, đổi job bằng `.env` | Chạy thử không cần CVAT ổn, đọc được CVAT | **Đã xong** |
 | 2. Thử trên job 2D thật | Tạo job 2D nhỏ có vài lỗi cố ý, review theo số job, đẩy Issue thật, kiểm frame và vị trí, chạy tầng 1 trên nhãn thật | Issue hiện đúng chỗ, nhãn gốc không đổi | **Đang chờ job 2D** |
-| 3. Hoàn thiện | Chống đẩy trùng (giữ / resolve Issue cũ), báo cáo HTML, thống kê theo labeler, kiểm tra track, webhook CVAT để tự chạy khi job hoàn thành | 2–3 labeler dùng thử 1 tuần ổn định | Chưa làm |
+| 3. Hoàn thiện | ~~Chống đẩy trùng~~, ~~thống kê theo labeler~~, ~~webhook CVAT~~, ~~kết nối nhiều CVAT, chọn job~~, ~~tool nhầm~~ (đã xong 2026-10-14); còn lại: báo cáo HTML, kiểm tra track | 2–3 labeler dùng thử 1 tuần ổn định | **Phần lớn đã xong** |
 | 4. Nâng model | Gom dữ liệu giao thông Việt Nam gán amodal (đêm, mưa, đông xe), fine-tune detector, đo lại bằng `review_eval.py` | Tỉ lệ bỏ sót dưới ngưỡng nhóm chọn | Chưa làm, cần dữ liệu |
 
 ### Việc cần chuẩn bị cho giai đoạn 2
 
 - [ ] Có một job **2D** để thử, trên CVAT online hoặc localhost. CVAT localhost hiện đang trống.
-- [ ] Tạo tài khoản CVAT `qc-bot`, tạo token, điền 4 biến vào `cvat_2d/.env`.
+- [ ] Tạo tài khoản CVAT `qc-bot`, tạo token, thêm thành một kết nối trên trang Kết nối CVAT (điền tổ chức nếu có).
 - [ ] Một task nhỏ khoảng 10 ảnh, chia 2 job (một job bắt đầu từ frame 0, một job bắt đầu giữa task), gán nhãn có cố ý vài lỗi.
 - [ ] File guideline thật của dự án (tên nhãn, thuộc tính bắt buộc, kích thước tối thiểu) để soạn file luật đầu tiên.
 

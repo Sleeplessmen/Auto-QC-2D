@@ -323,3 +323,100 @@ mark { background: #ffe58a; color: #111826; border-radius: 2px; padding: 0 1px; 
 .dialog p { color: var(--ink-2); font-size: 13.5px; }
 .dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+
+/* ================================ BAN 6: CHUC NANG DAY DU ================================ */
+.sp { flex: 1; }
+.mt { margin-top: 18px; }
+.btn.sm { height: 30px; padding: 0 10px; font-size: 12.5px; }
+.w-job { width: 190px; }
+.input-group { display: flex; }
+.input-group input { border-radius: var(--r) 0 0 var(--r); min-width: 0; }
+.input-group .btn { border-radius: 0 var(--r) var(--r) 0; border-left: 0; padding: 0 10px; }
+.job-ctx { flex-basis: 100%; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+.job-ctx:empty { display: none; }
+.job-ctx .chip { display: inline-flex; align-items: center; gap: 6px; height: 24px; padding: 0 9px; border-radius: 999px; background: var(--sunken); border: 1px solid var(--line); color: var(--ink-2); font-size: 12px; white-space: nowrap; }
+.job-ctx .chip.ok { background: var(--good-soft); color: var(--good); border-color: transparent; }
+.job-ctx .chip.bad { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+.job-ctx .chip.warn { background: var(--warn-soft); color: var(--warn); border-color: transparent; }
+.runhead-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+
+.workbench { display: flex; flex-direction: column; height: auto; }
+.wb-head { display: flex; align-items: center; gap: 12px; padding: 0 14px; border-bottom: 1px solid var(--line); flex-wrap: wrap; }
+.tabs-inline { display: flex; gap: 2px; overflow-x: auto; }
+.tabs-inline button { font: 500 13px var(--sans); border: 0; background: none; color: var(--muted); padding: 12px 10px 10px; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; }
+.tabs-inline button:hover { color: var(--ink); }
+.tabs-inline button.on { color: var(--ink); border-bottom-color: var(--accent); }
+.chip-filter { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 3px 4px 3px 10px; }
+.chip-filter button { border: 0; background: none; color: inherit; cursor: pointer; font-size: 14px; line-height: 1; padding: 0 6px; }
+.wb-body { display: grid; grid-template-columns: minmax(340px, 440px) minmax(0, 1fr); height: max(540px, calc(100vh - 380px)); min-height: 0; }
+.wb-pane { padding: 14px 16px; max-height: max(540px, calc(100vh - 380px)); overflow: auto; }
+.pane-tools { display: flex; align-items: center; gap: 12px; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; }
+.seg button { padding: 5px 6px; }
+.fi.fp { opacity: .55; }
+.fi.fp .fi-msg { text-decoration: line-through; }
+.fp-badge { font-size: 11px; font-weight: 600; color: var(--muted); background: var(--sunken); border: 1px dashed var(--line-2); border-radius: 4px; padding: 0 5px; }
+.detail-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
+.detail-actions input { height: 30px; font-size: 12.5px; flex: 1; min-width: 160px; }
+.btn.fp-on { background: var(--sunken); border-style: dashed; color: var(--muted); }
+.frame-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+.frame-card { border: 1px solid var(--line); border-radius: var(--r); overflow: hidden; cursor: pointer; background: var(--panel); text-align: left; padding: 0; font: inherit; color: inherit; }
+.frame-card:hover { border-color: var(--accent); }
+.frame-card img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; background: var(--viewer); }
+.frame-card .fc-meta { display: flex; align-items: center; gap: 6px; padding: 8px 10px; font-size: 12px; }
+.frame-card .fc-name { color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; font-family: var(--mono); font-size: 11px; }
+.frame-card.clean { opacity: .7; }
+@media (max-width: 1050px) { .wb-body { grid-template-columns: minmax(0, 1fr); height: auto; } .wb-body .wb-list { border-right: 0; border-bottom: 1px solid var(--line); } .wb-body .flist { max-height: 420px; } .wb-body .wb-view { overflow: visible; } }
+
+/* --- tong quan --- */
+.kpis-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); margin-top: 0; background: var(--panel); box-shadow: var(--shadow); }
+@media (max-width: 1100px) { .kpis-6 { grid-template-columns: repeat(3, minmax(0, 1fr)); } .kpis-6 .kpi { border-top: 1px solid var(--line); } }
+@media (max-width: 600px) { .kpis-6 { grid-template-columns: 1fr 1fr; } }
+.dash-grid { margin-top: 14px; }
+.seg-inline { display: inline-flex; }
+.seg-inline button { flex: none; padding: 5px 12px; }
+.panel-head.padded { padding: 14px 18px 0; margin-bottom: 10px; }
+.bars { display: grid; gap: 9px; }
+.bar-row { display: grid; grid-template-columns: 120px minmax(0, 1fr) 46px; align-items: center; gap: 10px; font-size: 13px; }
+.bar-row .bar { height: 10px; background: var(--sunken); border-radius: 3px; overflow: hidden; }
+.bar-row .bar i { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.bar-row .n { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+.trend { display: flex; align-items: flex-end; gap: 4px; height: 170px; padding-top: 10px; border-bottom: 1px solid var(--line); }
+.trend .t-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; min-width: 0; }
+.trend .t-bar { width: 100%; max-width: 28px; background: var(--accent); border-radius: 3px 3px 0 0; min-height: 2px; }
+.trend .t-bar.low { background: var(--bad); }
+.trend .t-lab { font: 10.5px var(--mono); color: var(--faint); margin-top: 4px; white-space: nowrap; }
+.empty-note { color: var(--muted); font-size: 13px; padding: 20px 0; text-align: center; }
+.pbar { display: inline-block; width: 70px; height: 6px; background: var(--sunken); border-radius: 3px; vertical-align: middle; margin-left: 8px; overflow: hidden; }
+.pbar i { display: block; height: 100%; background: var(--good); }
+.pbar.low i { background: var(--bad); }
+
+/* --- guideline: trinh soan luat --- */
+.gtabs { border-bottom: 1px solid var(--line); margin: 0 -20px 16px; padding: 0 12px; }
+.rule-tools { display: flex; align-items: flex-end; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.rule-tbl td { padding: 6px 8px; vertical-align: middle; }
+.rule-tbl th { padding: 8px; }
+.rule-tbl input, .rule-tbl select { height: 32px; font-size: 13px; padding: 0 8px; }
+.rule-tbl .in-name { min-width: 130px; font-family: var(--mono); font-size: 12.5px; }
+.rule-tbl .in-num { width: 72px; text-align: right; }
+.rule-tbl .in-ratio { display: flex; align-items: center; gap: 4px; }
+.rule-tbl .in-ratio input { width: 60px; }
+.rule-tbl .in-txt { min-width: 140px; }
+.rule-tbl .in-muc { width: 64px; }
+.rule-general { display: flex; flex-wrap: wrap; gap: 16px 24px; align-items: flex-end; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+.rule-general h3 { flex-basis: 100%; margin: 0; }
+.gpane textarea { min-height: 360px; font: 12.5px/1.6 var(--mono); resize: vertical; }
+
+/* --- ket noi --- */
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 12px; }
+@media (max-width: 800px) { .form-grid { grid-template-columns: 1fr; } }
+.row-btns { display: flex; gap: 6px; justify-content: flex-end; }
+.hook-box { background: var(--sunken); border: 1px solid var(--line); border-radius: var(--r); padding: 12px; font-size: 12.5px; color: var(--ink-2); display: grid; gap: 6px; }
+.hook-box:empty { display: none; }
+.hook-box code { word-break: break-all; }
+
+/* --- hop chon job --- */
+.dialog.wide { max-width: 980px; max-height: calc(100vh - 40px); display: flex; flex-direction: column; }
+.jp-table { margin-top: 12px; flex: 1; min-height: 200px; max-height: 60vh; }
+.jp-table tbody tr.dis td { color: var(--faint); }
+.jp-foot { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+.rule-general .fld { width: 190px; }
