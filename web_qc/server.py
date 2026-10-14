@@ -363,7 +363,16 @@ def delete_user(name: str, u=Depends(need("admin"))):
     return {}
 
 
-app.mount("/", StaticFiles(directory=os.path.join(HERE, "static"), html=True), name="static")
+class NoCacheStatic(StaticFiles):
+    """Trinh duyet luon hoi lai may chu (304 neu file khong doi) -> sua giao dien xong nguoi dung thay ngay, khong can Ctrl+F5."""
+
+    async def get_response(self, path, scope):
+        resp = await super().get_response(path, scope)
+        resp.headers["Cache-Control"] = "no-cache"
+        return resp
+
+
+app.mount("/", NoCacheStatic(directory=os.path.join(HERE, "static"), html=True), name="static")
 
 
 def main():
