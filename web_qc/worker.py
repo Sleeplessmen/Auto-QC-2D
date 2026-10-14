@@ -61,6 +61,25 @@ class Worker:
     def position(self, run_id):
         return self.waiting.index(run_id) + 1 if run_id in self.waiting else 0
 
+    def _frames_left(self, run_id):
+        """So anh con phai cham cua 1 lan review (dang chay: theo log [i/n]; dang cho: theo goi y luc tao)."""
+        import re
+        for line in reversed(self.logs.get(run_id, [])):
+            m = re.search(r"\[(\d+)/(\d+)\]", line)
+            if m:
+                return int(m.group(2)) - int(m.group(1))
+        r = store.get_run(run_id) or {}
+        p = r.get("params") or {}
+        return p.get("max_frames") or p.get("frames_hint") or 50
+
+    def eta(self, run_id):
+        """Uoc luong so giay den khi lan review nay xong (gom ca cac lan dung truoc trong hang doi)."""
+        spi = store.avg_sec_per_image()
+        ahead = ([self.current] if self.current and self.current != run_id else []) + \
+                self.waiting[:self.waiting.index(run_id)] if run_id in self.waiting else []
+        total = sum(self._frames_left(r) for r in ahead) + self._frames_left(run_id)
+        return round(total * spi + (20 if not self.runners else 0))
+
     def log_tail(self, run_id, n=120):
         lines = self.logs.get(run_id)
         if lines is None:
@@ -194,7 +213,7 @@ class Worker:
         self.reviews[run_id] = rv
         return rv
 
-    def push(self, run_id, ids, replace_old=True):
+    def push(self, run_id, ids, replace_old=True, note_ids=(), summary=False, report_url=None):
         rv = self.review_obj(run_id)
         if rv is None:
             raise RuntimeError("Không tìm thấy kết quả review này.")
@@ -208,7 +227,29 @@ class Worker:
                 rv.before = json.load(open(os.path.join(rv.out_dir, "annotations_truoc_review.json"), encoding="utf-8"))
             keep = rv.findings
             skip = {fid for fid, fb in store.get_feedback(run_id).items() if fb["verdict"] == "tool_nham"}
-            pick = [keep[i] for i in sorted(set(ids)) if 0 <= i < len(keep) and i not in skip]
+            edits = store.get_edits(run_id)
+            pick = []
+            for i in sorted(set(ids)):
+                if 0 <= i < len(keep) and i not in skip:
+                    f = dict(keep[i])
+                    if i in edits:                      # nguoi review da sua loi nhan
+                        f["msg"] = edits[i]
+                    pick.append(f)
+            want_notes = set(note_ids or ())
+            for n in store.get_notes(run_id):           # ghi chu tay cua nguoi review (khung ve tren anh)
+                if n["id"] in want_notes:
+                    pick.append(dict(kind="ghi_chu", sure=True, label="", box=n["box"], ref=f"note {n['id']}",
+                                     msg=n["msg"], frame=n["frame"], name=n["name"]))
+            if summary and (pick or rv.frames):
+                st = rv.stats or {}
+                pct = st["ok"] / st["boxes"] if st.get("boxes") else 0
+                thr = store.get_settings()["pass_threshold"]
+                frame0 = min((f["frame"] for f in pick if f["frame"] is not None), default=rv.frames[0][0] if rv.frames else 0)
+                text = (f"QC lần #{run_id}: {pct:.1%} box không có lỗi chắc chắn, {'ĐẠT' if pct >= thr else 'CHƯA ĐẠT'} ngưỡng {thr:.0%}. "
+                        f"Đẩy {len(pick)} ghi chú cần xem.")
+                if report_url:
+                    text += f" Danh sách lỗi kèm ảnh: {report_url}"
+                pick.append(dict(kind="tong_ket", sure=True, label="", box=[4, 4, 64, 64], ref=f"run {run_id}", msg=text, frame=frame0, name=""))
             try:
                 rv.findings = pick
                 res = rv.push(include_unsure=True, replace_old=replace_old, cb=cb)

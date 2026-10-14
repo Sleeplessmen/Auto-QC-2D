@@ -36,6 +36,11 @@ create table if not exists feedback(
   run_id integer, finding_id integer, verdict text, note text, username text, ts real,
   primary key(run_id, finding_id));
 create table if not exists settings(key text primary key, value text);
+create table if not exists notes(
+  id integer primary key autoincrement, run_id integer, frame integer, name text, box text, msg text,
+  username text, ts real);
+create table if not exists edits(run_id integer, finding_id integer, msg text, username text, ts real,
+  primary key(run_id, finding_id));
 """
 RUN_EXTRA = {"connection_id": "integer", "job_name": "text", "task_name": "text", "project_name": "text",
              "assignee": "text", "job_stage": "text", "job_state": "text", "source": "text"}
@@ -296,6 +301,51 @@ def get_feedback(run_id):
 def feedback_counts():
     with conn() as c:
         return {r["run_id"]: r["n"] for r in c.execute("select run_id, count(*) n from feedback where verdict='tool_nham' group by run_id")}
+
+
+# ---------------------------------------------------------------- ghi chu tay + sua loi nhan
+def add_note(run_id, frame, name, box, msg, username):
+    with _lock, conn() as c:
+        cur = c.execute("insert into notes(run_id,frame,name,box,msg,username,ts) values(?,?,?,?,?,?,?)",
+                        (run_id, frame, name, json.dumps([round(float(v), 1) for v in box]), msg, username, time.time()))
+        return cur.lastrowid
+
+
+def update_note(note_id, msg):
+    with _lock, conn() as c:
+        c.execute("update notes set msg=? where id=?", (msg, note_id))
+
+
+def del_note(note_id):
+    with _lock, conn() as c:
+        c.execute("delete from notes where id=?", (note_id,))
+
+
+def get_notes(run_id):
+    with conn() as c:
+        return [dict(id=r["id"], frame=r["frame"], name=r["name"], box=json.loads(r["box"]), msg=r["msg"], username=r["username"], ts=r["ts"])
+                for r in c.execute("select * from notes where run_id=? order by id", (run_id,))]
+
+
+def set_edit(run_id, finding_id, msg, username):
+    with _lock, conn() as c:
+        if msg:
+            c.execute("insert or replace into edits values(?,?,?,?,?)", (run_id, finding_id, msg, username, time.time()))
+        else:
+            c.execute("delete from edits where run_id=? and finding_id=?", (run_id, finding_id))
+
+
+def get_edits(run_id):
+    with conn() as c:
+        return {r["finding_id"]: r["msg"] for r in c.execute("select * from edits where run_id=?", (run_id,))}
+
+
+def avg_sec_per_image(default=1.5):
+    """Toc do trung binh tu 20 lan review gan nhat (de uoc luong thoi gian cho)."""
+    with conn() as c:
+        rs = [json.loads(r["stats"]) for r in c.execute("select stats from runs where status='xong' and stats is not null order by id desc limit 20")]
+    sp = [s["giay"] / s["frames"] for s in rs if s.get("frames") and s.get("giay")]
+    return sum(sp) / len(sp) if sp else default
 
 
 # ---------------------------------------------------------------- guideline

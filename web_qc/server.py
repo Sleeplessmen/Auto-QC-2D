@@ -72,11 +72,42 @@ def need(role):
 
 
 def num(v):
-    return int(v) if str(v or "").strip().lstrip("-").isdigit() else None
+    """'12' / 12 -> 12; 0 la so hop le (frame dau tien thuong la 0); rong / chu -> None."""
+    s = "" if v is None else str(v).strip()
+    return int(s) if s.lstrip("-").isdigit() else None
 
 
 def pct_of(stats):
     return (stats["ok"] / stats["boxes"]) if stats and stats.get("boxes") else None
+
+
+def report_token(run_id):
+    """Ma bi mat cho link bao cao gui labeler (khong can dang nhap). Doi secret.key la moi link cu het hieu luc."""
+    return hmac.new(store.secret_key().encode(), f"report:{run_id}".encode(), hashlib.sha256).hexdigest()[:24]
+
+
+def report_url(request, run_id):
+    return str(request.base_url).rstrip("/") + f"/bao-cao.html?run={run_id}&t={report_token(run_id)}"
+
+
+def _findings_of(run):
+    p = os.path.join(run.get("out_dir") or "", "ket_qua_review.json")
+    if not os.path.exists(p):
+        return []
+    return json.load(open(p, encoding="utf-8")).get("findings", [])
+
+
+def compare_prev(run):
+    """So voi lan review xong gan nhat truoc do cua cung job: bao nhieu loi da sua / con / moi (theo dau van tay)."""
+    if not run.get("job_id"):
+        return None
+    prev = next((r for r in store.list_runs(job_id=run["job_id"]) if r["id"] < run["id"] and r["status"] == "xong"), None)
+    if not prev:
+        return None
+    fp = R.Review.fingerprint
+    a = {fp(f) for f in _findings_of(prev) if f.get("frame") is not None}
+    b = {fp(f) for f in _findings_of(run) if f.get("frame") is not None}
+    return dict(prev_id=prev["id"], prev_pct=pct_of(prev.get("stats")), fixed=len(a - b), still=len(a & b), new=len(b - a))
 
 
 # ------------------------------------------------------------------ dang nhap
@@ -282,13 +313,19 @@ def create_run(job_id: str = Form(""), task_id: str = Form(""), guideline_id: st
     jid, tid, cid = num(job_id), num(task_id), num(connection_id)
     if not jid and not (file and file.filename):
         raise HTTPException(400, "Chọn một job, hoặc tải lên file export.")
+    frames_hint = None
     if jid:
         cid = connection_for(cid)["id"]
+        try:                                     # so frame de uoc luong thoi gian cho trong hang doi
+            cv, _ = cvat_client(cid)
+            frames_hint = cv.job(jid).get("frame_count")
+        except Exception:
+            pass
     gid = num(guideline_id)
     if gid is None and guideline_id != "0":
         gid = store.task_guideline(tid)
     params = dict(mode="nhanh" if mode == "nhanh" else "chinh_xac", rider=rider == "1", max_frames=num(max_frames),
-                  auto_push=auto_push == "1", push_unsure=push_unsure == "1")
+                  auto_push=auto_push == "1", push_unsure=push_unsure == "1", frames_hint=frames_hint)
     run_id = store.new_run(jid, tid, u["username"], params, gid or None, cid if jid else None)
     if file and file.filename:
         if not file.filename.lower().endswith(".zip"):
@@ -297,6 +334,12 @@ def create_run(job_id: str = Form(""), task_id: str = Form(""), guideline_id: st
         with open(path, "wb") as f:
             shutil.copyfileobj(file.file, f)
         params["file"] = path
+        try:                                     # so anh trong file -> uoc luong thoi gian cho
+            import zipfile
+            with zipfile.ZipFile(path) as z:
+                params["frames_hint"] = sum(1 for n in z.namelist() if n.lower().endswith((".jpg", ".jpeg", ".png", ".bmp", ".webp")))
+        except Exception:
+            pass
         store.update_run(run_id, params=params)
     worker.submit(run_id)
     return dict(id=run_id)
@@ -318,6 +361,11 @@ def rerun(run_id: int, u=Depends(user)):
 def _run_public(r):
     r = dict(r)
     r["position"] = worker.position(r["id"])
+    if r["status"] in ("cho", "dang_chay"):
+        try:
+            r["eta"] = worker.eta(r["id"])
+        except Exception:
+            r["eta"] = None
     r["pct"] = pct_of(r.get("stats"))
     r.pop("out_dir", None)
     if r.get("params"):
@@ -337,7 +385,7 @@ def runs(job_id: str = "", u=Depends(user)):
 
 
 @app.get("/api/runs/{run_id}")
-def run_detail(run_id: int, u=Depends(user)):
+def run_detail(run_id: int, request: Request, u=Depends(user)):
     r = store.get_run(run_id)
     if not r:
         raise HTTPException(404, "Không có lần review này.")
@@ -372,7 +420,56 @@ def run_detail(run_id: int, u=Depends(user)):
                     d["guideline_refs"][lb] = G.find_related(g["text"], G.words_for(rules, lb))
             d["skipped_labels"] = rv.skipped_labels
     d["feedback"] = store.get_feedback(run_id)
+    d["notes"] = store.get_notes(run_id)
+    d["edits"] = store.get_edits(run_id)
+    if r["status"] == "xong":
+        d["compare"] = compare_prev(r)
+        d["report_url"] = report_url(request, run_id)
     return d
+
+
+# ------------------------------------------------------------------ ghi chu tay + sua loi nhan (nguoi review)
+def _msg(body, limit=500):
+    m = (body.get("msg") or "").strip()
+    if len(m) > limit:
+        raise HTTPException(400, f"Ghi chú dài quá {limit} ký tự.")
+    return m
+
+
+@app.post("/api/runs/{run_id}/notes")
+def add_note(run_id: int, body: dict, u=Depends(user)):
+    if not store.get_run(run_id):
+        raise HTTPException(404, "Không có lần review này.")
+    box = body.get("box") or []
+    if len(box) != 4 or box[2] - box[0] < 2 or box[3] - box[1] < 2:
+        raise HTTPException(400, "Kéo một khung trên ảnh để đánh dấu chỗ cần ghi chú.")
+    msg = _msg(body)
+    if not msg:
+        raise HTTPException(400, "Nhập nội dung ghi chú.")
+    nid = store.add_note(run_id, num(body.get("frame")), body.get("name") or "", box, msg, u["username"])
+    return dict(id=nid, notes=store.get_notes(run_id))
+
+
+@app.put("/api/runs/{run_id}/notes/{nid}")
+def edit_note(run_id: int, nid: int, body: dict, u=Depends(user)):
+    msg = _msg(body)
+    if not msg:
+        raise HTTPException(400, "Nhập nội dung ghi chú.")
+    store.update_note(nid, msg)
+    return store.get_notes(run_id)
+
+
+@app.delete("/api/runs/{run_id}/notes/{nid}")
+def delete_note(run_id: int, nid: int, u=Depends(user)):
+    store.del_note(nid)
+    return store.get_notes(run_id)
+
+
+@app.put("/api/runs/{run_id}/findings/{fid}")
+def edit_finding(run_id: int, fid: int, body: dict, u=Depends(user)):
+    """Nguoi review sua loi nhan cua tool truoc khi day (trong = tro ve loi nhan goc)."""
+    store.set_edit(run_id, fid, _msg(body), u["username"])
+    return store.get_edits(run_id)
 
 
 def _run_dir(run_id):
@@ -409,11 +506,60 @@ def feedback(run_id: int, body: dict, u=Depends(user)):
 
 
 @app.post("/api/runs/{run_id}/push")
-def push(run_id: int, body: dict, u=Depends(user)):
+def push(run_id: int, body: dict, request: Request, u=Depends(user)):
     ids = [int(i) for i in body.get("ids", [])]
-    if not ids:
+    note_ids = [int(i) for i in body.get("note_ids", [])]
+    if not ids and not note_ids and not body.get("summary"):
         raise HTTPException(400, "Chưa chọn ghi chú nào để đẩy.")
-    return worker.push(run_id, ids, replace_old=bool(body.get("replace_old", True)))
+    return worker.push(run_id, ids, replace_old=bool(body.get("replace_old", True)), note_ids=note_ids,
+                       summary=bool(body.get("summary")), report_url=report_url(request, run_id))
+
+
+# ------------------------------------------------------------------ trang bao cao cho labeler (khong can dang nhap, co ma)
+def _check_token(run_id, t):
+    if not t or not hmac.compare_digest(t, report_token(run_id)):
+        raise HTTPException(403, "Link báo cáo không đúng hoặc đã hết hiệu lực.")
+
+
+@app.get("/api/public/runs/{run_id}")
+def public_run(run_id: int, t: str = ""):
+    _check_token(run_id, t)
+    r = store.get_run(run_id)
+    if not r or r["status"] != "xong":
+        raise HTTPException(404, "Lần review này chưa xong.")
+    rv = worker.review_obj(run_id)
+    fb = store.get_feedback(run_id)
+    edits = store.get_edits(run_id)
+    pushed = set((r.get("pushed") or {}).get("ids") or [])
+    pv_name = {base: os.path.basename(pv) for n, base, _, pv, _ in rv.frames}       # tim anh theo ten file
+    items = []
+    for i, f in enumerate(rv.findings):
+        if fb.get(i, {}).get("verdict") == "tool_nham":
+            continue
+        if pushed and i not in pushed:                   # da day roi thi chi hien nhung loi da day
+            continue
+        items.append(dict(frame=f["frame"], name=f["name"], kind_vi=R.KIND_VI.get(f["kind"], f["kind"]), sure=f["sure"],
+                          label=f["label"], box=[round(v) for v in f["box"]], msg=edits.get(i, f["msg"]),
+                          preview=pv_name.get(f["name"])))
+    for n in store.get_notes(run_id):
+        items.append(dict(frame=n["frame"], name=n["name"], kind_vi="Ghi chú người review", sure=True, label="", box=n["box"],
+                          msg=n["msg"], preview=pv_name.get(n["name"])))
+    c = store.get_connection(r.get("connection_id"), with_token=False) if r.get("connection_id") else None
+    base = f"{c['url']}/tasks/{r['task_id']}/jobs/{r['job_id']}" if c and r.get("task_id") and r.get("job_id") else None
+    g = store.get_guideline(r["guideline_id"])
+    return dict(id=r["id"], job_id=r["job_id"], task_name=r.get("task_name") or (f"Task {r['task_id']}" if r.get("task_id") else ""),
+                assignee=r.get("assignee"), created=r["created"], stats=r["stats"], pct=pct_of(r["stats"]),
+                threshold=store.get_settings()["pass_threshold"], cvat_job_url=base, guideline_name=g["name"] if g else None,
+                items=sorted(items, key=lambda x: (x["frame"] if x["frame"] is not None else 1e9, not x["sure"])), compare=compare_prev(r))
+
+
+@app.get("/api/public/runs/{run_id}/preview/{fn}")
+def public_preview(run_id: int, fn: str, t: str = ""):
+    _check_token(run_id, t)
+    p = os.path.join(_run_dir(run_id), "preview", os.path.basename(fn))
+    if not os.path.exists(p):
+        raise HTTPException(404, "Không có ảnh.")
+    return FileResponse(p)
 
 
 @app.get("/api/runs/{run_id}/issues")

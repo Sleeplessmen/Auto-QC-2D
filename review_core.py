@@ -612,6 +612,7 @@ def draw_review(img, lab, finds, path):
 
 
 KIND_VI = {"sai_kich_thuoc": "Sai kích thước", "sai_nhan": "Sai nhãn", "thieu": "Thiếu", "thua": "Thừa", "trung": "Trùng",
+           "ghi_chu": "Ghi chú người review", "tong_ket": "Tổng kết",
            "guideline": "Vi phạm guideline"}
 
 
@@ -706,8 +707,19 @@ class Review:
 
         runner = runner or ToolRunner(mode, cb)
         st = dict(frames=0, boxes=0, ok=0, sure=0, unsure=0)
+        from concurrent.futures import ThreadPoolExecutor
+        pool = ThreadPoolExecutor(max_workers=4)
+        futs = {}
+
+        def prefetch(i):
+            if i < len(items) and i not in futs:
+                futs[i] = pool.submit(items[i][2])
+
+        for i in range(4):
+            prefetch(i)
         for idx, (n, base, loader, boxes) in enumerate(items, 1):
-            img = loader()
+            prefetch(idx + 3)
+            img = futs.pop(idx - 1).result()
             H, W = img.shape[:2]
             lab = [b for b in boxes if b["label"] in job_group]
             rot = [b for b in lab if abs(b.get("rotation") or 0) > 0.5]
@@ -733,6 +745,7 @@ class Review:
             log(f"[{idx}/{len(items)}] frame {n if n is not None else '-'} {base[:40]}: {len(lab)} box, "
                 f"{sum(f['sure'] for f in finds)} lỗi, {sum(not f['sure'] for f in finds)} không chắc "
                 f"(còn ~{el / idx * (len(items) - idx) / 60:.1f} phút)", cb)
+        pool.shutdown(wait=False, cancel_futures=True)
         st["giay"] = round(time.time() - t0, 1)
         self.stats = st
         self.save_report()
@@ -796,7 +809,8 @@ class Review:
         made = []
         new = [f for fp, f in want.items() if fp not in keep_fp]
         for k, f in enumerate(new, 1):
-            msg = f"{PREFIX} {f['msg']}" + ("" if f["sure"] else " (không chắc — nên kiểm tra lại)")
+            kind = KIND_VI.get(f["kind"], f["kind"])
+            msg = f"{PREFIX} [{kind}] {f['msg']}" + ("" if f["sure"] else " (không chắc — nên kiểm tra lại)")
             if f["ref"]:
                 msg += f" [{f['ref']}]"
             msg += f" [qc:{self.fingerprint(f)}]"

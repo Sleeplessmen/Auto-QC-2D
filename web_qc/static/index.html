@@ -6,7 +6,7 @@
 <title>QC nhãn 2D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=8">
+<link rel="stylesheet" href="style.css?v=10">
 </head>
 <body>
 
@@ -28,6 +28,9 @@
   <symbol id="i-redo" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7L20 8"/><path d="M20 3v5h-5"/></symbol>
   <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
   <symbol id="i-flag" viewBox="0 0 24 24"><path d="M5 21V4M5 4h11l-2 4 2 4H5"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="12" rx="1" stroke-dasharray="3 2"/><path d="M8 21l4-4 4 4"/></symbol>
 </svg>
 
 <!-- ================================ DANG NHAP ================================ -->
@@ -155,9 +158,11 @@
             <div class="runhead-title">
               <h2 id="runTitle">Lần review</h2>
               <p id="runMeta" class="meta"></p>
+              <div id="runCompare" class="compare"></div>
             </div>
             <div class="runhead-actions">
               <a id="openCvat" class="btn sm hidden" target="_blank" rel="noopener"><svg class="ic"><use href="#i-ext"/></svg>Mở job trên CVAT</a>
+              <button id="copyReport" class="btn sm hidden" type="button" title="Trang xem lỗi kèm ảnh cho labeler, không cần đăng nhập"><svg class="ic"><use href="#i-link"/></svg>Link cho labeler</button>
               <button id="rerunBtn" class="btn sm" type="button"><svg class="ic"><use href="#i-redo"/></svg>Chạy lại</button>
               <a id="csv" class="btn sm" href="#"><svg class="ic"><use href="#i-download"/></svg>CSV</a>
               <span id="runStatus" class="pill"></span>
@@ -187,6 +192,7 @@
                   <button type="button" data-v="1">Lỗi <b id="cSure"></b></button>
                   <button type="button" data-v="0">Không chắc <b id="cUnsure"></b></button>
                   <button type="button" data-v="fp">Tool nhầm <b id="cFp"></b></button>
+                  <button type="button" data-v="note">Ghi chú <b id="cNote"></b></button>
                 </div>
                 <div class="wb-filters">
                   <select id="fKind" aria-label="Loại lỗi"><option value="">Mọi loại lỗi</option></select>
@@ -200,13 +206,21 @@
                 </div>
               </div>
               <ul id="flist" class="flist" tabindex="0" aria-label="Danh sách lỗi"></ul>
-              <p class="kbd-hint"><kbd>↑</kbd><kbd>↓</kbd> chuyển · <kbd>Space</kbd> chọn/bỏ · <kbd>X</kbd> tool nhầm</p>
+              <p class="kbd-hint"><kbd>↑</kbd><kbd>↓</kbd> chuyển · <kbd>Space</kbd> chọn/bỏ · <kbd>X</kbd> tool nhầm · <kbd>N</kbd> ghi chú trên ảnh</p>
             </div>
             <div class="wb-view">
-              <div id="pvBox" class="viewer"><div class="viewer-empty">Chọn một lỗi bên trái để xem ảnh.</div></div>
-              <div class="legend" aria-hidden="true">
-                <span><i class="lg lg-bad"></i>Lỗi</span><span><i class="lg lg-warn"></i>Không chắc</span><span><i class="lg lg-miss"></i>Vật bị thiếu</span><span><i class="lg lg-lab"></i>Box người gán</span>
+              <div class="viewer-bar">
+                <div class="legend" aria-hidden="true">
+                  <span><i class="lg lg-bad"></i>Lỗi</span><span><i class="lg lg-warn"></i>Không chắc</span><span><i class="lg lg-miss"></i>Vật bị thiếu</span><span><i class="lg lg-lab"></i>Box người gán</span><span><i class="lg lg-cur"></i>Đang xem</span><span><i class="lg lg-note"></i>Ghi chú</span>
+                </div>
+                <button type="button" class="btn sm" id="drawBtn" title="Kéo một khung trên ảnh để ghi chú cho labeler (phím N)"><svg class="ic"><use href="#i-note"/></svg>Ghi chú trên ảnh</button>
               </div>
+              <div id="pvBox" class="viewer"><div class="viewer-empty">Chọn một lỗi bên trái để xem ảnh.</div></div>
+              <form id="noteForm" class="note-form hidden">
+                <label class="fld" for="noteText"><span>Ghi chú cho labeler tại khung vừa vẽ <em>sẽ đẩy lên CVAT thành Issue ghim đúng chỗ này</em></span>
+                  <textarea id="noteText" rows="2" maxlength="500" placeholder="vd: Xe này bị che một nửa, cần đóng box ước lượng toàn bộ xe (guideline 2.1)"></textarea></label>
+                <div class="row-actions"><button type="submit" class="btn primary sm">Lưu ghi chú</button><button type="button" class="btn sm" id="noteCancel">Huỷ</button><span class="meta">Ghi chú tự được chọn để đẩy.</span></div>
+              </form>
               <div id="detail" class="detail"></div>
               <div id="gRef" class="gref-wrap"></div>
             </div>
@@ -222,7 +236,8 @@
           </div>
 
           <div class="actionbar">
-            <label class="chk" for="replaceOld" title="Lỗi vẫn còn: giữ Issue cũ. Lỗi đã hết: xoá Issue cũ, hoặc đóng lại nếu đã có người trả lời."><input type="checkbox" id="replaceOld" checked><span>Đồng bộ với Issue tự động lần trước</span></label>
+            <label class="chk" for="replaceOld" title="Lỗi vẫn còn: giữ Issue cũ. Lỗi đã hết: xoá Issue cũ, hoặc đóng lại nếu đã có người trả lời."><input type="checkbox" id="replaceOld" checked><span>Đồng bộ với Issue lần trước</span></label>
+            <label class="chk" for="addSummary" title="Thêm 1 Issue tổng kết: % box đúng, đạt hay chưa, kèm link trang lỗi cho labeler"><input type="checkbox" id="addSummary" checked><span>Kèm Issue tổng kết</span></label>
             <span id="pushRes" class="meta push-res"></span>
             <button id="pushBtn" class="btn primary" type="button"><svg class="ic"><use href="#i-upload"/></svg><span id="pushLabel">Đẩy Issue lên CVAT</span></button>
           </div>
@@ -407,6 +422,6 @@
   </div>
 </div>
 <div id="modal" class="modal zoom hidden"><img id="modalImg" alt="Ảnh phóng to"></div>
-<script src="app.js?v=9"></script>
+<script src="app.js?v=10"></script>
 </body>
 </html>

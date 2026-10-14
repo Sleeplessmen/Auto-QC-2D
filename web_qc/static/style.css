@@ -420,3 +420,37 @@ mark { background: #ffe58a; color: #111826; border-radius: 2px; padding: 0 1px; 
 .jp-table tbody tr.dis td { color: var(--faint); }
 .jp-foot { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
 .rule-general .fld { width: 190px; }
+
+/* ================================ BAN 7: CONG CU CUA NGUOI REVIEW ================================ */
+:root { --note: #8b5cf6; --note-soft: #f1ecfe; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --note: #b39dfb; --note-soft: #2a2046; } }
+:root[data-theme="dark"] { --note: #b39dfb; --note-soft: #2a2046; }
+.compare { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.compare:empty { display: none; }
+.compare .c { display: inline-flex; align-items: center; height: 22px; padding: 0 8px; border-radius: 999px; font-size: 12px; background: var(--sunken); border: 1px solid var(--line); color: var(--ink-2); }
+.compare .c.good { background: var(--good-soft); color: var(--good); border-color: transparent; }
+.compare .c.bad { background: var(--bad-soft); color: var(--bad); border-color: transparent; }
+.viewer-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.viewer { position: relative; }
+.stage { position: relative; display: inline-block; max-width: 100%; line-height: 0; }
+.stage img { display: block; max-width: 100%; max-height: 56vh; width: auto; height: auto; cursor: zoom-in; }
+.stage svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.stage.drawing img, .stage.drawing svg { cursor: crosshair; }
+.ov-cur { fill: rgba(47, 95, 232, .12); stroke: #4d7cff; stroke-width: 4; stroke-dasharray: 14 8; vector-effect: non-scaling-stroke; }
+.ov-note { fill: rgba(139, 92, 246, .14); stroke: #a07cff; stroke-width: 3; vector-effect: non-scaling-stroke; }
+.ov-note.cur { stroke-width: 4; stroke-dasharray: 10 6; }
+.ov-draft { fill: rgba(139, 92, 246, .2); stroke: #a07cff; stroke-width: 2; stroke-dasharray: 6 4; vector-effect: non-scaling-stroke; }
+.lg-cur { border: 2px dashed #4d7cff; } .lg-note { border: 2px solid #a07cff; background: rgba(139, 92, 246, .15); }
+#drawBtn.on { background: var(--note-soft); border-color: var(--note); color: var(--note); }
+.note-form { border: 1px solid var(--note); background: var(--note-soft); border-radius: var(--r); padding: 12px; display: grid; gap: 8px; }
+.note-form textarea { min-height: 60px; }
+.fi.note { border-left-color: var(--note); }
+.fi.note .fi-kind { color: var(--note); }
+.edited-badge { font-size: 11px; font-weight: 600; color: var(--accent); background: var(--accent-soft); border-radius: 4px; padding: 0 5px; }
+.zoom-wrap { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 14px; align-items: start; }
+.zoom-wrap canvas { width: 220px; max-width: 40vw; border-radius: var(--r); border: 1px solid var(--line); background: var(--viewer); display: block; }
+@media (max-width: 600px) { .zoom-wrap { grid-template-columns: 1fr; } .zoom-wrap canvas { width: 100%; max-width: none; } }
+.edit-box { display: grid; gap: 8px; margin-top: 6px; }
+.edit-box textarea { min-height: 64px; }
+.tag.note { background: var(--note-soft); color: var(--note); }
+.copied { color: var(--good) !important; border-color: var(--good) !important; }

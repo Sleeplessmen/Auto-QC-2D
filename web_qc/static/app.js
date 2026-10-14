@@ -196,7 +196,8 @@ document.addEventListener("click", e => { const p = $("#optPop"); if (p.open && 
 
 function openRun(id) {
   showTab("review");
-  RUN = id; RUN_DATA = null; CUR_F = null; FRAME_FILTER = null; FEEDBACK = {}; SELECTED.clear();
+  RUN = id; RUN_DATA = null; CUR_F = null; FRAME_FILTER = null; FEEDBACK = {}; NOTES = []; EDITS = {}; CUR_NAME = null; DRAFT = null; SELECTED.clear();
+  $("#frameFilter").classList.add("hidden"); $("#runCompare").innerHTML = ""; $("#copyReport").classList.add("hidden"); $("#noteForm").classList.add("hidden");
   location.hash = "run=" + id;
   $("#runEmpty").classList.add("hidden");
   $("#runPanel").classList.remove("hidden");
@@ -234,7 +235,8 @@ async function poll() {
   bar.className = "progress-bar" + (r.status === "xong" ? " done" : r.status === "loi" ? " fail" : "");
   const st = $("#runStatus");
   st.className = "pill " + r.status;
-  st.textContent = STATUS[r.status] + (r.status === "cho" && r.position ? ` · thứ ${r.position} trong hàng đợi` : r.status === "dang_chay" && m ? ` · ảnh ${m[1]}/${m[2]}` : "");
+  const eta = r.eta != null ? (r.eta < 60 ? ` · còn ~${Math.max(5, Math.round(r.eta / 5) * 5)} giây` : ` · còn ~${Math.round(r.eta / 60)} phút`) : "";
+  st.textContent = STATUS[r.status] + (r.status === "cho" && r.position ? ` · thứ ${r.position} trong hàng đợi` : r.status === "dang_chay" && m ? ` · ảnh ${m[1]}/${m[2]}` : "") + eta;
   const log = $("#runLog");
   const atBottom = log.scrollTop + log.clientHeight >= log.scrollHeight - 10;
   log.textContent = (r.log || []).join("\n") + (r.error ? `\n❌ ${r.error}` : "");
@@ -246,8 +248,22 @@ async function poll() {
 }
 
 // ============================================================ ket qua
+// Moi dong trong danh sach la 1 "muc": loi cua tool (id = "0","1",…) hoac ghi chu tay cua nguoi review (id = "n12").
+let NOTES = [], EDITS = {}, DRAW = false, DRAFT = null;
+const isNote = id => String(id).startsWith("n");
+const isFp = id => !isNote(id) && FEEDBACK[id]?.verdict === "tool_nham";
+const frameOf = name => RUN_DATA.frames.find(fr => fr.name === name);
+function noteItems() {
+  return NOTES.map(n => ({ id: "n" + n.id, nid: n.id, note: true, frame: n.frame, name: n.name, kind_vi: "Ghi chú người review", sure: true,
+    label: "", tang: 0, box: n.box.map(Math.round), msg: n.msg, ref: null, username: n.username,
+    preview: (frameOf(n.name)?.preview || "").split("/").pop() || null }));
+}
+function allItems() { return RUN_DATA.findings.map(f => ({ ...f, id: String(f.id) })).concat(noteItems()); }
+const itemById = id => allItems().find(f => f.id === String(id));
+const msgOf = f => (!f.note && EDITS[f.id]) || f.msg;
+
 function showResult(r) {
-  RUN_DATA = r; FEEDBACK = r.feedback || {};
+  RUN_DATA = r; FEEDBACK = r.feedback || {}; NOTES = r.notes || []; EDITS = r.edits || {};
   $("#runResult").classList.remove("hidden");
   const s = r.stats || {}, pct = r.pct ?? 0, pass = pct >= THR(), sec = s.giay || 0;
   $("#stats").innerHTML = `
@@ -255,15 +271,21 @@ function showResult(r) {
     <div class="kpi ${s.sure ? "bad" : ""}"><div class="v">${s.sure ?? 0}</div><div class="k">Lỗi chắc chắn</div></div>
     <div class="kpi ${s.unsure ? "warn" : ""}"><div class="v">${s.unsure ?? 0}</div><div class="k">Không chắc, cần xem</div></div>
     <div class="kpi"><div class="v">${s.boxes ?? 0}</div><div class="k">Box trong ${s.frames ?? 0} ảnh</div></div>
-    <div class="kpi"><div class="v">${sec < 90 ? Math.round(sec) + "s" : (sec / 60).toFixed(1) + "m"}</div><div class="k">Thời gian chạy</div></div>`;
+    <div class="kpi"><div class="v">${sec < 90 ? Math.round(sec) + "s" : (sec / 60).toFixed(1) + "m"}</div><div class="k">Thời gian chạy · ${s.frames ? (sec / s.frames).toFixed(1) : "?"}s/ảnh</div></div>`;
   $("#runStatus").className = "pill " + (pass ? "pass" : "fail");
   $("#runStatus").textContent = pass ? "Xong · Đạt" : "Xong · Chưa đạt";
   if (r.skipped_labels?.length) $("#runMeta").textContent = runMeta(r) + ` · tool không đánh giá được nhãn: ${r.skipped_labels.join(", ")}`;
+  const c = r.compare;
+  $("#runCompare").innerHTML = c ? `<span class="c">So với lần #${c.prev_id}${c.prev_pct != null ? " (" + pctTxt(c.prev_pct) + ")" : ""}</span>` +
+    `<span class="c good">Đã sửa ${c.fixed}</span><span class="c ${c.still ? "bad" : ""}">Còn ${c.still}</span><span class="c ${c.new ? "bad" : ""}">Mới ${c.new}</span>` : "";
+  $("#copyReport").classList.toggle("hidden", !r.report_url);
   $("#fKind").innerHTML = `<option value="">Mọi loại lỗi</option>` + [...new Set(r.findings.map(f => f.kind_vi))].map(k => `<option>${esc(k)}</option>`).join("");
   SELECTED.clear();
-  r.findings.forEach(f => { if (f.sure && !isFp(f.id)) SELECTED.add(f.id); });   // mac dinh: chon loi chac (tru tool nham)
+  r.findings.forEach(f => { if (f.sure && !isFp(String(f.id))) SELECTED.add(String(f.id)); });   // mac dinh: chon loi chac (tru tool nham)
+  NOTES.forEach(n => SELECTED.add("n" + n.id));
   $("#csv").href = `/api/runs/${r.id}/report.csv`;
   $("#pushBtn").disabled = !r.job_id;
+  $("#drawBtn").disabled = !r.frames.length;
   $("#pushRes").innerHTML = r.pushed ? pushedText(r.pushed) : r.job_id ? "" : "Review từ file nên không đẩy Issue được. Chạy lại theo số job để đẩy.";
   updateCounts();
   renderList();
@@ -271,21 +293,21 @@ function showResult(r) {
   if (first) select(first.id);
   else { $("#pvBox").innerHTML = `<div class="viewer-empty">Không có lỗi nào. Job đạt yêu cầu.</div>`; $("#detail").innerHTML = ""; $("#gRef").innerHTML = ""; }
 }
-const isFp = id => FEEDBACK[id]?.verdict === "tool_nham";
 function updateCounts() {
-  const F = RUN_DATA.findings;
-  $("#cAll").textContent = F.length;
+  const F = RUN_DATA.findings.map(f => ({ ...f, id: String(f.id) }));
+  $("#cAll").textContent = F.length + NOTES.length;
   $("#cSure").textContent = F.filter(f => f.sure && !isFp(f.id)).length;
   $("#cUnsure").textContent = F.filter(f => !f.sure && !isFp(f.id)).length;
   $("#cFp").textContent = F.filter(f => isFp(f.id)).length;
+  $("#cNote").textContent = NOTES.length;
 }
 
 let SURE_FILTER = "";
 function filtered() {
   const k = $("#fKind").value, t = $("#fTang").value;
-  return RUN_DATA.findings.filter(f =>
-    (!k || f.kind_vi === k) && (!t || String(f.tang) === t) && (!FRAME_FILTER || f.name === FRAME_FILTER) &&
-    (SURE_FILTER === "" || (SURE_FILTER === "fp" ? isFp(f.id) : !isFp(f.id) && String(+f.sure) === SURE_FILTER)));
+  return allItems().filter(f =>
+    (!k || f.kind_vi === k || f.note) && (!t || String(f.tang) === t || f.note) && (!FRAME_FILTER || f.name === FRAME_FILTER) &&
+    (SURE_FILTER === "" || (SURE_FILTER === "fp" ? isFp(f.id) : SURE_FILTER === "note" ? f.note : !f.note && !isFp(f.id) && String(+f.sure) === SURE_FILTER)));
 }
 ["#fKind", "#fTang"].forEach(s => $(s).onchange = renderList);
 $$("#segSure button").forEach(b => b.onclick = () => {
@@ -296,75 +318,202 @@ $$("#segSure button").forEach(b => b.onclick = () => {
 function renderList() {
   const rows = filtered();
   $("#flist").innerHTML = rows.map(f => `
-    <li class="fi s${+f.sure}${f.id === CUR_F ? " cur" : ""}${isFp(f.id) ? " fp" : ""}" data-id="${f.id}">
-      <input type="checkbox" aria-label="Chọn lỗi ${f.id + 1}" ${SELECTED.has(f.id) ? "checked" : ""} ${isFp(f.id) ? "disabled" : ""}>
+    <li class="fi ${f.note ? "note" : "s" + (+f.sure)}${f.id === CUR_F ? " cur" : ""}${isFp(f.id) ? " fp" : ""}" data-id="${f.id}">
+      <input type="checkbox" aria-label="Chọn mục ${esc(f.id)}" ${SELECTED.has(f.id) ? "checked" : ""} ${isFp(f.id) ? "disabled" : ""}>
       <div>
-        <div class="fi-top"><span class="fi-kind">${esc(f.kind_vi)}</span><span class="fi-lab">${esc(f.label)}</span>${f.tang === 1 ? '<span class="fi-tier">luật</span>' : ""}${isFp(f.id) ? '<span class="fp-badge">tool nhầm</span>' : ""}<span class="fi-frame">${f.frame != null ? "F" + f.frame : "#" + (f.id + 1)}</span></div>
-        <div class="fi-msg">${esc(f.msg)}</div>
+        <div class="fi-top"><span class="fi-kind">${f.note ? "Ghi chú" : esc(f.kind_vi)}</span>${f.label ? `<span class="fi-lab">${esc(f.label)}</span>` : ""}${f.tang === 1 ? '<span class="fi-tier">luật</span>' : ""}${isFp(f.id) ? '<span class="fp-badge">tool nhầm</span>' : ""}${!f.note && EDITS[f.id] ? '<span class="edited-badge">đã sửa</span>' : ""}<span class="fi-frame">${f.frame != null ? "F" + f.frame : ""}</span></div>
+        <div class="fi-msg">${esc(msgOf(f))}</div>
       </div>
-    </li>`).join("") || `<li class="fl-empty">Không có lỗi nào với bộ lọc này.</li>`;
+    </li>`).join("") || `<li class="fl-empty">Không có mục nào với bộ lọc này.</li>`;
   updatePush();
 }
 $("#flist").addEventListener("click", e => {
   const li = e.target.closest("li[data-id]");
   if (!li) return;
-  const id = +li.dataset.id;
+  const id = li.dataset.id;
   if (e.target.type === "checkbox") { e.target.checked ? SELECTED.add(id) : SELECTED.delete(id); return updatePush(); }
   select(id);
 });
 function select(id) {
-  CUR_F = id;
+  CUR_F = String(id);
   $$("#flist .fi.cur").forEach(x => x.classList.remove("cur"));
-  const li = $(`#flist li[data-id="${id}"]`);
+  const li = $(`#flist li[data-id="${CUR_F}"]`);
   if (li) { li.classList.add("cur"); li.scrollIntoView({ block: "nearest" }); }
-  showFinding(RUN_DATA.findings[id]);
+  const f = itemById(CUR_F);
+  if (f) showFinding(f);
 }
 
+// --- khung xem anh: anh co ve san loi + lop SVG ve khung dang xem va ghi chu tay ---
+let CUR_NAME = null;
 function showFinding(f) {
-  $("#pvBox").innerHTML = f.preview
-    ? `<img src="/api/runs/${RUN}/preview/${encodeURIComponent(f.preview)}" alt="Ảnh frame ${f.frame ?? ""} có vẽ lỗi" title="Bấm để phóng to">`
-    : `<div class="viewer-empty">Không có ảnh xem trước cho lỗi này.</div>`;
-  const fb = FEEDBACK[f.id];
-  $("#detail").innerHTML = `
-    <div class="detail-head"><span class="tag s${+f.sure}">${f.sure ? "Lỗi" : "Không chắc"}</span><span class="tag k">${esc(f.kind_vi)}</span><span class="tag k">${esc(f.label)}</span>${f.tang === 1 ? '<span class="tag k">Tầng 1 · luật</span>' : '<span class="tag k">Tầng 2 · model</span>'}</div>
-    <div class="detail-msg">${esc(f.msg)}</div>
-    <div class="detail-meta">${f.frame != null ? "frame " + f.frame + " · " : ""}${esc(f.name)} · box [${f.box.join(", ")}]${f.ref ? " · " + esc(f.ref) : ""}</div>
-    <div class="detail-actions">
-      <button type="button" class="btn sm ${fb ? "fp-on" : ""}" id="fpBtn"><svg class="ic"><use href="#i-flag"/></svg>${fb ? "Bỏ đánh dấu tool nhầm" : "Tool nhầm"}</button>
-      <input id="fpNote" placeholder="Lý do (không bắt buộc), vd: xe trong gương" value="${esc(fb?.note || "")}" aria-label="Lý do tool nhầm">
-      ${fb ? `<span class="meta">đánh dấu bởi ${esc(fb.username)}</span>` : ""}
-    </div>`;
-  $("#fpBtn").onclick = () => toggleFp(f.id, $("#fpNote").value);
-  const refs = RUN_DATA.guideline_refs?.[f.label] || [];
-  $("#gRef").innerHTML = RUN_DATA.guideline_name
+  setDraw(false);
+  const src = f.preview ? `/api/runs/${RUN}/preview/${encodeURIComponent(f.preview)}` : null;
+  if (!src) $("#pvBox").innerHTML = `<div class="viewer-empty">Không có ảnh xem trước cho mục này.</div>`;
+  else if (CUR_NAME !== f.name || !$("#pvImg")) {
+    $("#pvBox").innerHTML = `<div class="stage" id="stage"><img id="pvImg" src="${src}" alt="Ảnh frame ${f.frame ?? ""} có vẽ lỗi" title="Bấm để phóng to"><svg id="pvSvg" aria-hidden="true"></svg></div>`;
+    $("#pvImg").onload = () => { drawOverlay(); drawZoom(); };
+  }
+  CUR_NAME = src ? f.name : null;
+  if ($("#pvImg")?.complete && $("#pvImg").naturalWidth) drawOverlay();
+  renderDetail(f);
+  const refs = f.note ? [] : (RUN_DATA.guideline_refs?.[f.label] || []);
+  $("#gRef").innerHTML = f.note ? "" : RUN_DATA.guideline_name
     ? `<h3>Guideline nói gì về "${esc(f.label)}"</h3>` + (refs.length
       ? refs.map(x => `<div class="gref"><b>${esc(x.title)}</b>${esc(x.snippet)}</div>`).join("")
       : `<p class="meta">Không tìm thấy đoạn nào nhắc tới nhãn này. Thêm tên gọi khác vào cột "Tên gọi khác" trong luật của guideline.</p>`)
     : `<p class="meta">Lần review này không dùng guideline. Gán guideline cho task để thấy đoạn guideline liên quan ở đây.</p>`;
 }
-async function toggleFp(id, note) {
+function drawOverlay() {
+  const img = $("#pvImg"), svg = $("#pvSvg");
+  if (!img || !svg || !img.naturalWidth) return;
+  const W = img.naturalWidth, H = img.naturalHeight, f = itemById(CUR_F);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("preserveAspectRatio", "none");
+  const rect = (b, cls) => `<rect class="${cls}" x="${b[0]}" y="${b[1]}" width="${Math.max(1, b[2] - b[0])}" height="${Math.max(1, b[3] - b[1])}" rx="2"/>`;
+  let html = noteItems().filter(n => n.name === CUR_NAME).map(n => rect(n.box, "ov-note" + (n.id === CUR_F ? " cur" : ""))).join("");
+  if (f && !f.note && f.name === CUR_NAME) html += rect(f.box, "ov-cur");
+  if (DRAFT) html += rect(DRAFT, "ov-draft");
+  svg.innerHTML = html;
+}
+function drawZoom() {
+  const cv = $("#zoomCv"), img = $("#pvImg"), f = itemById(CUR_F);
+  if (!cv || !img || !img.naturalWidth || !f) return;
+  const [x1, y1, x2, y2] = f.box, w = x2 - x1, h = y2 - y1, pad = Math.max(30, Math.max(w, h) * .45);
+  const sx = Math.max(0, x1 - pad), sy = Math.max(0, y1 - pad);
+  const sw = Math.min(img.naturalWidth - sx, w + 2 * pad), sh = Math.min(img.naturalHeight - sy, h + 2 * pad);
+  if (sw < 2 || sh < 2) return;
+  cv.width = 440; cv.height = Math.round(440 * sh / sw);
+  const g = cv.getContext("2d");
+  g.drawImage(img, sx, sy, sw, sh, 0, 0, cv.width, cv.height);
+  const k = cv.width / sw;
+  g.strokeStyle = f.note ? "#a07cff" : "#4d7cff"; g.lineWidth = 3; g.setLineDash([10, 6]);
+  g.strokeRect((x1 - sx) * k, (y1 - sy) * k, w * k, h * k);
+}
+function renderDetail(f) {
+  const fb = FEEDBACK[f.id], edited = !f.note && EDITS[f.id];
+  const tags = f.note
+    ? `<span class="tag note">Ghi chú người review</span><span class="tag k">${esc(f.username || "")}</span>`
+    : `<span class="tag s${+f.sure}">${f.sure ? "Lỗi" : "Không chắc"}</span><span class="tag k">${esc(f.kind_vi)}</span><span class="tag k">${esc(f.label)}</span>${f.tang === 1 ? '<span class="tag k">Tầng 1 · luật</span>' : '<span class="tag k">Tầng 2 · model</span>'}${edited ? '<span class="edited-badge">lời nhắn đã sửa</span>' : ""}`;
+  $("#detail").innerHTML = `
+    <div class="zoom-wrap"><canvas id="zoomCv" title="Phóng to vùng ${f.note ? "ghi chú" : "lỗi"}"></canvas>
+      <div>
+        <div class="detail-head">${tags}</div>
+        <div class="detail-msg" id="detailMsg">${esc(msgOf(f))}</div>
+        <div class="detail-meta">${f.frame != null ? "frame " + f.frame + " · " : ""}${esc(f.name)} · box [${f.box.join(", ")}]${f.ref ? " · " + esc(f.ref) : ""}</div>
+        <div class="detail-actions">
+          <button type="button" class="btn sm" id="editBtn"><svg class="ic"><use href="#i-pen"/></svg>${f.note ? "Sửa ghi chú" : "Sửa lời nhắn"}</button>
+          ${f.note ? `<button type="button" class="link-danger" id="delNoteBtn">Xoá ghi chú</button>`
+            : `<button type="button" class="btn sm ${fb ? "fp-on" : ""}" id="fpBtn"><svg class="ic"><use href="#i-flag"/></svg>${fb ? "Bỏ đánh dấu tool nhầm" : "Tool nhầm"}</button>${fb ? `<span class="meta">${esc(fb.username)}${fb.note ? ": " + esc(fb.note) : ""}</span>` : ""}`}
+        </div>
+        <div id="editBox" class="edit-box hidden">
+          <textarea id="editText" maxlength="500" aria-label="Lời nhắn cho labeler">${esc(msgOf(f))}</textarea>
+          <div class="row-actions"><button type="button" class="btn primary sm" id="editSave">Lưu</button><button type="button" class="btn sm" id="editCancel">Huỷ</button>${edited ? '<button type="button" class="txt-btn" id="editReset">Về lời nhắn gốc của tool</button>' : ""}</div>
+        </div>
+      </div>
+    </div>`;
+  drawZoom();
+  $("#editBtn").onclick = () => { $("#editBox").classList.remove("hidden"); $("#editText").focus(); };
+  $("#editCancel").onclick = () => $("#editBox").classList.add("hidden");
+  $("#editSave").onclick = () => saveMsg(f, $("#editText").value.trim());
+  if ($("#editReset")) $("#editReset").onclick = () => saveMsg(f, "");
+  if ($("#fpBtn")) $("#fpBtn").onclick = () => toggleFp(f.id, "");
+  if ($("#delNoteBtn")) $("#delNoteBtn").onclick = async () => {
+    if (!(await askConfirm("Xoá ghi chú này?", "Xoá", "Xoá ghi chú?"))) return;
+    NOTES = await api(`/api/runs/${RUN}/notes/${f.nid}`, { method: "DELETE" });
+    SELECTED.delete(f.id); updateCounts(); renderList();
+    const first = filtered()[0]; if (first) select(first.id); else { $("#detail").innerHTML = ""; drawOverlay(); }
+  };
+}
+async function saveMsg(f, msg) {
   try {
-    FEEDBACK = await api(`/api/runs/${RUN}/feedback`, { method: "POST", json: { finding_id: id, verdict: isFp(id) ? "" : "tool_nham", note } });
+    if (f.note) {
+      if (!msg) return;
+      NOTES = await api(`/api/runs/${RUN}/notes/${f.nid}`, { method: "PUT", json: { msg } });
+    } else EDITS = await api(`/api/runs/${RUN}/findings/${f.id}`, { method: "PUT", json: { msg } });
+    renderList(); select(f.id);
+  } catch (err) { $("#pushRes").innerHTML = bad(err.message); }
+}
+async function toggleFp(id, note) {
+  if (isNote(id)) return;
+  try {
+    FEEDBACK = await api(`/api/runs/${RUN}/feedback`, { method: "POST", json: { finding_id: +id, verdict: isFp(id) ? "" : "tool_nham", note } });
     if (isFp(id)) SELECTED.delete(id);
     updateCounts(); renderList(); select(id);
   } catch (err) { $("#pushRes").innerHTML = bad(err.message); }
 }
-$("#pvBox").addEventListener("click", e => { if (e.target.tagName === "IMG") { $("#modalImg").src = e.target.src; $("#modal").classList.remove("hidden"); } });
-$("#modal").onclick = () => $("#modal").classList.add("hidden");
 
-$("#selSure").onclick = () => { SELECTED.clear(); RUN_DATA.findings.forEach(f => f.sure && !isFp(f.id) && SELECTED.add(f.id)); renderList(); };
+// --- ve khung ghi chu tren anh ---
+function setDraw(on) {
+  DRAW = on; DRAFT = on ? DRAFT : null;
+  $("#drawBtn").classList.toggle("on", on);
+  $("#stage")?.classList.toggle("drawing", on);
+  if (!on) $("#noteForm").classList.add("hidden");
+  drawOverlay();
+}
+$("#drawBtn").onclick = () => {
+  if (!$("#pvImg")) { const fr = RUN_DATA.frames[0]; if (!fr) return; FRAME_FILTER = null; showFinding({ id: "", name: fr.name, frame: fr.frame, preview: fr.preview.split("/").pop(), box: [0, 0, 0, 0], note: true, msg: "" }); }
+  setDraw(!DRAW);
+};
+function toNat(e) {
+  const img = $("#pvImg"), r = img.getBoundingClientRect();
+  return [Math.max(0, Math.min(img.naturalWidth, (e.clientX - r.left) / r.width * img.naturalWidth)),
+          Math.max(0, Math.min(img.naturalHeight, (e.clientY - r.top) / r.height * img.naturalHeight))];
+}
+let DRAG = null;
+$("#pvBox").addEventListener("pointerdown", e => {
+  if (!DRAW || !$("#pvImg") || !e.target.closest("#stage")) return;
+  e.preventDefault(); DRAG = toNat(e); DRAFT = [...DRAG, ...DRAG]; drawOverlay();
+  $("#stage").setPointerCapture?.(e.pointerId);
+});
+$("#pvBox").addEventListener("pointermove", e => {
+  if (!DRAG) return;
+  const [x, y] = toNat(e);
+  DRAFT = [Math.min(DRAG[0], x), Math.min(DRAG[1], y), Math.max(DRAG[0], x), Math.max(DRAG[1], y)]; drawOverlay();
+});
+$("#pvBox").addEventListener("pointerup", () => {
+  if (!DRAG) return;
+  DRAG = null;
+  if (!DRAFT || DRAFT[2] - DRAFT[0] < 6 || DRAFT[3] - DRAFT[1] < 6) { DRAFT = null; drawOverlay(); return; }
+  $("#noteForm").classList.remove("hidden"); $("#noteText").value = ""; $("#noteText").focus();
+});
+$("#noteCancel").onclick = () => { DRAFT = null; setDraw(false); };
+$("#noteForm").onsubmit = async e => {
+  e.preventDefault();
+  const fr = frameOf(CUR_NAME);
+  try {
+    const r = await api(`/api/runs/${RUN}/notes`, { method: "POST", json: { frame: fr?.frame, name: CUR_NAME, box: DRAFT, msg: $("#noteText").value.trim() } });
+    NOTES = r.notes; SELECTED.add("n" + r.id);
+    DRAFT = null; setDraw(false); updateCounts(); renderList(); select("n" + r.id);
+  } catch (err) { $("#pushRes").innerHTML = bad(err.message); }
+};
+$("#pvBox").addEventListener("click", e => {
+  if (DRAW || e.target.id !== "pvImg") return;
+  $("#modalImg").src = e.target.src; $("#modal").classList.remove("hidden");
+});
+$("#modal").onclick = () => $("#modal").classList.add("hidden");
+window.addEventListener("resize", debounce(drawOverlay, 100));
+
+$("#selSure").onclick = () => { SELECTED.clear(); allItems().forEach(f => (f.note || (f.sure && !isFp(f.id))) && SELECTED.add(f.id)); renderList(); };
 $("#selAll").onclick = () => { filtered().forEach(f => !isFp(f.id) && SELECTED.add(f.id)); renderList(); };
 $("#selNone").onclick = () => { filtered().forEach(f => SELECTED.delete(f.id)); renderList(); };
 function updatePush() {
   $("#pushLabel").textContent = SELECTED.size ? `Đẩy ${SELECTED.size} Issue lên CVAT` : "Đẩy Issue lên CVAT";
-  if (RUN_DATA) $("#selInfo").textContent = `Đã chọn ${SELECTED.size} / ${RUN_DATA.findings.length}`;
+  if (RUN_DATA) $("#selInfo").textContent = `Đã chọn ${SELECTED.size} / ${RUN_DATA.findings.length + NOTES.length}`;
 }
+$("#copyReport").onclick = async () => {
+  const url = RUN_DATA?.report_url; if (!url) return;
+  const b = $("#copyReport");
+  try { await navigator.clipboard.writeText(url); b.classList.add("copied"); b.lastChild.textContent = "Đã copy link"; }
+  catch { window.open(url, "_blank"); }
+  setTimeout(() => { b.classList.remove("copied"); b.lastChild.textContent = "Link cho labeler"; }, 2500);
+};
 
-// phim tat: len/xuong chuyen loi, Space chon/bo, X tool nham
+// phim tat: len/xuong chuyen, Space chon/bo, X tool nham, N ghi chu tren anh, Esc thoat ve
 document.addEventListener("keydown", e => {
   if (!RUN_DATA || VIEW !== "list" || $("#tab-review").classList.contains("hidden")) return;
   if ($$(".modal").some(m => !m.classList.contains("hidden"))) return;
   if (["INPUT", "SELECT", "TEXTAREA"].includes(document.activeElement?.tagName)) return;
+  if (e.key === "n" || e.key === "N") { e.preventDefault(); $("#drawBtn").click(); return; }
   const rows = filtered(); if (!rows.length) return;
   const i = Math.max(0, rows.findIndex(f => f.id === CUR_F));
   if (e.key === "ArrowDown" || e.key === "j") { e.preventDefault(); select(rows[Math.min(rows.length - 1, i + 1)].id); }
@@ -381,6 +530,7 @@ document.addEventListener("keydown", e => {
 $$(".wb-head .tabs-inline button").forEach(b => b.onclick = () => setView(b.dataset.view));
 function setView(v) {
   VIEW = v;
+  if (v !== "list") setDraw(false);
   $$(".wb-head .tabs-inline button").forEach(b => b.classList.toggle("on", b.dataset.view === v));
   $("#viewList").classList.toggle("hidden", v !== "list");
   $("#viewFrames").classList.toggle("hidden", v !== "frames");
@@ -390,11 +540,13 @@ function setView(v) {
 }
 function renderFrames() {
   if (!RUN_DATA) return;
-  $("#frameGrid").innerHTML = RUN_DATA.frames.map(fr => `
-    <button type="button" class="frame-card ${fr.n ? "" : "clean"}" data-name="${esc(fr.name)}">
+  $("#frameGrid").innerHTML = RUN_DATA.frames.map(fr => {
+    const nn = NOTES.filter(n => n.name === fr.name).length, unsure = fr.n - fr.sure;
+    return `<button type="button" class="frame-card ${fr.n || nn ? "" : "clean"}" data-name="${esc(fr.name)}">
       <img src="${fr.preview}" alt="Frame ${fr.frame ?? ""}" loading="lazy">
-      <div class="fc-meta">${fr.n ? `${fr.sure ? `<span class="tag s1">${fr.sure} lỗi</span>` : ""}${fr.n - fr.sure ? `<span class="tag s0">${fr.n - fr.sure} không chắc</span>` : ""}` : '<span class="tag k">Không lỗi</span>'}<span class="fc-name" title="${esc(fr.name)}">${fr.frame != null ? "F" + fr.frame + " · " : ""}${esc(fr.name)}</span></div>
-    </button>`).join("") || `<p class="empty-note">Không có ảnh.</p>`;
+      <div class="fc-meta">${fr.sure ? `<span class="tag s1">${fr.sure} lỗi</span>` : ""}${unsure ? `<span class="tag s0">${unsure} không chắc</span>` : ""}${nn ? `<span class="tag note">${nn} ghi chú</span>` : ""}${fr.n || nn ? "" : '<span class="tag k">Không lỗi</span>'}<span class="fc-name" title="${esc(fr.name)}">${fr.frame != null ? "F" + fr.frame + " · " : ""}${esc(fr.name)}</span></div>
+    </button>`;
+  }).join("") || `<p class="empty-note">Không có ảnh.</p>`;
 }
 $("#frameGrid").addEventListener("click", e => {
   const c = e.target.closest(".frame-card"); if (!c) return;
@@ -402,7 +554,9 @@ $("#frameGrid").addEventListener("click", e => {
   $("#frameFilter").innerHTML = `Chỉ hiện ${esc(FRAME_FILTER.slice(0, 32))}${FRAME_FILTER.length > 32 ? "…" : ""}<button type="button" aria-label="Bỏ lọc khung hình">×</button>`;
   $("#frameFilter").classList.remove("hidden");
   setView("list"); renderList();
-  const first = filtered()[0]; if (first) select(first.id);
+  const first = filtered()[0];
+  if (first) select(first.id);
+  else { const fr = frameOf(FRAME_FILTER); showFinding({ id: "", name: fr.name, frame: fr.frame, preview: fr.preview.split("/").pop(), box: [0, 0, 0, 0], note: true, msg: "Khung hình này không có lỗi. Bấm Ghi chú trên ảnh nếu muốn nhắc labeler điều gì." }); }
 });
 $("#frameFilter").addEventListener("click", e => { if (e.target.tagName === "BUTTON") { FRAME_FILTER = null; $("#frameFilter").classList.add("hidden"); renderList(); } });
 async function loadIssues() {
@@ -428,14 +582,16 @@ function pushedText(p) {
   return parts.join(", ") + ` · ${fmtTime(p.time)} · ` + (p.unchanged ? ok("Nhãn gốc không đổi ✔") : bad("Nhãn trên CVAT đã khác lúc review (có người đang sửa job?)"));
 }
 $("#pushBtn").onclick = async () => {
-  if (!SELECTED.size) { $("#pushRes").innerHTML = bad("Chưa chọn lỗi nào."); return; }
-  const nUnsure = RUN_DATA.findings.filter(f => SELECTED.has(f.id) && !f.sure).length;
-  const sure = await askConfirm(`Đẩy ${SELECTED.size} lỗi lên job ${RUN_DATA.job_id}${nUnsure ? `, trong đó ${nUnsure} lỗi "không chắc"` : ""}. ` +
-    ($("#replaceOld").checked ? "Lỗi đã có Issue từ lần trước sẽ không bị tạo trùng. " : "") + "Tool chỉ tạo Issue, không sửa nhãn.", "Đẩy Issue", "Đẩy Issue lên CVAT?");
+  const ids = [...SELECTED].filter(x => !isNote(x)).map(Number), noteIds = [...SELECTED].filter(isNote).map(x => +x.slice(1));
+  const summary = $("#addSummary").checked;
+  if (!ids.length && !noteIds.length && !summary) { $("#pushRes").innerHTML = bad("Chưa chọn mục nào."); return; }
+  const nUnsure = RUN_DATA.findings.filter(f => SELECTED.has(String(f.id)) && !f.sure).length;
+  const sure = await askConfirm(`Đẩy lên job ${RUN_DATA.job_id}: ${ids.length} lỗi${nUnsure ? ` (${nUnsure} không chắc)` : ""}, ${noteIds.length} ghi chú của bạn${summary ? ", kèm 1 Issue tổng kết có link trang lỗi cho labeler" : ""}. ` +
+    ($("#replaceOld").checked ? "Lỗi đã có Issue từ lần trước sẽ không bị tạo trùng. " : "") + "Mỗi mục thành 1 Issue ghim đúng chỗ trên ảnh. Tool không sửa nhãn.", "Đẩy Issue", "Đẩy Issue lên CVAT?");
   if (!sure) return;
   const b = $("#pushBtn"); b.disabled = true; $("#pushRes").textContent = "Đang đẩy…";
   try {
-    const p = await api(`/api/runs/${RUN}/push`, { method: "POST", json: { ids: [...SELECTED], replace_old: $("#replaceOld").checked } });
+    const p = await api(`/api/runs/${RUN}/push`, { method: "POST", json: { ids, note_ids: noteIds, summary, replace_old: $("#replaceOld").checked } });
     $("#pushRes").innerHTML = pushedText(p);
   } catch (err) { $("#pushRes").innerHTML = bad(err.message); }
   b.disabled = false;
@@ -478,7 +634,7 @@ function renderHistory() {
     const st = r.status === "xong" && p != null ? (p >= THR() ? ["pass", "Đạt"] : ["fail", "Chưa đạt"]) : [r.status, STATUS[r.status] + (r.position ? " · thứ " + r.position : "")];
     return `<tr data-id="${r.id}"><td class="strong">#${r.id}</td><td>${r.job_id ?? "file"}</td><td>${esc(r.task_name || r.task_id || "—")}</td>
       <td>${esc(r.assignee || "—")}</td><td>${esc(r.username)}${r.source === "webhook" ? ' <span class="fp-badge">tự động</span>' : ""}</td><td>${fmtTime(r.created)}</td>
-      <td><span class="pill ${st[0]}">${st[1]}</span></td><td class="r">${pctTxt(p)}</td><td class="r">${s.boxes !== undefined ? `${s.sure} / ${s.unsure}` : "—"}</td>
+      <td><span class="pill ${st[0]}">${st[1]}${r.eta != null ? " · ~" + Math.max(1, Math.round(r.eta / 60)) + " phút" : ""}</span></td><td class="r">${pctTxt(p)}</td><td class="r">${s.boxes !== undefined ? `${s.sure} / ${s.unsure}` : "—"}</td>
       <td class="r">${r.fp || "—"}</td><td class="r">${r.pushed ? r.pushed.created + (r.pushed.kept ? " +" + r.pushed.kept : "") : "—"}</td></tr>`;
   }).join("") || `<tr><td colspan="11" class="empty-row">Chưa có lần review nào.</td></tr>`;
 }

@@ -1,6 +1,6 @@
 # Web QC nhãn 2D — tài liệu cho nhóm
 
-Cập nhật: 2026-10-14 (bản 6: kết nối CVAT trên web, chọn job, tool nhầm, tổng quan, webhook) · Thư mục code: `sam2/cvat_2d/web_qc/` · Chạy bằng: `cvat_2d/web_qc.bat`
+Cập nhật: 2026-10-14 (bản 7: ghi chú trên ảnh, sửa lời nhắn, trang cho labeler, so sánh lần trước, Issue tổng kết, thời gian chờ) · Thư mục code: `sam2/cvat_2d/web_qc/` · Chạy bằng: `cvat_2d/web_qc.bat`
 
 ---
 
@@ -183,6 +183,29 @@ Toàn bộ diễn ra trên trang **Review job**.
 3. Phím tắt: **↑ ↓** chuyển lỗi, **Space** chọn / bỏ, **X** tool nhầm.
 4. Ô **Đồng bộ với Issue tự động lần trước** (bật sẵn): lỗi vẫn còn thì giữ Issue cũ, không tạo trùng; lỗi đã hết thì xoá Issue cũ, hoặc đóng lại nếu labeler đã trả lời bên dưới. Issue của người review thật không bị đụng tới.
 5. Bấm **Đẩy N Issue lên CVAT** → xác nhận. Kết quả báo số Issue mới, số giữ lại, số đóng, số xoá và dòng "Nhãn gốc không đổi ✔".
+
+### Công cụ của người review
+
+| Công cụ | Dùng khi nào | Lên CVAT thế nào |
+| --- | --- | --- |
+| **Ghi chú trên ảnh** (nút trên khung ảnh, phím **N**) | Tool không tự thấy nhưng bạn thấy cần nhắc labeler: kéo một khung lên đúng chỗ trên ảnh rồi gõ lời nhắn | Thành 1 Issue ghim đúng khung đó, nội dung bắt đầu `[Review tự động] [Ghi chú người review]` |
+| **Sửa lời nhắn** | Lời nhắn của tool khó hiểu hoặc muốn hướng dẫn cụ thể hơn ("kéo cạnh dưới xuống bánh xe") | Issue dùng lời nhắn đã sửa. Có nút trở về lời nhắn gốc |
+| **Tool nhầm** (phím **X**) | Tool báo sai | Không đẩy. Đếm vào tỉ lệ tool nhầm |
+| **Khung đang xem + phóng to vùng lỗi** | Mỗi lỗi được khoanh khung xanh đứt nét trên ảnh và phóng to bên dưới, để thấy rõ chỗ sai mà không phải zoom tay | — |
+| **So sánh với lần trước** | Job được review lại: hiện "Đã sửa X · Còn Y · Mới Z" so với lần review xong gần nhất của cùng job | — |
+| **Kèm Issue tổng kết** (bật sẵn) | Mỗi lần đẩy thêm 1 Issue ở góc ảnh đầu tiên: % box đúng, đạt hay chưa, số mục cần xem và **link trang lỗi cho labeler** | 1 Issue `[Tổng kết]`, lần sau tự thay bằng tổng kết mới |
+| **Link cho labeler** | Gửi cho labeler một trang xem lỗi kèm ảnh, **không cần đăng nhập** | — |
+
+Mọi lời nhắn đều giữ nguyên nhãn của labeler: box đúng không bị đụng tới, chỗ sai chỉ có Issue ghim bên trên.
+
+### Trang dành cho labeler
+
+Bấm **Link cho labeler** (hoặc mở link trong Issue tổng kết) để có trang `…/bao-cao.html?run=12&t=<mã>`:
+
+- Đầu trang: job, labeler, % box đúng, Đạt / Chưa đạt, so sánh với lần trước, nút **Mở job trên CVAT**, và 3 bước hướng dẫn sửa.
+- Mỗi frame một khung: ảnh có **khung đánh số** đúng chỗ từng lỗi, danh sách lời nhắn cùng số, nút **Mở frame trên CVAT** (nhảy thẳng tới frame đó).
+- Lỗi đánh dấu "tool nhầm" không hiện. Nếu đã đẩy Issue, trang chỉ hiện đúng những mục đã đẩy.
+- Link có mã bí mật riêng cho từng lần review; sai mã thì không mở được. Dùng trong mạng nội bộ.
 
 ### Labeler sửa trên CVAT
 
@@ -484,12 +507,20 @@ Tool đủ tin để thay phần lớn công kiểm tra thô, nhưng **chưa tha
 | Rủi ro | Cách giảm |
 | --- | --- |
 | Báo nhầm làm labeler mất niềm tin | Giữ ngưỡng "chắc" chặt. Lỗi không chắc luôn để người duyệt |
-| Một GPU chỉ chạy được một job mỗi lần | Hàng đợi đã có, web hiện vị trí chờ. Nếu đông người thì thêm máy hoặc giới hạn số frame |
+| Một GPU chỉ chạy được một job mỗi lần | Hàng đợi có vị trí chờ và **thời gian chờ dự kiến**; ảnh được tải song song trong lúc GPU chấm. Đông người thì thêm GPU / máy (xem dưới) |
 | Labeler sửa trong lúc đang QC | Phép so sánh trước/sau sẽ phát hiện và cảnh báo. Chạy lại review |
 | CVAT nâng phiên bản làm đổi cách đánh số frame hoặc API Issue | Mỗi lần nâng cấp, chạy lại bài thử đẩy Issue trên một job nhỏ |
 | Hỏng ổ đĩa máy chủ | Sao lưu `web_qc/data/` và `review_out/` |
 
 ---
+
+### Web review được bao nhiêu người cùng lúc
+
+- **Người dùng web:** vài chục người mở web, xem kết quả, duyệt lỗi, đẩy Issue cùng lúc không vấn đề gì (máy chủ FastAPI xử lý song song).
+- **Phần chấm lỗi (GPU):** chạy **lần lượt từng job** trên 1 GPU. Chạy song song nhiều job trên cùng 1 GPU không nhanh hơn (chỉ chia nhau sức máy) và dễ tràn bộ nhớ (RTX 4050 Laptop có 6 GB).
+- **Tốc độ đo được** (chế độ Chính xác, RTX 4050 Laptop, có tải ảnh song song): khoảng **1,2 giây / ảnh**. Job 100 ảnh ≈ 2 phút; khoảng **30 job 100 ảnh mỗi giờ**, đủ cho nhóm 10–20 labeler nộp rải rác. Chế độ Nhanh nhanh hơn nhưng kém chính xác.
+- Người nộp sau thấy "Đang chờ · thứ 2 · còn ~3 phút" và có thể đóng trang, mở lại sau ở Lịch sử. Ảnh đã chấm được lưu cache nên **Chạy lại** cùng job nhanh hơn nhiều.
+- **Muốn nhanh hơn:** chạy web QC trên máy có GPU mạnh hơn, hoặc dựng thêm máy QC thứ hai và chia task cho từng máy (mỗi máy một web QC, cùng trỏ về CVAT).
 
 ## 13. Bảo mật
 
@@ -608,6 +639,9 @@ Mọi API (trừ đăng nhập) cần cookie phiên. Lỗi trả về dạng `{"
 | `POST /api/runs/{id}/push` | Mọi vai trò | Đẩy các lỗi được chọn (`ids`, `replace_old`), bỏ qua lỗi đã đánh dấu tool nhầm |
 | `POST /api/runs/{id}/feedback` | Mọi vai trò | Đánh dấu / bỏ đánh dấu "tool nhầm" (`finding_id`, `verdict`, `note`) |
 | `GET /api/runs/{id}/issues` | Mọi vai trò | Issue tool đã tạo trên job, trạng thái resolved, số trả lời |
+| `POST/PUT/DELETE /api/runs/{id}/notes[/{nid}]` | Mọi vai trò | Ghi chú tay trên ảnh (`frame`, `name`, `box`, `msg`) |
+| `PUT /api/runs/{id}/findings/{fid}` | Mọi vai trò | Sửa lời nhắn của một lỗi (rỗng = về lời nhắn gốc) |
+| `GET /api/public/runs/{id}?t=`, `GET /api/public/runs/{id}/preview/{file}?t=` | Có mã link | Dữ liệu và ảnh cho trang labeler `bao-cao.html` |
 | `POST /api/runs/{id}/rerun` | Mọi vai trò | Chạy lại với cùng thiết lập |
 | `GET/POST /api/guidelines`, `GET/DELETE /api/guidelines/{id}` | Xem: mọi vai trò. Tải lên, xoá: qc | Danh sách, tải lên, chi tiết, xoá |
 | `GET /api/guidelines/{id}/file`, `GET /api/guidelines/{id}/search?q=` | Mọi vai trò | File gốc, tìm kiếm |
