@@ -1,0 +1,26 @@
+# Token / cau hinh that — KHONG dua len git
+.env
+.env.class
+.menu_last.json
+
+# Model (qua lon cho GitHub, tai rieng — xem README)
+*.pt
+*.ts
+*.onnx
+*.task
+models/
+
+# Du lieu, cache, ket qua chay
+cache_hq2d/
+review_out/
+web_qc/data/
+labels/
+vi_du_*/
+preview_*/
+out*/
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/

@@ -1,0 +1,15 @@
+requests
+python-dotenv
+numpy
+opencv-python
+pillow
+torch
+torchvision
+transformers
+ultralytics
+onnxruntime
+scikit-learn
+scipy
+open3d
+gradio
+pypdf            # web_qc: doc guideline PDF
