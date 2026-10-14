@@ -84,6 +84,13 @@ def login(request: Request, body: dict):
     return request.session["user"]
 
 
+@app.get("/api/setup")
+def setup_info():
+    """Cho trang dang nhap biet day la lan dau (file mat khau admin con) de hien huong dan. Khong lo mat khau."""
+    first = os.path.exists(os.path.join(store.DATA, "MAT_KHAU_ADMIN.txt"))
+    return dict(first_run=first, admin_file=r"cvat_2d\web_qc\data\MAT_KHAU_ADMIN.txt" if first else None)
+
+
 @app.post("/api/logout")
 def logout(request: Request):
     request.session.clear()

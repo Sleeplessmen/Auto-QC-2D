@@ -3,117 +3,183 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Web QC nhãn 2D</title>
+<title>QC nhãn 2D</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- Dang nhap -->
+<!-- ============================== DANG NHAP ============================== -->
 <section id="login" class="login hidden">
-  <form id="loginForm" class="card login-card">
-    <h1>Web QC nhãn 2D</h1>
-    <p class="muted">Tool chỉ ghi chú lỗi lên CVAT bằng Issue, không sửa nhãn.</p>
-    <label>Tài khoản<input name="username" autocomplete="username" required></label>
-    <label>Mật khẩu<input name="password" type="password" autocomplete="current-password" required></label>
-    <button class="primary" type="submit">Đăng nhập</button>
-    <p id="loginErr" class="err"></p>
-  </form>
+  <div class="login-shell">
+    <aside class="login-brand">
+      <div class="brand-mark"><span class="bm-box"></span>QC nhãn 2D</div>
+      <h1>Review nhãn CVAT thay người review, không chạm vào nhãn.</h1>
+      <ul class="brand-points">
+        <li><b>Tìm lỗi bằng model</b><span>4 detector + SAM2 + CLIP tìm box chưa khít, sai nhãn, thiếu, thừa, trùng.</span></li>
+        <li><b>Đối chiếu guideline</b><span>File luật kiểm từng box, ghi số mục guideline vào ghi chú.</span></li>
+        <li><b>Chỉ ghi Issue</b><span>Người QC duyệt từng lỗi rồi mới đẩy lên CVAT. Nhãn gốc giữ nguyên.</span></li>
+      </ul>
+      <svg class="brand-art" viewBox="0 0 320 150" aria-hidden="true">
+        <rect x="18" y="40" width="120" height="80" rx="3" class="art-ok"/>
+        <rect x="170" y="28" width="132" height="96" rx="3" class="art-bad"/>
+        <rect x="186" y="44" width="96" height="62" rx="3" class="art-dash"/>
+        <g class="art-handle"><rect x="14" y="36" width="8" height="8"/><rect x="134" y="36" width="8" height="8"/><rect x="14" y="116" width="8" height="8"/><rect x="134" y="116" width="8" height="8"/></g>
+        <text x="18" y="32" class="art-label">car ✓</text>
+        <text x="170" y="20" class="art-label art-label-bad">bus · cạnh dưới thiếu 34px</text>
+      </svg>
+    </aside>
+
+    <form id="loginForm" class="login-form" autocomplete="on">
+      <h2>Đăng nhập</h2>
+      <p class="muted">Dùng tài khoản của web QC (do admin tạo), không phải tài khoản CVAT hay email.</p>
+      <div id="loginHint" class="hint hidden"></div>
+      <label for="lgUser">Tài khoản<input id="lgUser" name="username" autocomplete="username" placeholder="vd: admin" required></label>
+      <label for="lgPass">Mật khẩu<input id="lgPass" name="password" type="password" autocomplete="current-password" required></label>
+      <button class="primary big" type="submit">Đăng nhập</button>
+      <p id="loginErr" class="err" role="alert"></p>
+    </form>
+  </div>
 </section>
 
-<!-- Ung dung -->
+<!-- ============================== UNG DUNG ============================== -->
 <div id="app" class="hidden">
   <header class="top">
-    <div class="brand">Web QC nhãn 2D</div>
-    <nav id="tabs">
+    <div class="brand"><span class="bm-box"></span>QC nhãn 2D</div>
+    <nav id="tabs" aria-label="Các trang">
       <button data-tab="review" class="active">Review job</button>
       <button data-tab="history">Lịch sử</button>
       <button data-tab="guide">Guideline</button>
       <button data-tab="settings">Cài đặt</button>
     </nav>
-    <div class="who"><span id="whoName"></span> <button id="logout" class="link">Đăng xuất</button></div>
+    <div class="who"><span id="whoName" class="chip"></span><button id="logout" class="link">Đăng xuất</button></div>
   </header>
 
   <main>
-    <!-- REVIEW -->
+    <!-- ------------------------------ REVIEW ------------------------------ -->
     <section id="tab-review" class="tab">
-      <form id="runForm" class="card">
-        <h2>Review một job</h2>
-        <p class="muted" id="cvatInfo"></p>
-        <div class="grid4">
-          <label>CVAT_JOB_ID<input name="job_id" inputmode="numeric" placeholder="vd 70"></label>
-          <label>CVAT_TASK_ID <span class="muted">(kiểm tra job đúng task)</span><input name="task_id" inputmode="numeric"></label>
-          <label>Guideline<select name="guideline_id" id="runGuide"><option value="">— không dùng —</option></select></label>
-          <label>Chế độ<select name="mode"><option value="chinh_xac">Chính xác (4 model + SAM2)</option><option value="nhanh">Nhanh (2 model, kém chính xác hơn)</option></select></label>
-        </div>
-        <div class="grid4">
-          <label>File export <span class="muted">(không bắt buộc, .zip)</span><input name="file" type="file" accept=".zip"></label>
-          <label>Chỉ chạy N frame đầu <span class="muted">(thử nhanh)</span><input name="max_frames" inputmode="numeric"></label>
-          <label class="check"><input type="checkbox" name="rider" checked> Người lái xe máy có box person riêng <span class="muted">(guideline có luật thì theo luật)</span></label>
-          <label class="check"><input type="checkbox" name="auto_push"> Xong tự đẩy lỗi chắc chắn lên CVAT</label>
-        </div>
-        <div class="row"><button class="primary" type="submit">▶ Đánh giá</button><span id="runErr" class="err"></span></div>
-      </form>
+      <div class="review-grid">
+        <form id="runForm" class="card run-form">
+          <div class="card-head">
+            <h2>Review một job</h2>
+            <p class="muted" id="cvatInfo"></p>
+          </div>
+          <div class="field-row">
+            <label for="fJob">Số job<input id="fJob" name="job_id" inputmode="numeric" placeholder="vd 70"></label>
+            <label for="fTask">Số task <span class="muted">(tuỳ chọn)</span><input id="fTask" name="task_id" inputmode="numeric"></label>
+          </div>
+          <label for="runGuide">Guideline<select name="guideline_id" id="runGuide"><option value="">— không dùng —</option></select></label>
+          <label for="fMode">Chế độ<select id="fMode" name="mode"><option value="chinh_xac">Chính xác — 4 model + SAM2 (khuyên dùng)</option><option value="nhanh">Nhanh — 2 model, cho máy yếu</option></select></label>
+          <details class="more">
+            <summary>Tuỳ chọn thêm</summary>
+            <label for="fFile">File export .zip <span class="muted">(chỉ khi không đọc được từ CVAT)</span><input id="fFile" name="file" type="file" accept=".zip"></label>
+            <label for="fMax">Chỉ chạy N frame đầu <span class="muted">(để thử nhanh)</span><input id="fMax" name="max_frames" inputmode="numeric"></label>
+            <label class="check" for="fRider"><input id="fRider" type="checkbox" name="rider" checked> Người lái xe máy có box person riêng</label>
+            <label class="check" for="fAuto"><input id="fAuto" type="checkbox" name="auto_push"> Chạy xong tự đẩy lỗi chắc chắn lên CVAT</label>
+          </details>
+          <button class="primary big" type="submit">▶ Đánh giá</button>
+          <p id="runErr" class="err" role="alert"></p>
+        </form>
 
-      <div id="runPanel" class="card hidden">
-        <div class="row between">
-          <h2 id="runTitle">Lần review</h2>
-          <span id="runStatus" class="badge"></span>
-        </div>
-        <pre id="runLog" class="log"></pre>
-        <div id="runResult" class="hidden">
-          <div id="stats" class="stats"></div>
-          <p id="skipped" class="muted"></p>
-          <div class="row wrap">
-            <label>Loại<select id="fKind"><option value="">Tất cả</option></select></label>
-            <label>Mức<select id="fSure"><option value="">Tất cả</option><option value="1">Lỗi</option><option value="0">Không chắc</option></select></label>
-            <label>Tầng<select id="fTang"><option value="">Tất cả</option><option value="1">1 – luật guideline</option><option value="2">2 – so với model</option></select></label>
-            <span class="grow"></span>
-            <button id="selSure" type="button">Chọn lỗi chắc</button>
-            <button id="selAll" type="button">Chọn tất cả</button>
-            <button id="selNone" type="button">Bỏ chọn</button>
-            <a id="csv" class="btn" href="#">Tải CSV</a>
+        <div class="run-area">
+          <!-- trang thai trong: huong dan 3 buoc -->
+          <div id="runEmpty" class="card empty">
+            <h2>Cách dùng</h2>
+            <ol class="steps">
+              <li><b>Nhập số job</b><span>Lấy sẵn từ <code>.env</code>. Sửa nếu muốn review job khác.</span></li>
+              <li><b>Bấm Đánh giá</b><span>Tool đọc nhãn trên CVAT, tìm lỗi. Mỗi ảnh mất vài giây.</span></li>
+              <li><b>Duyệt rồi đẩy Issue</b><span>Lỗi chắc chắn được chọn sẵn. Lỗi "không chắc" bạn xem ảnh rồi tự chọn.</span></li>
+            </ol>
+            <p class="muted">Muốn xem lại kết quả cũ, vào tab <b>Lịch sử</b>.</p>
           </div>
-          <div class="split">
-            <div class="tablewrap">
-              <table id="ftable">
-                <thead><tr><th></th><th>#</th><th>Frame</th><th>Loại</th><th>Mức</th><th>Nhãn</th><th>Ghi chú</th></tr></thead>
-                <tbody></tbody>
-              </table>
+
+          <div id="runPanel" class="card hidden">
+            <div class="run-head">
+              <div>
+                <h2 id="runTitle">Lần review</h2>
+                <p class="muted" id="skipped"></p>
+              </div>
+              <span id="runStatus" class="badge"></span>
             </div>
-            <aside class="side">
-              <div id="pvBox"><p class="muted">Bấm một dòng để xem ảnh và đoạn guideline liên quan.</p></div>
-              <div id="gRef"></div>
-            </aside>
+            <div class="progress" aria-hidden="true"><div id="runProgress" class="progress-bar"></div></div>
+            <details id="logBox" class="logbox" open>
+              <summary>Tiến độ chi tiết</summary>
+              <pre id="runLog" class="log"></pre>
+            </details>
+
+            <div id="runResult" class="hidden">
+              <div id="stats" class="stats"></div>
+
+              <div class="filters">
+                <div class="seg" id="segSure" role="group" aria-label="Lọc theo mức">
+                  <button type="button" data-v="" class="on">Tất cả</button>
+                  <button type="button" data-v="1">Lỗi</button>
+                  <button type="button" data-v="0">Không chắc</button>
+                </div>
+                <label for="fKind" class="inline">Loại<select id="fKind"><option value="">Tất cả</option></select></label>
+                <label for="fTang" class="inline">Tầng<select id="fTang"><option value="">Tất cả</option><option value="1">1 – luật guideline</option><option value="2">2 – so với model</option></select></label>
+                <select id="fSure" class="hidden"><option value=""></option><option value="1"></option><option value="0"></option></select>
+                <span class="grow"></span>
+                <a id="csv" class="btn ghost" href="#">Tải CSV</a>
+              </div>
+
+              <div class="split">
+                <div class="list-col">
+                  <div class="list-tools">
+                    <span class="muted" id="selInfo"></span>
+                    <span class="grow"></span>
+                    <button id="selSure" type="button" class="ghost sm">Chọn lỗi chắc</button>
+                    <button id="selAll" type="button" class="ghost sm">Chọn tất cả</button>
+                    <button id="selNone" type="button" class="ghost sm">Bỏ chọn</button>
+                  </div>
+                  <div class="tablewrap">
+                    <table id="ftable">
+                      <thead><tr><th class="c-chk"></th><th>#</th><th>Ảnh</th><th>Lỗi</th><th>Ghi chú</th></tr></thead>
+                      <tbody></tbody>
+                    </table>
+                  </div>
+                </div>
+                <aside class="side">
+                  <div id="pvBox" class="pv-empty">Bấm một dòng bên trái để xem ảnh và đoạn guideline liên quan.</div>
+                  <div id="gRef"></div>
+                </aside>
+              </div>
+
+              <div class="pushbar">
+                <label class="check" for="replaceOld"><input type="checkbox" id="replaceOld" checked> Xoá Issue tự động của lần trước (chỉ Issue do tool tạo)</label>
+                <span class="grow"></span>
+                <span id="pushRes"></span>
+                <button id="pushBtn" class="primary" type="button">⬆ Đẩy Issue lên CVAT</button>
+              </div>
+            </div>
           </div>
-          <div class="row pushbar">
-            <label class="check"><input type="checkbox" id="replaceOld" checked> Xoá Issue tự động của lần trước (chỉ Issue do tool tạo)</label>
-            <span class="grow"></span>
-            <button id="pushBtn" class="primary" type="button">⬆ Đẩy Issue lên CVAT</button>
-          </div>
-          <p id="pushRes"></p>
         </div>
       </div>
+
     </section>
 
-    <!-- LICH SU -->
+    <!-- ------------------------------ LICH SU ------------------------------ -->
     <section id="tab-history" class="tab hidden">
       <div class="card">
-        <div class="row between"><h2>Lịch sử review</h2>
-          <label>Lọc theo job<input id="hJob" inputmode="numeric" placeholder="số job"></label></div>
+        <div class="card-head row-between">
+          <h2>Lịch sử review</h2>
+          <label for="hJob" class="inline">Lọc theo job<input id="hJob" inputmode="numeric" placeholder="số job"></label>
+        </div>
         <div class="tablewrap"><table id="htable">
           <thead><tr><th>#</th><th>Job</th><th>Task</th><th>Người chạy</th><th>Thời gian</th><th>Trạng thái</th><th>Box đúng</th><th>Lỗi / không chắc</th><th>Đã đẩy</th></tr></thead>
           <tbody></tbody></table></div>
       </div>
     </section>
 
-    <!-- GUIDELINE -->
+    <!-- ------------------------------ GUIDELINE ------------------------------ -->
     <section id="tab-guide" class="tab hidden">
       <div class="card">
-        <h2>Guideline</h2>
-        <p class="muted">Tải file guideline (PDF, DOCX, TXT, MD) để tra cứu khi xem lỗi. Thêm <b>file luật</b> để tool tự kiểm tra theo guideline (tầng 1) và ghi số mục vào Issue.</p>
-        <form id="gUpload" class="row wrap">
-          <label>Tên<input name="name" placeholder="vd GreenSM 2D v3"></label>
-          <label>File<input name="file" type="file" accept=".pdf,.docx,.txt,.md" required></label>
+        <div class="card-head">
+          <h2>Guideline</h2>
+          <p class="muted">Tải guideline (PDF, DOCX, TXT, MD) để tra cứu khi xem lỗi. Thêm <b>file luật</b> để tool tự kiểm theo guideline và ghi số mục vào Issue.</p>
+        </div>
+        <form id="gUpload" class="upload">
+          <label for="gNameIn">Tên guideline<input id="gNameIn" name="name" placeholder="vd GreenSM 2D v3"></label>
+          <label for="gFileIn">File<input id="gFileIn" name="file" type="file" accept=".pdf,.docx,.txt,.md" required></label>
           <button class="primary" type="submit">Tải lên</button>
           <span id="gUpErr" class="err"></span>
         </form>
@@ -123,23 +189,23 @@
       </div>
 
       <div id="gDetail" class="card hidden">
-        <div class="row between"><h2 id="gName"></h2><a id="gFile" class="btn" target="_blank">Mở file gốc</a></div>
+        <div class="card-head row-between"><h2 id="gName"></h2><a id="gFile" class="btn ghost" target="_blank">Mở file gốc</a></div>
         <div class="split2">
           <div>
             <h3>Nội dung theo mục</h3>
-            <div class="row"><input id="gSearch" placeholder="Tìm: car, xe máy, occluded…" class="grow"><button id="gSearchBtn" type="button">Tìm</button></div>
+            <div class="search"><input id="gSearch" aria-label="Tìm trong guideline" placeholder="Tìm: car, xe máy, occluded…"><button id="gSearchBtn" type="button">Tìm</button></div>
             <div id="gSections" class="sections"></div>
           </div>
           <div>
             <h3>File luật (YAML)</h3>
-            <div class="row wrap">
-              <label>Task<input id="gTask" inputmode="numeric" placeholder="số task"></label>
-              <button id="gTemplate" type="button">Tạo mẫu từ nhãn của task</button>
-              <button id="gAssign" type="button">Gán guideline cho task</button>
+            <div class="field-row tight">
+              <label for="gTask">Task<input id="gTask" inputmode="numeric" placeholder="số task"></label>
+              <button id="gTemplate" type="button" class="ghost">Tạo mẫu từ nhãn của task</button>
+              <button id="gAssign" type="button" class="ghost">Gán cho task</button>
             </div>
             <p class="muted" id="gTasks"></p>
-            <textarea id="gRules" spellcheck="false" placeholder="nhan:&#10;  car:&#10;    loai_tool: car&#10;    kich_thuoc_toi_thieu_px: 10&#10;    thuoc_tinh_bat_buoc: [occluded]&#10;    muc: &quot;3.1&quot;&#10;quy_tac:&#10;  nguoi_lai_co_box_rieng: true"></textarea>
-            <div class="row"><button id="gSave" class="primary" type="button">Lưu file luật</button><span id="gMsg"></span></div>
+            <textarea id="gRules" aria-label="File luật" spellcheck="false" placeholder="nhan:&#10;  car:&#10;    loai_tool: car&#10;    kich_thuoc_toi_thieu_px: 10&#10;    thuoc_tinh_bat_buoc: [occluded]&#10;    muc: &quot;3.1&quot;&#10;quy_tac:&#10;  nguoi_lai_co_box_rieng: true"></textarea>
+            <div class="row-actions"><button id="gSave" class="primary" type="button">Lưu file luật</button><span id="gMsg"></span></div>
             <details class="help"><summary>Các khoá trong file luật</summary>
               <ul>
                 <li><code>loai_tool</code>: tool hiểu nhãn này là gì (car, truck, bus, motorcycle, bicycle, person, GreenSM).</li>
@@ -157,38 +223,47 @@
       </div>
     </section>
 
-    <!-- CAI DAT -->
+    <!-- ------------------------------ CAI DAT ------------------------------ -->
     <section id="tab-settings" class="tab hidden">
-      <div class="card">
-        <h2>Kết nối CVAT</h2>
-        <p class="muted">Đổi job hoặc máy CVAT: sửa <code>CVAT_URL</code>, <code>CVAT_TOKEN</code>, <code>CVAT_TASK_ID</code>, <code>CVAT_JOB_ID</code> trong file <code>cvat_2d/.env</code> trên máy chủ, rồi tải lại trang. Token không bao giờ hiện lên trình duyệt.</p>
-        <div id="cfgBox" class="kv"></div>
-        <div class="row"><button id="testCvat" type="button">Kiểm tra kết nối</button><span id="testRes"></span></div>
-      </div>
-      <div class="card">
-        <h2>Đổi mật khẩu</h2>
-        <form id="pwForm" class="row wrap">
-          <label>Mật khẩu cũ<input name="old" type="password" required></label>
-          <label>Mật khẩu mới<input name="new" type="password" minlength="6" required></label>
-          <button type="submit">Đổi</button><span id="pwMsg"></span>
-        </form>
-      </div>
-      <div id="usersCard" class="card hidden">
-        <h2>Tài khoản</h2>
-        <p class="muted"><b>labeler</b>: chạy review, xem, đẩy Issue. <b>qc</b>: thêm quyền quản lý guideline. <b>admin</b>: thêm quyền quản lý tài khoản.</p>
-        <form id="userForm" class="row wrap">
-          <label>Tài khoản<input name="username" required></label>
-          <label>Mật khẩu <span class="muted">(trống = giữ nguyên)</span><input name="password" type="password"></label>
-          <label>Vai trò<select name="role"><option>labeler</option><option>qc</option><option>admin</option></select></label>
-          <button type="submit">Lưu</button><span id="userMsg"></span>
-        </form>
-        <table id="utable"><thead><tr><th>Tài khoản</th><th>Vai trò</th><th></th></tr></thead><tbody></tbody></table>
+      <div class="settings-grid">
+        <div class="card">
+          <h2>Kết nối CVAT</h2>
+          <p class="muted">Đổi job hoặc máy CVAT: sửa <code>CVAT_URL</code>, <code>CVAT_TOKEN</code>, <code>CVAT_TASK_ID</code>, <code>CVAT_JOB_ID</code> trong <code>cvat_2d/.env</code> trên máy chủ, rồi tải lại trang. Token không bao giờ hiện lên trình duyệt.</p>
+          <div id="cfgBox" class="kv"></div>
+          <div class="row-actions"><button id="testCvat" type="button">Kiểm tra kết nối</button><span id="testRes"></span></div>
+        </div>
+        <div class="card">
+          <h2>Đổi mật khẩu</h2>
+          <form id="pwForm" class="stack">
+            <label for="pwOld">Mật khẩu cũ<input id="pwOld" name="old" type="password" autocomplete="current-password" required></label>
+            <label for="pwNew">Mật khẩu mới <span class="muted">(ít nhất 6 ký tự)</span><input id="pwNew" name="new" type="password" minlength="6" autocomplete="new-password" required></label>
+            <div class="row-actions"><button type="submit">Đổi mật khẩu</button><span id="pwMsg"></span></div>
+          </form>
+        </div>
+        <div id="usersCard" class="card wide hidden">
+          <h2>Tài khoản</h2>
+          <p class="muted"><b>labeler</b>: chạy review, xem, đẩy Issue. <b>qc</b>: thêm quyền quản lý guideline. <b>admin</b>: thêm quyền quản lý tài khoản.</p>
+          <form id="userForm" class="upload">
+            <label for="uName">Tài khoản<input id="uName" name="username" autocomplete="off" required></label>
+            <label for="uPass">Mật khẩu <span class="muted">(trống = giữ nguyên)</span><input id="uPass" name="password" type="password" autocomplete="new-password"></label>
+            <label for="uRole">Vai trò<select id="uRole" name="role"><option>labeler</option><option>qc</option><option>admin</option></select></label>
+            <button type="submit" class="primary">Lưu</button><span id="userMsg"></span>
+          </form>
+          <div class="tablewrap"><table id="utable"><thead><tr><th>Tài khoản</th><th>Vai trò</th><th></th></tr></thead><tbody></tbody></table></div>
+        </div>
       </div>
     </section>
   </main>
 </div>
 
-<div id="modal" class="modal hidden"><div class="modal-body"><img id="modalImg" alt=""></div></div>
+<div id="confirmBox" class="modal hidden" role="dialog" aria-modal="true" aria-labelledby="cfTitle">
+  <div class="dialog">
+    <h3 id="cfTitle">Xác nhận</h3>
+    <p id="cfText"></p>
+    <div class="dialog-actions"><button type="button" id="cfNo" class="ghost">Huỷ</button><button type="button" id="cfYes" class="primary">Đồng ý</button></div>
+  </div>
+</div>
+<div id="modal" class="modal hidden"><div class="modal-body"><img id="modalImg" alt="Ảnh phóng to"></div></div>
 <script src="app.js"></script>
 </body>
 </html>
