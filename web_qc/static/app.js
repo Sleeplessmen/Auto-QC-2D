@@ -536,6 +536,8 @@ function setView(v) {
   $("#viewList").classList.toggle("hidden", v !== "list");
   $("#viewFrames").classList.toggle("hidden", v !== "frames");
   $("#viewIssues").classList.toggle("hidden", v !== "issues");
+  $("#viewAnalysis").classList.toggle("hidden", v !== "analysis");
+  if (v === "analysis") openAnalysis();
   if (v === "frames") renderFrames();
   if (v === "issues") loadIssues();
 }
@@ -922,5 +924,177 @@ document.addEventListener("keydown", e => {
   $("#modal").classList.add("hidden"); $("#optPop").open = false; $("#jobPicker").classList.add("hidden");
   if (!$("#confirmBox").classList.contains("hidden")) $("#cfNo").click();
 });
+
+// ============================================================ che do Phan tich
+// Ve chong len anh goc: nhan cua labeler (theo ket luan), vat tool phat hien, mat duong model to, cho thieu.
+const AN = { idx: 0, data: null, img: null, items: [], hover: null, pick: null, scale: 1, layers: { lab: true, tool: true, road: false, miss: true } };
+const AN_COL = { dung: "#22c55e", nghi: "#f0a020", loi: "#ef4444", tool: "#22d3ee", miss: "#e879f9", road: "rgba(34,197,94,.30)", area: "#3b82f6" };
+const ST_VI = { dung: "Khớp", nghi: "Nghi", loi: "Lỗi" };
+
+function openAnalysis() {
+  if (!RUN_DATA) return;
+  const fr = RUN_DATA.frames || [];
+  $("#anFrame").innerHTML = fr.map((f, i) => `<option value="${i}">${f.frame != null ? "F" + f.frame + " · " : ""}${esc(f.name)}${f.sure ? ` · ${f.sure} lỗi` : ""}</option>`).join("");
+  if (FRAME_FILTER) { const i = fr.findIndex(f => f.name === FRAME_FILTER); if (i >= 0) AN.idx = i; }
+  if (AN.idx >= fr.length) AN.idx = 0;
+  loadAnalysis(AN.idx);
+}
+async function loadAnalysis(i) {
+  const fr = RUN_DATA.frames[i]; if (!fr) return;
+  AN.idx = i; AN.pick = AN.hover = null; $("#anFrame").value = i;
+  $("#anPrev").disabled = i <= 0; $("#anNext").disabled = i >= RUN_DATA.frames.length - 1;
+  if (!fr.analysis) {
+    AN.data = null; AN.items = [];
+    $("#anSum").innerHTML = `<p class="empty-note">Lần review này chạy bằng bản cũ nên chưa có dữ liệu phân tích. Bấm <b>Review lại</b> để có.</p>`;
+    $("#anTable tbody").innerHTML = ""; $("#anDetail").innerHTML = "";
+    const c = $("#anCanvas"); c.width = c.height = 0; return;
+  }
+  try {
+    const [d, img] = await Promise.all([api(fr.analysis), new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => no(new Error("Không tải được ảnh gốc")); im.src = fr.raw; })]);
+    if (AN.idx !== i) return;
+    AN.data = d; AN.img = img;
+    buildAnItems(); renderAnSide(); drawAnalysis();
+  } catch (err) { $("#anSum").innerHTML = bad(err.message); }
+}
+function buildAnItems() {
+  const d = AN.data, items = [];
+  d.labels.forEach((l, k) => items.push({ key: "l" + k, type: "lab", label: l.label, box: l.box, status: l.status, msgs: l.msgs, iou: l.iou, tool: l.match != null ? d.tool[l.match] : null, id: l.id, occluded: l.occluded }));
+  d.areas.forEach((a, k) => items.push({ key: "a" + k, type: "area", label: a.label, polys: a.polys, status: a.status, msgs: a.msgs, id: a.id, kind: a.kind, road: a.road }));
+  d.missing.forEach((m, k) => items.push({ key: "m" + k, type: "miss", label: m.label, box: m.box, poly: m.poly, sure: m.sure, msgs: [m.msg], kind: m.kind }));
+  // vat tool thay ma labeler khong co box, va chua thanh loi "Thieu" (tool chua du chac) -> de nguoi review tu xem
+  const iou = (a, b) => { const w = Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])), h = Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1])), i = w * h; return i / ((a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - i || 1); };
+  d.tool.forEach((t, k) => { if (!t.matched && !d.missing.some(m => iou(m.box, t.box) > 0.5)) items.push({ key: "t" + k, type: "tool", label: t.label, box: t.box, score: t.score, sure: t.sure }); });
+  AN.items = items;
+}
+function renderAnSide() {
+  const d = AN.data, L = d.labels, cnt = s => L.filter(l => l.status === s).length + d.areas.filter(a => a.status === s).length;
+  const nMiss = d.missing.length, nLab = L.length + d.areas.length, nFree = AN.items.filter(i => i.type === "tool").length;
+  let road = "";
+  if (d.road) {
+    const r = d.road, only = Math.max(0, r.model_pct - r.both_pct), extra = Math.max(0, r.label_pct - r.both_pct);
+    road = `<div class="an-road"><b>Mặt đường:</b> model thấy ${r.model_pct}% ảnh · labeler tô ${r.label_pct}% · trùng nhau ${r.both_pct}%.
+      ${only > 1 ? `<span class="err">Chưa tô ~${only.toFixed(1)}% ảnh.</span>` : ""} ${extra > 1 ? `<span class="err">Tô ngoài đường ~${extra.toFixed(1)}%.</span>` : ""}
+      <div class="bar" title="Xanh đậm: cả hai cùng tô · xanh nhạt: chỉ model thấy · đỏ: chỉ labeler tô">
+        <i style="width:${r.both_pct}%;background:#22c55e"></i><i style="left:${r.both_pct}%;width:${only}%;background:rgba(34,197,94,.35)"></i><i style="left:${r.both_pct + only}%;width:${extra}%;background:#ef4444"></i></div></div>`;
+  }
+  $("#anSum").innerHTML = `<div class="an-kpis">
+      <div class="an-kpi good"><div class="v">${cnt("dung")}</div><div class="k">Khớp với tool</div></div>
+      <div class="an-kpi warn"><div class="v">${cnt("nghi")}</div><div class="k">Nghi, cần xem</div></div>
+      <div class="an-kpi bad"><div class="v">${cnt("loi")}</div><div class="k">Lỗi</div></div>
+      <div class="an-kpi bad"><div class="v">${nMiss}</div><div class="k">Thiếu</div></div>
+    </div>
+    <div class="meta">Labeler gán ${nLab} nhãn · tool phát hiện ${d.tool.length} vật${nFree ? ` · ${nFree} vật tool thấy nhưng chưa chắc, nên xem bằng mắt` : ""}.</div>${road}`;
+  const rank = it => it.type === "miss" ? (it.sure ? 1 : 2.5) : it.type === "tool" ? 3 : { loi: 0, nghi: 2, dung: 4 }[it.status];
+  const rows = [...AN.items].sort((a, b) => rank(a) - rank(b));
+  $("#anTable tbody").innerHTML = rows.map((it, n) => {
+    const st = it.type === "miss" ? "thieu" : it.type === "tool" ? "tool" : it.status;
+    const labCell = it.type === "lab" ? `${ST_VI[it.status]}<span class="sub">box ${Math.round(it.box[2] - it.box[0])}×${Math.round(it.box[3] - it.box[1])}${it.occluded ? " · bị che" : ""}</span>`
+      : it.type === "area" ? `${ST_VI[it.status]}<span class="sub">${it.kind === "mask" ? "mask" : "polygon"}</span>`
+      : it.type === "miss" ? `<span class="err">Không có</span>` : `<span class="meta">Không có</span>`;
+    const toolCell = it.type === "lab" ? (it.tool ? `${esc(it.tool.label)} <span class="sub">tin cậy ${Math.round(it.tool.score * 100)}%</span>` : `<span class="meta">Không thấy</span>`)
+      : it.type === "area" ? (it.road ? "so với mặt đường" : "—")
+      : it.type === "tool" ? `${esc(it.label)} <span class="sub">tin cậy ${Math.round(it.score * 100)}%${it.sure ? "" : " · thấp"}</span>`
+      : `${esc(it.label)}<span class="sub">${it.sure ? "chắc chắn" : "chưa chắc"}</span>`;
+    const iou = it.type === "lab" && it.tool ? Math.round(it.iou * 100) + "%" : "—";
+    return `<tr data-key="${it.key}"><td>${n + 1}</td><td><span class="st ${st}"></span>${esc(it.label)}</td><td>${labCell}</td><td>${toolCell}</td><td class="r">${iou}</td></tr>`;
+  }).join("") || `<tr><td colspan="5" class="empty-row">Ảnh này không có nhãn nào.</td></tr>`;
+  showAnDetail(null);
+}
+function anDesc(it) {
+  if (!it) return "";
+  const head = it.type === "lab" ? `Box <b>${esc(it.label)}</b> của labeler — <b>${ST_VI[it.status]}</b>`
+    : it.type === "area" ? `${it.kind === "mask" ? "Mask" : "Polygon"} <b>${esc(it.label)}</b> của labeler — <b>${ST_VI[it.status]}</b>`
+    : it.type === "miss" ? `<b>Thiếu ${esc(it.label)}</b>${it.sure ? "" : " (chưa chắc)"}`
+    : `Tool thấy <b>${esc(it.label)}</b> (tin cậy ${Math.round(it.score * 100)}%), labeler không có box. Tool chưa đủ chắc để báo thiếu, nên xem bằng mắt.`;
+  let body = "";
+  if (it.type === "lab") body = it.tool ? `<br>Tool thấy <b>${esc(it.tool.label)}</b> ở đây, tin cậy ${Math.round(it.tool.score * 100)}%, khung trùng ${Math.round(it.iou * 100)}%.` : "<br>Tool không thấy vật nào khớp với box này.";
+  const msgs = (it.msgs || []).map(m => `<li>${esc(m)}</li>`).join("");
+  return `${head}${body}${msgs ? `<ul style="margin:6px 0 0 16px;padding:0">${msgs}</ul>` : it.type === "lab" && it.status === "dung" ? "<br>Không có lỗi." : ""}`;
+}
+function showAnDetail(it) {
+  $("#anDetail").innerHTML = it ? anDesc(it) : `<p class="empty-note">Bấm một dòng hoặc một vật trên ảnh để xem chi tiết.</p>`;
+  $$("#anTable tr[data-key]").forEach(tr => tr.classList.toggle("on", !!it && tr.dataset.key === it.key));
+}
+function anPath(g, polys) {
+  g.beginPath();
+  polys.forEach(p => { g.moveTo(p[0], p[1]); for (let k = 2; k < p.length; k += 2) g.lineTo(p[k], p[k + 1]); g.closePath(); });
+}
+function drawAnalysis() {
+  const c = $("#anCanvas"), d = AN.data, img = AN.img; if (!d || !img) return;
+  const wrap = $("#anWrap"), W = d.W, H = d.H;
+  const s = Math.min(wrap.clientWidth / W, (wrap.clientHeight || 600) / H), dpr = window.devicePixelRatio || 1;
+  AN.scale = s;
+  c.style.width = W * s + "px"; c.style.height = H * s + "px";
+  c.width = Math.round(W * s * dpr); c.height = Math.round(H * s * dpr);
+  const g = c.getContext("2d");
+  g.setTransform(s * dpr, 0, 0, s * dpr, 0, 0);
+  g.drawImage(img, 0, 0, W, H);
+  const lw = 2 / s, focus = AN.pick || AN.hover;
+  if (AN.layers.road && d.road) { anPath(g, d.road.polys); g.fillStyle = AN_COL.road; g.fill("evenodd"); }
+  if (AN.layers.lab) for (const it of AN.items) if (it.type === "area") {
+    anPath(g, it.polys); g.fillStyle = it.road ? "rgba(59,130,246,.16)" : "rgba(59,130,246,.10)"; g.fill("evenodd");
+    g.strokeStyle = it.status === "dung" ? AN_COL.area : AN_COL[it.status]; g.lineWidth = lw; g.setLineDash([]); g.stroke();
+  }
+  if (AN.layers.tool) for (const t of d.tool) {
+    const [x1, y1, x2, y2] = t.box; g.strokeStyle = AN_COL.tool; g.lineWidth = 1.5 / s; g.setLineDash([5 / s, 4 / s]); g.strokeRect(x1, y1, x2 - x1, y2 - y1);
+  }
+  g.setLineDash([]);
+  if (AN.layers.lab) for (const it of AN.items) if (it.type === "lab") {
+    const [x1, y1, x2, y2] = it.box; g.strokeStyle = AN_COL[it.status]; g.lineWidth = lw; g.strokeRect(x1, y1, x2 - x1, y2 - y1);
+  }
+  if (AN.layers.miss) for (const it of AN.items) if (it.type === "miss") {
+    g.strokeStyle = AN_COL.miss; g.lineWidth = lw; g.setLineDash([6 / s, 4 / s]);
+    if (it.poly) { anPath(g, [it.poly]); g.fillStyle = "rgba(232,121,249,.18)"; g.fill(); g.stroke(); }
+    else { const [x1, y1, x2, y2] = it.box; g.strokeRect(x1, y1, x2 - x1, y2 - y1); }
+    g.setLineDash([]);
+  }
+  if (focus) {                     // to dam vat dang chon / re chuot
+    g.lineWidth = 4 / s; g.strokeStyle = "#ffffff"; g.setLineDash([]);
+    if (focus.polys || focus.poly) { anPath(g, focus.polys || [focus.poly]); g.stroke(); }
+    else { const [x1, y1, x2, y2] = focus.box; g.strokeRect(x1 - 2 / s, y1 - 2 / s, x2 - x1 + 4 / s, y2 - y1 + 4 / s); }
+    if (focus.tool) { const [x1, y1, x2, y2] = focus.tool.box; g.strokeStyle = AN_COL.tool; g.lineWidth = 3 / s; g.setLineDash([5 / s, 4 / s]); g.strokeRect(x1, y1, x2 - x1, y2 - y1); g.setLineDash([]); }
+  }
+}
+function anHit(x, y) {
+  const inBox = b => b && x >= b[0] && x <= b[2] && y >= b[1] && y <= b[3];
+  const area = b => (b[2] - b[0]) * (b[3] - b[1]);
+  const vis = AN.items.filter(it => (it.type === "lab" || it.type === "area") ? AN.layers.lab : it.type === "tool" ? AN.layers.tool : AN.layers.miss);
+  const boxes = vis.filter(it => it.box && !it.poly && inBox(it.box)).sort((a, b) => area(a.box) - area(b.box));
+  if (boxes.length) return boxes[0];
+  const g = document.createElement("canvas").getContext("2d");
+  for (const it of vis) {
+    const polys = it.polys || (it.poly ? [it.poly] : null);
+    if (!polys) continue;
+    anPath(g, polys);
+    if (g.isPointInPath(x, y, "evenodd")) return it;
+  }
+  return null;
+}
+$("#anCanvas").addEventListener("mousemove", e => {
+  if (!AN.data) return;
+  const r = e.currentTarget.getBoundingClientRect(), x = (e.clientX - r.left) / AN.scale, y = (e.clientY - r.top) / AN.scale;
+  const it = anHit(x, y), tip = $("#anTip");
+  if (it !== AN.hover) { AN.hover = it; drawAnalysis(); }
+  if (!it) { tip.classList.add("hidden"); return; }
+  tip.innerHTML = anDesc(it); tip.classList.remove("hidden");
+  const wr = $("#anWrap").getBoundingClientRect();
+  let lx = e.clientX - wr.left + 14, ly = e.clientY - wr.top + 14;
+  if (lx + 300 > wr.width) lx = Math.max(4, e.clientX - wr.left - 310);
+  if (ly + tip.offsetHeight > wr.height) ly = Math.max(4, e.clientY - wr.top - tip.offsetHeight - 10);
+  tip.style.left = lx + "px"; tip.style.top = ly + "px";
+});
+$("#anCanvas").addEventListener("mouseleave", () => { AN.hover = null; $("#anTip").classList.add("hidden"); drawAnalysis(); });
+$("#anCanvas").addEventListener("click", () => {
+  AN.pick = AN.hover; showAnDetail(AN.pick); drawAnalysis();
+  const tr = AN.pick && $(`#anTable tr[data-key="${AN.pick.key}"]`); if (tr) tr.scrollIntoView({ block: "nearest" });
+});
+$("#anTable").addEventListener("click", e => { const tr = e.target.closest("tr[data-key]"); if (!tr) return; AN.pick = AN.items.find(i => i.key === tr.dataset.key); showAnDetail(AN.pick); drawAnalysis(); });
+$("#anTable").addEventListener("mouseover", e => { const tr = e.target.closest("tr[data-key]"); if (!tr) return; const it = AN.items.find(i => i.key === tr.dataset.key); if (it !== AN.hover) { AN.hover = it; drawAnalysis(); } });
+$("#anTable").addEventListener("mouseleave", () => { AN.hover = null; drawAnalysis(); });
+$$(".an-layers input").forEach(cb => cb.onchange = () => { AN.layers[cb.dataset.layer] = cb.checked; drawAnalysis(); });
+$("#anFrame").onchange = e => loadAnalysis(+e.target.value);
+$("#anPrev").onclick = () => loadAnalysis(AN.idx - 1);
+$("#anNext").onclick = () => loadAnalysis(AN.idx + 1);
+window.addEventListener("resize", debounce(() => { if (VIEW === "analysis") drawAnalysis(); }, 120));
 
 start();

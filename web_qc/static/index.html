@@ -6,7 +6,7 @@
 <title>QC nhãn 2D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=11">
+<link rel="stylesheet" href="style.css?v=12">
 </head>
 <body>
 
@@ -177,6 +177,7 @@
           <div class="wb-head">
             <div class="tabs-inline" role="tablist">
               <button type="button" class="on" data-view="list">Danh sách lỗi</button>
+              <button type="button" data-view="analysis">Phân tích</button>
               <button type="button" data-view="frames">Theo khung hình</button>
               <button type="button" data-view="issues">Issue trên CVAT</button>
             </div>
@@ -223,6 +224,32 @@
               </form>
               <div id="detail" class="detail"></div>
               <div id="gRef" class="gref-wrap"></div>
+            </div>
+          </div>
+
+          <!-- che do: phan tich (nhan labeler vs nhung gi tool thay) -->
+          <div class="an-body hidden" id="viewAnalysis">
+            <div class="an-stage">
+              <div class="an-bar">
+                <div class="an-nav">
+                  <button type="button" class="btn sm icon" id="anPrev" aria-label="Ảnh trước">‹</button>
+                  <select id="anFrame" aria-label="Chọn ảnh"></select>
+                  <button type="button" class="btn sm icon" id="anNext" aria-label="Ảnh sau">›</button>
+                </div>
+                <div class="an-layers" role="group" aria-label="Lớp hiển thị">
+                  <label class="chk"><input type="checkbox" data-layer="lab" checked><span><i class="sw sw-lab"></i>Nhãn labeler</span></label>
+                  <label class="chk"><input type="checkbox" data-layer="tool" checked><span><i class="sw sw-tool"></i>Tool phát hiện</span></label>
+                  <label class="chk"><input type="checkbox" data-layer="road"><span><i class="sw sw-road"></i>Mặt đường (model)</span></label>
+                  <label class="chk"><input type="checkbox" data-layer="miss" checked><span><i class="sw sw-miss"></i>Thiếu</span></label>
+                </div>
+              </div>
+              <div class="an-canvas-wrap" id="anWrap"><canvas id="anCanvas"></canvas><div id="anTip" class="an-tip hidden"></div></div>
+              <p class="an-legend">Box labeler: <b class="c-ok">xanh = khớp với tool</b> · <b class="c-warn">vàng = nghi</b> · <b class="c-bad">đỏ = lỗi</b>. Nét đứt xanh lơ = vật tool thấy. Rê chuột lên ảnh hoặc bảng để xem chi tiết.</p>
+            </div>
+            <div class="an-side">
+              <div id="anSum" class="an-sum"></div>
+              <div class="an-tbl-wrap"><table class="tbl an-tbl" id="anTable"><thead><tr><th>#</th><th>Nhãn</th><th>Labeler</th><th>Tool thấy</th><th class="r">Khớp</th></tr></thead><tbody></tbody></table></div>
+              <div id="anDetail" class="an-detail"></div>
             </div>
           </div>
 
@@ -422,6 +449,6 @@
   </div>
 </div>
 <div id="modal" class="modal zoom hidden"><img id="modalImg" alt="Ảnh phóng to"></div>
-<script src="app.js?v=12"></script>
+<script src="app.js?v=14"></script>
 </body>
 </html>

@@ -96,15 +96,34 @@ class RoadSeg:
 
     @torch.no_grad()
     def __call__(self, img):
-        """img RGB -> nhan lop Cityscapes tung pixel (HxW int)"""
+        """img RGB -> nhan lop Cityscapes tung pixel (HxW int). Nho ket qua anh gan nhat (check + phan tich goi 2 lan)."""
         H, W = img.shape[:2]
+        key = (img.__array_interface__["data"][0], img.shape)
+        last = getattr(self, "_last", None)
+        if last is not None and last[0] == key:
+            return last[1]
         with self._lock:
             x = self.proc(images=img, return_tensors="pt")["pixel_values"].to(self.dev)
             if self.dev == "cuda":
                 x = x.half()
             lo = self.model(pixel_values=x).logits
             lo = torch.nn.functional.interpolate(lo.float(), size=(H, W), mode="bilinear", align_corners=False)
-            return lo.argmax(1)[0].cpu().numpy()
+            cls = lo.argmax(1)[0].cpu().numpy()
+        self._last = (key, cls)
+        return cls
+
+
+def outlines(mask, min_px=200, eps=2.0):
+    """Moi duong vien (ca lo thung) cua 1 mask -> [[x1, y1, ...], ...] de ve tren web (to kieu even-odd)."""
+    cs, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    out = []
+    for c in cs:
+        if cv2.contourArea(c) < min_px:
+            continue
+        p = cv2.approxPolyDP(c, eps, True)
+        if len(p) >= 3:
+            out.append([int(v) for v in p.reshape(-1)])
+    return out
 
 
 def _fmt(b):

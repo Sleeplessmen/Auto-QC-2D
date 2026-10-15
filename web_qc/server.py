@@ -406,8 +406,12 @@ def run_detail(run_id: int, request: Request, u=Depends(user)):
             pv_of = {}
             for n, base, nbox, pv, finds in rv.frames:
                 fn = os.path.basename(pv)
+                stem = os.path.splitext(fn)[0]
+                has_an = os.path.exists(os.path.join(rv.out_dir, "analysis", stem + ".json"))
                 d["frames"].append(dict(frame=n, name=base, preview=f"/api/runs/{run_id}/preview/{fn}",
-                                        n=len(finds), sure=sum(1 for f in finds if f["sure"])))
+                                        n=len(finds), sure=sum(1 for f in finds if f["sure"]),
+                                        analysis=f"/api/runs/{run_id}/analysis/{stem}" if has_an else None,
+                                        raw=f"/api/runs/{run_id}/raw/{stem}" if has_an else None))
                 pv_of[(n, base)] = fn
             for i, f in enumerate(rv.findings):
                 d["findings"].append(dict(id=i, frame=f["frame"], name=f["name"], kind=f["kind"],
@@ -484,6 +488,23 @@ def preview(run_id: int, fn: str, u=Depends(user)):
     p = os.path.join(_run_dir(run_id), "preview", os.path.basename(fn))
     if not os.path.exists(p):
         raise HTTPException(404, "Không có ảnh.")
+    return FileResponse(p)
+
+
+@app.get("/api/runs/{run_id}/analysis/{stem}")
+def analysis(run_id: int, stem: str, u=Depends(user)):
+    """Du lieu che do Phan tich cua 1 anh: nhan labeler, vat tool thay, mat duong model, doi chieu."""
+    p = os.path.join(_run_dir(run_id), "analysis", os.path.basename(stem) + ".json")
+    if not os.path.exists(p):
+        raise HTTPException(404, "Lần review này chạy bằng bản cũ, chưa có dữ liệu phân tích. Bấm Review lại.")
+    return FileResponse(p, media_type="application/json")
+
+
+@app.get("/api/runs/{run_id}/raw/{stem}")
+def raw_image(run_id: int, stem: str, u=Depends(user)):
+    p = os.path.join(_run_dir(run_id), "goc", os.path.basename(stem) + ".jpg")
+    if not os.path.exists(p):
+        raise HTTPException(404, "Không có ảnh gốc.")
     return FileResponse(p)
 
 

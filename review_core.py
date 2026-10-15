@@ -405,6 +405,45 @@ def _miss_where(t, lab, bad):
     return f" ({', '.join(s)})" if s else ""
 
 
+def analysis_data(lab, areas, tool, tool2job, job_group, finds, road_cls, road_names, W, H):
+    """Du lieu cho che do xem 'Phan tich' tren web: nhan cua labeler, vat tool thay, mat duong model to, va doi chieu."""
+    level, msgs = {}, {}
+    for f in finds:
+        if f.get("ref"):
+            level[f["ref"]] = max(level.get(f["ref"], 0), 2 if f["sure"] else 1)
+            msgs.setdefault(f["ref"], []).append(f["msg"])
+    status = ("dung", "nghi", "loi")
+    rd = lambda b: [round(float(v), 1) for v in b]
+    T = [dict(box=rd(o["box"]), label=tool2job.get(o["cls"]) or o["cls"], cls=o["cls"], score=round(float(o["score"]), 2),
+              sure=o.get("trang_thai") == "TU_DONG" and o["score"] >= SURE_SCORE) for o in tool]
+    labs = []
+    for l in lab:
+        g = job_group.get(l["label"])
+        best = max(((L.iou(l["box"], t["box"]), k) for k, t in enumerate(T) if GROUP.get(t["cls"]) == g), default=(0.0, None))
+        labs.append(dict(id=l["id"], label=l["label"], box=rd(l["box"]), occluded=bool(l.get("occluded")),
+                         status=status[level.get(l["id"], 0)], msgs=msgs.get(l["id"], []),
+                         match=best[1] if best[0] >= NEAR_IOU else None, iou=round(best[0], 2)))
+    used = {x["match"] for x in labs if x["match"] is not None}
+    for k, t in enumerate(T):
+        t["matched"] = k in used
+    out_areas = [dict(id=a["id"], label=a["label"], kind=a["kind"], polys=area_check.outlines(a["mask"], 20, 1.5),
+                      road=a["label"] in road_names, status=status[level.get(a["id"], 0)], msgs=msgs.get(a["id"], []))
+                 for a in areas]
+    road = None
+    if road_cls is not None:
+        rm = road_cls == area_check.ROAD
+        lab_m = np.zeros_like(rm)
+        for a in areas:
+            if a["label"] in road_names:
+                lab_m |= a["mask"]
+        n = float(rm.size)
+        road = dict(polys=area_check.outlines(rm), model_pct=round(rm.sum() / n * 100, 1), label_pct=round(lab_m.sum() / n * 100, 1),
+                    both_pct=round((rm & lab_m).sum() / n * 100, 1))
+    missing = [dict(label=f["label"], box=rd(f["box"]), sure=f["sure"], msg=f["msg"], kind=f["kind"],
+                    poly=f.get("poly")) for f in finds if not f.get("ref")]
+    return dict(W=W, H=H, labels=labs, tool=T, areas=out_areas, road=road, missing=missing)
+
+
 def _inside(a, b):
     ix = max(0, min(a[2], b[2]) - max(a[0], b[0])) * max(0, min(a[3], b[3]) - max(a[1], b[1]))
     return ix / max(1e-6, (a[2] - a[0]) * (a[3] - a[1]))
@@ -711,7 +750,8 @@ class Review:
         ts = time.strftime("%Y%m%d_%H%M%S")
         self.job_id = int(job_id) if job_id else None
         self.out_dir = os.path.join(OUT_ROOT, f"job{self.job_id or 'file'}_{ts}")
-        os.makedirs(os.path.join(self.out_dir, "preview"), exist_ok=True)
+        for sub in ("preview", "analysis", "goc"):
+            os.makedirs(os.path.join(self.out_dir, sub), exist_ok=True)
 
         export = read_export(zip_path) if zip_path else None
         areas = {}                         # {frame: [polygon / mask]} — chi co khi doc tu CVAT
@@ -823,8 +863,14 @@ class Review:
             st["unsure"] += sum(not f["sure"] for f in finds)
             for f in finds:
                 f.update(frame=n, name=base)
-            pv = os.path.join(self.out_dir, "preview", f"{idx:04d}_{os.path.splitext(base)[0][:40]}.jpg")
+            stem = f"{idx:04d}_{os.path.splitext(base)[0][:40]}"
+            pv = os.path.join(self.out_dir, "preview", stem + ".jpg")
             draw_review(img, lab, finds, pv)
+            # du lieu cho che do "Phan tich": anh goc + nhung gi tool thay + doi chieu
+            an = analysis_data(lab, areas.get(n, []), tool, tool2job, job_group, finds,
+                               seg(img) if seg is not None else None, road_names, W, H)
+            json.dump(an, open(os.path.join(self.out_dir, "analysis", stem + ".json"), "w", encoding="utf-8"), ensure_ascii=False)
+            cv2.imwrite(os.path.join(self.out_dir, "goc", stem + ".jpg"), img[:, :, ::-1], [cv2.IMWRITE_JPEG_QUALITY, 88])
             self.findings += finds
             self.frames.append((n, base, len(lab), pv, finds))
             el = time.time() - t0

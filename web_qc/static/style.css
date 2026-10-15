@@ -456,3 +456,49 @@ mark { background: #ffe58a; color: #111826; border-radius: 2px; padding: 0 1px; 
 .copied { color: var(--good) !important; border-color: var(--good) !important; }
 .tbl tbody tr.row-cur { background: var(--accent-soft); }
 .tbl tbody tr.row-cur td:first-child { box-shadow: inset 3px 0 0 var(--accent); }
+
+/* ---------- che do Phan tich: nhan labeler vs nhung gi tool thay ---------- */
+.an-body { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 420px); height: max(560px, calc(100vh - 380px)); min-height: 0; }
+.an-stage { display: flex; flex-direction: column; min-width: 0; min-height: 0; border-right: 1px solid var(--line); padding: 12px 14px; gap: 10px; }
+.an-bar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.an-nav { display: flex; align-items: center; gap: 6px; }
+.an-nav select { height: 30px; font-size: 13px; width: auto; max-width: 280px; }
+.btn.icon { width: 30px; padding: 0; font-size: 18px; line-height: 1; }
+.an-layers { display: flex; gap: 14px; flex-wrap: wrap; }
+.an-layers .chk span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { display: inline-block; width: 14px; height: 10px; border-radius: 2px; }
+.sw-lab { border: 2px solid #22c55e; }
+.sw-tool { border: 2px dashed #22d3ee; }
+.sw-road { background: rgba(34, 197, 94, .45); }
+.sw-miss { border: 2px dashed #e879f9; }
+.an-canvas-wrap { position: relative; flex: 1; min-height: 0; background: #0b0f16; border-radius: var(--r); overflow: hidden; display: flex; align-items: center; justify-content: center; }
+.an-canvas-wrap canvas { display: block; max-width: 100%; max-height: 100%; cursor: crosshair; }
+.an-tip { position: absolute; pointer-events: none; max-width: 300px; background: rgba(10, 14, 22, .94); color: #e7ebf2; font-size: 12.5px; line-height: 1.45; padding: 8px 10px; border-radius: 6px; border: 1px solid #2f3a4d; z-index: 2; }
+.an-tip b { color: #fff; }
+.an-legend { margin: 0; font-size: 12.5px; color: var(--muted); }
+.an-legend .c-ok { color: var(--good); } .an-legend .c-warn { color: var(--warn); } .an-legend .c-bad { color: var(--bad); }
+.an-side { display: flex; flex-direction: column; min-height: 0; }
+.an-sum { padding: 12px 14px; border-bottom: 1px solid var(--line); display: grid; gap: 10px; }
+.an-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.an-kpi { background: var(--sunken); border: 1px solid var(--line); border-radius: var(--r); padding: 7px 9px; }
+.an-kpi .v { font-size: 18px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.an-kpi .k { font-size: 11.5px; color: var(--muted); }
+.an-kpi.good .v { color: var(--good); } .an-kpi.warn .v { color: var(--warn); } .an-kpi.bad .v { color: var(--bad); }
+.an-road { font-size: 12.5px; color: var(--ink-2); }
+.an-road .bar { position: relative; height: 8px; background: var(--sunken); border: 1px solid var(--line); border-radius: 4px; margin-top: 5px; overflow: hidden; }
+.an-road .bar i { position: absolute; top: 0; bottom: 0; left: 0; }
+.an-tbl-wrap { flex: 1; min-height: 0; overflow: auto; }
+.an-tbl th, .an-tbl td { padding: 7px 10px; }
+.an-tbl td { white-space: normal; }
+.an-tbl tr.on td { background: var(--accent-soft); }
+.an-tbl .st { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.st.dung { background: #22c55e; } .st.nghi { background: #f0a020; } .st.loi { background: #ef4444; } .st.thieu { background: #e879f9; } .st.tool { background: #22d3ee; }
+.an-tbl .sub { display: block; font-size: 11.5px; color: var(--muted); }
+.an-detail { border-top: 1px solid var(--line); padding: 10px 14px; font-size: 13px; color: var(--ink-2); min-height: 64px; }
+.an-detail .empty-note { margin: 0; }
+@media (max-width: 1050px) {
+  .an-body { grid-template-columns: 1fr; height: auto; }
+  .an-stage { border-right: 0; border-bottom: 1px solid var(--line); }
+  .an-canvas-wrap { min-height: 260px; }
+  .an-tbl-wrap { max-height: 420px; }
+}
