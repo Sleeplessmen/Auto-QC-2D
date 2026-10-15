@@ -158,8 +158,7 @@ def check(areas, boxes, img, seg, road_names):
                 dup.add(small["id"])
                 out.append(dict(kind="trung", sure=True, label=small["label"], box=small["box"], ref=small["id"],
                                 poly=outline(small["mask"]),
-                                msg=f"Vùng '{small['label']}' bị vẽ trùng: {inter / small['mask'].sum():.0%} diện tích nằm đè lên "
-                                    f"vùng '{big['label']}' khác {_fmt(big['box'])}. Xoá vùng thừa, chỉ giữ 1 vùng."))
+                                msg=f"Trùng: vùng '{small['label']}' này nằm đè lên vùng khác, xoá vùng này."))
 
     # trung: mask / polygon va box cung nhan tren 1 vat
     for a in areas:
@@ -168,8 +167,8 @@ def check(areas, boxes, img, seg, road_names):
         for b in boxes:
             if b["label"] == a["label"] and _iou(a["box"], b["box"]) >= MASK_BOX_IOU:
                 out.append(dict(kind="trung", sure=True, label=a["label"], box=b["box"], ref=a["id"],
-                                msg=f"Trùng: 1 '{a['label']}' vừa có {'mask' if a['kind'] == 'mask' else 'polygon'} "
-                                    f"vừa có box {_fmt(b['box'])}. Mỗi vật chỉ gán 1 lần, xoá 1 trong 2."))
+                                msg=f"Trùng: '{a['label']}' này vừa có {'mask' if a['kind'] == 'mask' else 'polygon'} "
+                                    f"vừa có box, xoá 1 cái."))
                 break
 
     if seg is None or not road_names:
@@ -194,17 +193,15 @@ def check(areas, boxes, img, seg, road_names):
             top = [CS_VI[k] for k in np.argsort(-what)[:2] if what[k] > 0.2 * px and k in CS_VI]
             out.append(dict(kind="thua", sure=px >= SURE_FRAC * N, label=a["label"], box=box, ref=a["id"],
                             poly=outline(comp),
-                            msg=f"Vùng '{a['label']}' tô thừa lên chỗ không phải mặt đường"
-                                f"{' (' + ', '.join(top) + ')' if top else ''} tại {_fmt(box)}, "
-                                f"khoảng {px / N:.0%} ảnh. Kéo đường viền polygon vào sát mép đường."))
+                            msg=f"Tô thừa '{a['label']}' lên {' / '.join(top) if top else 'chỗ không phải đường'}, "
+                                f"kéo viền vào sát mép đường."))
 
     # thieu: mat duong chua duoc to
     miss = road & ~union & ~hood
     for px, box, comp in _blobs(miss, MIN_FRAC * N):
         out.append(dict(kind="thieu", sure=px >= SURE_FRAC * N, label=road_names[0], box=box, ref=None,
                         poly=outline(comp),
-                        msg=f"Thiếu vùng '{road_names[0]}': mặt đường tại {_fmt(box)} (khoảng {px / N:.0%} ảnh) "
-                            f"chưa được tô. Mở rộng polygon cho phủ hết phần đường này."))
+                        msg=f"Thiếu '{road_names[0]}': phần đường này chưa tô."))
     return out
 
 

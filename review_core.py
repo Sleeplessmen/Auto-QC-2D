@@ -33,7 +33,18 @@ from label_mapping import norm
 HERE = L.HERE
 CACHE = os.path.join(HERE, "cache_hq2d")
 OUT_ROOT = os.path.join(HERE, "review_out")
-PREFIX = "[Review tự động]"
+PREFIX = "[Review tự động]"     # Issue kieu cu bat dau bang chu nay; Issue moi chi co ma [qc:...] o cuoi
+QC_TAG = re.compile(r"\[qc:([^\]]+)\]\s*$")
+
+
+def tool_issue(first):
+    """Comment dau cua 1 Issue -> (ma qc, loi nhan sach) neu do tool tao, nguoc lai None."""
+    m = QC_TAG.search(first)
+    if not m and not first.startswith(PREFIX):
+        return None
+    text = first[:m.start()] if m else first
+    text = re.sub(r"^\[Review tự động\]\s*(\[[^\]]+\]\s*)?", "", text).strip()
+    return (m.group(1) if m else None), text
 
 # ---------------------------------------------------------------------------
 # Nguong (do tren 123 anh D:\DATA, xem review_eval.py)
@@ -283,10 +294,10 @@ def compare(lab, tool, rejected, W, H, tool2job, job_group, img=None, runner=Non
         if l["label"] != t["label"]:
             if t["sure"] and "GreenSM?" not in t.get("can_xem", ""):
                 out.append(dict(kind="sai_nhan", sure=True, label=l["label"], box=l["box"], ref=l["id"],
-                                msg=f"Sai nhãn: đang gán '{l['label']}', vật này là '{t['label']}'."))
+                                msg=f"Sai nhãn: đây là '{t['label']}', không phải '{l['label']}'."))
             elif t["score"] >= UNSURE_SCORE:
                 out.append(dict(kind="sai_nhan", sure=False, label=l["label"], box=l["box"], ref=l["id"],
-                                msg=f"Nhãn '{l['label']}' có thể sai, có vẻ là '{t['label']}'."))
+                                msg=f"Có thể sai nhãn: giống '{t['label']}' hơn '{l['label']}'."))
             continue
         _check_size(out, l, t, W, H)
 
@@ -305,8 +316,7 @@ def compare(lab, tool, rejected, W, H, tool2job, job_group, img=None, runner=Non
         off = _edges(l["box"], t["box"], W, H, _refs(t))
         sure = t["sure"] and t["box_ok"] and not l.get("occluded")
         out.append(dict(kind="sai_kich_thuoc", sure=sure, label=l["label"], box=l["box"], ref=l["id"],
-                        msg=f"Sai kích thước nhiều: box '{l['label']}' lệch xa vật thật (IoU {v:.2f}); "
-                            f"{_size_msg(off) or 'lệch vị trí'}. Box đúng khoảng {_fmt(t['box'])}."))
+                        msg=f"Box lệch nhiều so với vật: {_size_msg(off) or 'sai vị trí'}."))
 
     # thieu: tool thay chac chan, nguoi gan khong co box nao
     for k, t in enumerate(T):
@@ -320,10 +330,10 @@ def compare(lab, tool, rejected, W, H, tool2job, job_group, img=None, runner=Non
         where = _miss_where(t, lab, bad)
         if t["sure"]:
             out.append(dict(kind="thieu", sure=True, label=t["label"], box=t["box"], ref=None,
-                            msg=f"Thiếu nhãn: có 1 '{t['label']}' chưa được gán {where}"))
+                            msg=f"Thiếu box '{t['label']}' ở đây{where}."))
         elif t["score"] >= MISS_UNSURE:
             out.append(dict(kind="thieu", sure=False, label=t["label"], box=t["box"], ref=None,
-                            msg=f"Có thể thiếu 1 '{t['label']}' {where}"))
+                            msg=f"Có thể thiếu box '{t['label']}' ở đây{where}."))
 
     # thua: nguoi gan co box ma tool khong thay gi (ca box diem thap)
     cand = [o["box"] for o in tool] + [o["box"] for o in rejected]
@@ -336,17 +346,17 @@ def compare(lab, tool, rejected, W, H, tool2job, job_group, img=None, runner=Non
         p_neg = runner.lookalike(img, l["box"], job_group[l["label"]]) if runner is not None and img is not None else 0.0
         if p_neg >= L.NEG_P:
             out.append(dict(kind="thua", sure=True, label=l["label"], box=l["box"], ref=l["id"],
-                            msg=f"Box thừa: trong box '{l['label']}' không có vật thể (giống biển báo / quảng cáo / bóng phản chiếu)."))
+                            msg=f"Box thừa: không có '{l['label']}' ở đây (biển báo / quảng cáo / bóng phản chiếu?)."))
         else:
             out.append(dict(kind="thua", sure=False, label=l["label"], box=l["box"], ref=l["id"],
-                            msg=f"Tool không thấy '{l['label']}' nào trong box này, kiểm tra lại xem có phải box thừa."))
+                            msg=f"Có thể box thừa: không thấy '{l['label']}' trong box."))
 
     # box trung: 2 box cung nhan tren 1 vat
     for i in range(len(lab)):
         for j in range(i + 1, len(lab)):
             if lab[i]["label"] == lab[j]["label"] and L.iou(lab[i]["box"], lab[j]["box"]) >= DUP_IOU:
                 out.append(dict(kind="trung", sure=True, label=lab[i]["label"], box=lab[j]["box"], ref=lab[j]["id"],
-                                msg=f"Box trùng: 2 box '{lab[i]['label']}' chồng lên nhau trên cùng 1 vật."))
+                                msg=f"Trùng: 2 box '{lab[i]['label']}' cho cùng 1 vật, xoá 1 box."))
     return out
 
 
@@ -362,7 +372,7 @@ def _check_size(out, l, t, W, H):
         return
     sure = t["sure"] and t["box_ok"]
     out.append(dict(kind="sai_kich_thuoc", sure=sure, label=l["label"], box=l["box"], ref=l["id"],
-                    msg=f"Box '{l['label']}' chưa khít: {_size_msg(off)} (IoU {v:.2f}). Box đúng khoảng {_fmt(t['box'])}."))
+                    msg=f"Box chưa khít: {_size_msg(off)}."))
 
 
 def _check_shape(l, grp, W, H):
@@ -379,25 +389,20 @@ def _check_shape(l, grp, W, H):
     sure = r > s_hi or r < s_lo or min(w, h) < 3
     if not (sure or r > u_hi or r < u_lo):
         return None
-    ratio = f"{r:.0f}:1" if r >= 1 else f"1:{1 / r:.0f}"
     shape = "quá dẹt" if r > 1 else "quá mảnh"
     return dict(kind="sai_kich_thuoc", sure=sure, label=l["label"], box=l["box"], ref=l["id"],
-                msg=f"Box '{l['label']}' hình dạng bất thường, {shape}: rộng {w:.0f}px, cao {h:.0f}px (tỉ lệ {ratio}). "
-                    f"Một '{l['label']}' thật không có hình như vậy, có thể kéo nhầm hoặc vẽ trùm nhiều vật. "
-                    f"Xoá và vẽ lại sát đúng 1 vật.")
+                msg=f"Box '{l['label']}' {shape} ({w:.0f}×{h:.0f}px), không đúng 1 vật. Xoá và vẽ lại.")
 
 
 def _miss_where(t, lab, bad):
     """Mo ta cho vat bi thieu: vi tri, co, va box da gan nam sat ben (de labeler khong nham la box do sai)."""
     x1, y1, x2, y2 = t["box"]
-    s = f"tại {_fmt(t['box'])}, cỡ {x2 - x1:.0f}×{y2 - y1:.0f}px"
+    s = []
     if max(x2 - x1, y2 - y1) < 40:
-        s += " (vật nhỏ ở xa, phóng to để thấy)"
-    near = [l for i, l in enumerate(lab) if i not in bad and _inside(t["box"], l["box"]) > 0]
-    if near:
-        n = max(near, key=lambda l: _inside(t["box"], l["box"]))
-        s += f". Vật này nằm sát / khuất sau box '{n['label']}' {_fmt(n['box'])} đã gán: box đó là của vật khác, cần vẽ thêm 1 box riêng cho vật này"
-    return s + "."
+        s.append("vật nhỏ ở xa, phóng to để thấy")
+    if any(i not in bad and _inside(t["box"], l["box"]) > 0 for i, l in enumerate(lab)):
+        s.append("nằm sát box khác, cần box riêng")
+    return f" ({', '.join(s)})" if s else ""
 
 
 def _inside(a, b):
@@ -807,7 +812,7 @@ class Review:
             finds = compare(lab, tool, rejected, W, H, tool2job, job_group, img=img, runner=runner, rider_person=rider_person)
             for b in rot:
                 finds.append(dict(kind="sai_kich_thuoc", sure=False, label=b["label"], box=b["box"], ref=b["id"],
-                                  msg=f"Box '{b['label']}' bị xoay {b['rotation']:.0f}°, tool chỉ kiểm tra được box không xoay."))
+                                  msg=f"Box bị xoay {b['rotation']:.0f}°, tool không kiểm tra được, xem lại."))
             if areas.get(n):
                 finds += area_check.check(areas[n], boxes, img, seg, road_names)
             bad_refs = {f["ref"] for f in finds if f["ref"] and f["sure"]}
@@ -871,11 +876,10 @@ class Review:
                 owner = (it.get("owner") or {}).get("id")
                 if owner != me or it.get("resolved"):
                     continue
-                first = self.cvat.first_comment(it["id"])
-                if not first.startswith(PREFIX):
+                ti = tool_issue(self.cvat.first_comment(it["id"]))
+                if ti is None:
                     continue
-                m = re.search(r"\[qc:([^\]]+)\]\s*$", first)
-                fp = m.group(1) if m else None
+                fp = ti[0]
                 if fp and fp in want:
                     keep_fp.add(fp)
                     kept += 1
@@ -890,8 +894,7 @@ class Review:
         made = []
         new = [f for fp, f in want.items() if fp not in keep_fp]
         for k, f in enumerate(new, 1):
-            kind = KIND_VI.get(f["kind"], f["kind"])
-            msg = f"{PREFIX} [{kind}] {f['msg']}" + ("" if f["sure"] else " (không chắc — nên kiểm tra lại)")
+            msg = f["msg"] + ("" if f["sure"] else " (chưa chắc, xem lại)")
             msg += f"\n\n[qc:{self.fingerprint(f)}]"          # ma de lan sau khong tao trung, labeler bo qua
             r = self.cvat.create_issue(self.job_id, f["frame"], f["box"], msg, f.get("poly"))
             made.append(r["id"])

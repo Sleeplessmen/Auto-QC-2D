@@ -190,7 +190,7 @@ Toàn bộ diễn ra trên trang **Review job**.
 
 | Công cụ | Dùng khi nào | Lên CVAT thế nào |
 | --- | --- | --- |
-| **Ghi chú trên ảnh** (nút trên khung ảnh, phím **N**) | Tool không tự thấy nhưng bạn thấy cần nhắc labeler: kéo một khung lên đúng chỗ trên ảnh rồi gõ lời nhắn | Thành 1 Issue ghim đúng khung đó, nội dung bắt đầu `[Review tự động] [Ghi chú người review]` |
+| **Ghi chú trên ảnh** (nút trên khung ảnh, phím **N**) | Tool không tự thấy nhưng bạn thấy cần nhắc labeler: kéo một khung lên đúng chỗ trên ảnh rồi gõ lời nhắn | Thành 1 Issue ghim đúng khung đó, nội dung là đúng lời nhắn bạn gõ |
 | **Sửa lời nhắn** | Lời nhắn của tool khó hiểu hoặc muốn hướng dẫn cụ thể hơn ("kéo cạnh dưới xuống bánh xe") | Issue dùng lời nhắn đã sửa. Có nút trở về lời nhắn gốc |
 | **Tool nhầm** (phím **X**) | Tool báo sai | Không đẩy. Đếm vào tỉ lệ tool nhầm |
 | **Khung đang xem + phóng to vùng lỗi** | Mỗi lỗi được khoanh khung xanh đứt nét trên ảnh và phóng to bên dưới, để thấy rõ chỗ sai mà không phải zoom tay | — |
@@ -211,7 +211,7 @@ Bấm **Link cho labeler** (hoặc mở link trong Issue tổng kết) để có
 
 ### Labeler sửa trên CVAT
 
-1. Mở job (nút **Mở job trên CVAT**). Issue ghim tại đúng vị trí lỗi, nội dung bắt đầu bằng `[Review tự động]`.
+1. Mở job (nút **Mở job trên CVAT**). Issue ghim tại đúng vị trí lỗi, mỗi Issue là 1 câu ngắn nói lỗi gì.
 2. Sửa nhãn rồi Resolve Issue. Nếu thấy tool sai, trả lời ngay dưới Issue: lần chạy sau tool sẽ đóng Issue đó thay vì xoá.
 3. Chạy review lại (nút **Chạy lại**).
 
@@ -325,7 +325,7 @@ quy_tac:
 
 Ví dụ một Issue tầng 1 trên CVAT:
 
-`[Review tự động] Box 'car' thiếu thuộc tính 'occluded' — Guideline mục 3.1. [shape 1234]`
+`Box 'car' thiếu thuộc tính 'occluded' — Guideline mục 3.1.`
 
 ### Lưu ý
 
@@ -419,17 +419,21 @@ Mỗi lỗi được chọn thành một Issue ghim đúng frame, đúng vị tr
 
 ### Nội dung Issue
 
-Nội dung gồm 4 phần:
+Issue chỉ ghi lỗi, ngắn gọn (bản 2026-10-15 bỏ tiền tố `[Review tự động]`, mã box, IoU và toạ độ). Issue đã ghim đúng chỗ nên không cần toạ độ. Nội dung gồm:
 
-1. Tiền tố `[Review tự động]`.
-2. Câu mô tả lỗi.
-3. Câu "(không chắc — nên kiểm tra lại)", nếu là lỗi không chắc.
-4. Mã box trên CVAT, ví dụ `[shape 1234]` hoặc `[track 56]`.
+1. Câu mô tả lỗi.
+2. "(chưa chắc, xem lại)", nếu là lỗi không chắc.
+3. Dòng cuối là mã `[qc:frame|loại|box]`. Tool dùng mã này để nhận Issue của mình và không tạo trùng; labeler bỏ qua.
 
-Mã box giúp labeler tìm đúng box. Ví dụ:
+Ví dụ:
 
-- `[Review tự động] Box 'car' chưa khít: cạnh dưới thiếu 40px (IoU 0.78). Box đúng khoảng [...]. [shape 1234]`
-- `[Review tự động] Có thể thiếu 1 'motorcycle' ở đây. (không chắc — nên kiểm tra lại)`
+- `Box chưa khít: cạnh dưới thừa 11px.`
+- `Box 'car' quá dẹt (912×14px), không đúng 1 vật. Xoá và vẽ lại.`
+- `Thiếu box 'car' ở đây (vật nhỏ ở xa, phóng to để thấy).`
+- `Trùng: 2 box 'car' cho cùng 1 vật, xoá 1 box.`
+- `Thiếu 'drivable_area': phần đường này chưa tô. (chưa chắc, xem lại)`
+
+Issue vùng đường được ghim theo đúng đường viền vùng, không theo khung chữ nhật. Issue kiểu cũ (có `[Review tự động]`) vẫn được nhận ra khi đồng bộ.
 
 ### Đồng bộ với Issue của lần trước (chống đẩy trùng)
 

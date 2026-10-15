@@ -245,10 +245,10 @@ class Worker:
                 pct = st["ok"] / st["boxes"] if st.get("boxes") else 0
                 thr = store.get_settings()["pass_threshold"]
                 frame0 = min((f["frame"] for f in pick if f["frame"] is not None), default=rv.frames[0][0] if rv.frames else 0)
-                text = (f"Kết quả QC lần #{run_id}: {pct:.0%} box đúng — {'ĐẠT' if pct >= thr else f'CHƯA ĐẠT (cần ≥ {thr:.0%})'}. "
-                        f"Có {len(pick)} chỗ cần xem, mỗi chỗ là 1 Issue trên ảnh.")
+                text = (f"{pct:.0%} box đúng — {'ĐẠT' if pct >= thr else f'CHƯA ĐẠT (cần ≥ {thr:.0%})'}. "
+                        f"{len(pick)} lỗi cần sửa.")
                 if report_url:
-                    text += f"\nXem tất cả lỗi kèm ảnh: {report_url}"
+                    text += f"\nDanh sách lỗi: {report_url}"
                 pick.append(dict(kind="tong_ket", sure=True, label="", box=[4, 4, 64, 64], ref=f"run {run_id}", msg=text, frame=frame0, name=""))
             try:
                 rv.findings = pick
@@ -268,10 +268,10 @@ class Worker:
         cv, _ = cvat_client(run.get("connection_id"))
         out = []
         for it in cv.issues(run["job_id"]):
-            first = cv.first_comment(it["id"])
-            if not first.startswith(R.PREFIX):
+            ti = R.tool_issue(cv.first_comment(it["id"]))
+            if ti is None:
                 continue
             out.append(dict(id=it["id"], frame=it.get("frame"), resolved=bool(it.get("resolved")),
-                            message=first[len(R.PREFIX):].split(" [qc:")[0].strip(), comments=cv.comment_count(it["id"]),
+                            message=ti[1], comments=cv.comment_count(it["id"]),
                             updated=it.get("updated_date")))
         return out
