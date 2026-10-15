@@ -130,7 +130,7 @@ function renderJobCtx() {
   if (JOBINFO?.error) chips.push(`<span class="chip bad">Job ${esc(jid)}: ${esc(JOBINFO.error)}</span>`);
   else if (JOBINFO) {
     chips.push(`<span class="chip">Job ${JOBINFO.id} · ${esc(JOBINFO.task_name || "Task " + JOBINFO.task_id)}</span>`);
-    chips.push(JOBINFO.dimension === "3d" ? `<span class="chip bad">Job 3D · web này chỉ review 2D</span>` : `<span class="chip ok">2D · ${JOBINFO.frames ?? "?"} frame</span>`);
+    chips.push(JOBINFO.dimension === "3d" ? `<span class="chip bad" title="Job này là dữ liệu 3D (lidar). Tool chỉ chấm được ảnh 2D.">Job 3D (lidar), không chấm được · hãy chọn job 2D khác</span>` : `<span class="chip ok">2D · ${JOBINFO.frames ?? "?"} frame</span>`);
     chips.push(`<span class="chip">${esc(JOBINFO.stage)} · ${esc(JOBINFO.state)}</span>`);
     if (JOBINFO.assignee) chips.push(`<span class="chip">Labeler: ${esc(JOBINFO.assignee)}</span>`);
   } else if (file) chips.push(`<span class="chip warn">Chấm từ file ${esc(file.name)} · không đẩy Issue được nếu không có số job</span>`);
@@ -273,7 +273,8 @@ function showResult(r) {
     <div class="kpi"><div class="v">${s.boxes ?? 0}</div><div class="k">Box trong ${s.frames ?? 0} ảnh</div></div>
     <div class="kpi"><div class="v">${sec < 90 ? Math.round(sec) + "s" : (sec / 60).toFixed(1) + "m"}</div><div class="k">Thời gian chạy · ${s.frames ? (sec / s.frames).toFixed(1) : "?"}s/ảnh</div></div>`;
   $("#runStatus").className = "pill " + (pass ? "pass" : "fail");
-  $("#runStatus").textContent = pass ? "Xong · Đạt" : "Xong · Chưa đạt";
+  $("#runStatus").textContent = pass ? `Đạt · ${pctTxt(pct)} box đúng` : `Chưa đạt · ${pctTxt(pct)} < ${(THR() * 100).toFixed(0)}%`;
+  $("#runStatus").title = `Đã chấm xong. ${pctTxt(pct)} box không có lỗi chắc chắn, ngưỡng đạt là ${(THR() * 100).toFixed(0)}% (đổi trong Cài đặt).`;
   if (r.skipped_labels?.length) $("#runMeta").textContent = runMeta(r) + ` · tool không đánh giá được nhãn: ${r.skipped_labels.join(", ")}`;
   const c = r.compare;
   $("#runCompare").innerHTML = c ? `<span class="c">So với lần #${c.prev_id}${c.prev_pct != null ? " (" + pctTxt(c.prev_pct) + ")" : ""}</span>` +
@@ -503,9 +504,9 @@ function updatePush() {
 $("#copyReport").onclick = async () => {
   const url = RUN_DATA?.report_url; if (!url) return;
   const b = $("#copyReport");
-  try { await navigator.clipboard.writeText(url); b.classList.add("copied"); b.lastChild.textContent = "Đã copy link"; }
+  try { await navigator.clipboard.writeText(url); b.classList.add("copied"); b.lastChild.textContent = "Đã copy, dán gửi labeler"; }
   catch { window.open(url, "_blank"); }
-  setTimeout(() => { b.classList.remove("copied"); b.lastChild.textContent = "Link cho labeler"; }, 2500);
+  setTimeout(() => { b.classList.remove("copied"); b.lastChild.textContent = "Copy link gửi labeler"; }, 2500);
 };
 
 // phim tat: len/xuong chuyen, Space chon/bo, X tool nham, N ghi chu tren anh, Esc thoat ve

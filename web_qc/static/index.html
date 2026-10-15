@@ -161,10 +161,10 @@
               <div id="runCompare" class="compare"></div>
             </div>
             <div class="runhead-actions">
-              <a id="openCvat" class="btn sm hidden" target="_blank" rel="noopener"><svg class="ic"><use href="#i-ext"/></svg>Mở job trên CVAT</a>
-              <button id="copyReport" class="btn sm hidden" type="button" title="Trang xem lỗi kèm ảnh cho labeler, không cần đăng nhập"><svg class="ic"><use href="#i-link"/></svg>Link cho labeler</button>
-              <button id="rerunBtn" class="btn sm" type="button"><svg class="ic"><use href="#i-redo"/></svg>Chạy lại</button>
-              <a id="csv" class="btn sm" href="#"><svg class="ic"><use href="#i-download"/></svg>CSV</a>
+              <a id="openCvat" class="btn sm hidden" target="_blank" rel="noopener" title="Mở job này trên CVAT để xem các Issue đã ghim"><svg class="ic"><use href="#i-ext"/></svg>Mở job trên CVAT</a>
+              <button id="copyReport" class="btn sm hidden" type="button" title="Copy đường link tới trang liệt kê lỗi kèm ảnh để gửi cho người gán nhãn. Họ mở được mà không cần đăng nhập."><svg class="ic"><use href="#i-link"/></svg><span>Copy link gửi labeler</span></button>
+              <button id="rerunBtn" class="btn sm" type="button" title="Chấm lại job này với cùng thiết lập, dùng sau khi labeler đã sửa xong"><svg class="ic"><use href="#i-redo"/></svg>Review lại</button>
+              <a id="csv" class="btn sm" href="#" title="Tải danh sách lỗi về máy, mở bằng Excel"><svg class="ic"><use href="#i-download"/></svg>Tải Excel</a>
               <span id="runStatus" class="pill"></span>
             </div>
           </div>
@@ -422,6 +422,6 @@
   </div>
 </div>
 <div id="modal" class="modal zoom hidden"><img id="modalImg" alt="Ảnh phóng to"></div>
-<script src="app.js?v=11"></script>
+<script src="app.js?v=12"></script>
 </body>
 </html>

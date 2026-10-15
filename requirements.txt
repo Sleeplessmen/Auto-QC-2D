@@ -13,3 +13,10 @@ scipy
 open3d
 gradio
 pypdf            # web_qc: doc guideline PDF
+pyyaml           # web_qc: file luat guideline
+fastapi          # web_qc: server
+uvicorn
+python-multipart
+itsdangerous
+hydra-core       # SAM2 (import tu thu muc cha)
+iopath

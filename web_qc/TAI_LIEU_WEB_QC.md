@@ -58,6 +58,8 @@ Mục 1–7 là hướng dẫn dùng. Mục 8–14 giải thích cách tool làm
 | Webhook CVAT: job hoàn thành thì tự review | Đã có, đã thử chữ ký và lọc sự kiện, chưa thử với CVAT thật |
 | Tầng 2: so với model (4 detector + SAM2 + CLIP) | Đã có, đã đo trên 123 ảnh có đáp án (GT) |
 | Tầng 1: kiểm tra theo file luật guideline | Đã có, mới thử trên dữ liệu giả |
+| Box hình dạng phi lý (quá dẹt / quá mảnh so với loại vật) | Đã có (2026-10-15), thử trên job e2e 3 ảnh |
+| Vùng đường (`drivable_area`, polygon / mask): thiếu, tô thừa, trùng, so với SegFormer Cityscapes; trùng mask + box | Đã có (2026-10-15), thử trên job e2e 3 ảnh. Chỉ khi đọc job từ CVAT, chưa đọc polygon từ file .zip |
 | Đọc guideline PDF / DOCX / TXT / MD, tra cứu đoạn liên quan theo nhãn | Đã có, đã thử |
 | Đổi job chỉ bằng file `.env` | Đã có |
 | Review job 2D qua API và đẩy Issue thật lên CVAT | Có code, **chưa thử trên job thật** vì chưa có job 2D để thử |

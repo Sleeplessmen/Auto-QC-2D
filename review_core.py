@@ -26,6 +26,7 @@ import numpy as np
 import requests
 import torch
 
+import area_check
 import label_hq_2d as L
 from label_mapping import norm
 
@@ -45,6 +46,8 @@ EDGE_REL = 0.10
 SIZE_IOU = 0.85          # IoU >= muc nay coi nhu khit, khong bao
 MIN_CHECK_SIDE = 24      # vat nho hon (px) khong cham kich thuoc (nhieu qua)
 MIN_MISS_SIDE = 14       # vat tool thay nho hon -> khong bao thieu
+# ti le rong/cao hop ly theo nhom: (khong chac duoi, khong chac tren, chac duoi, chac tren)
+SHAPE_RANGE = {"veh": (0.45, 4.5, 0.25, 7.0), "two": (0.25, 2.5, 0.12, 4.0), "person": (0.15, 1.6, 0.08, 3.0)}
 SURE_SCORE = L.REVIEW_SCORE
 UNSURE_SCORE = 0.36
 MISS_UNSURE = 0.38      # tool thay (diem thap) ma nguoi gan khong co -> "co the thieu"
@@ -171,6 +174,14 @@ class ToolRunner:
             o.pop("_mask", None)
         return objs, rejected
 
+    def road_seg(self, cb=None):
+        """Model phan vung mat duong, nap 1 lan khi job co nhan vung duong."""
+        if getattr(self, "_road", None) is None:
+            import area_check
+            log("Nạp model phân vùng mặt đường (SegFormer)...", cb)
+            self._road = area_check.RoadSeg()
+        return self._road
+
     def lookalike(self, img, box, grp):
         """Xac suat box KHONG phai vat (bien bao, quang cao, guong, than cay...)"""
         P = self.clf.probs(img, [box], L.OWN_PROMPTS[grp] + L.NEG_PROMPTS, pad=0.1)
@@ -242,8 +253,17 @@ def compare(lab, tool, rejected, W, H, tool2job, job_group, img=None, runner=Non
         two = [t["box"] for t in T if t["grp"] == "two"] + [l["box"] for l in lab if job_group.get(l["label"]) == "two"]
         T = [t for t in T if not (t["grp"] == "person" and any(_inside(t["box"], b) > 0.5 for b in two))]
 
+    # box hinh dang phi ly (dep / manh bat thuong): bao ngay, khong dem khop voi tool
+    bad = set()
+    for i, l in enumerate(lab):
+        f = _check_shape(l, job_group.get(l["label"]), W, H)
+        if f:
+            out.append(f)
+            bad.add(i)
+
     ml, mt = {}, {}
-    pairs = sorted(((L.iou(l["box"], t["box"]), i, k) for i, l in enumerate(lab) for k, t in enumerate(T)), reverse=True)
+    pairs = sorted(((L.iou(l["box"], t["box"]), i, k) for i, l in enumerate(lab) if i not in bad
+                    for k, t in enumerate(T)), reverse=True)
     # khop theo do trung + uu tien nhe cung nhan / cung nhom. Khac nhom (nguoi <-> xe may) phai trung rat sat,
     # vi box nguoi lai va box xe may hay chong nhau ~0.5 (nguoi gan dan nhan "motorcycle" len nguoi -> van bat duoc)
     cand = []
@@ -297,17 +317,18 @@ def compare(lab, tool, rejected, W, H, tool2job, job_group, img=None, runner=Non
             continue
         if any(L.iou(t["box"], l["box"]) >= 0.5 and job_group.get(l["label"]) == t["grp"] for l in lab):
             continue          # da co box cung nhom de len (lech / khac nhan, da xu ly o tren)
+        where = _miss_where(t, lab, bad)
         if t["sure"]:
             out.append(dict(kind="thieu", sure=True, label=t["label"], box=t["box"], ref=None,
-                            msg=f"Thiếu nhãn: có 1 '{t['label']}' ở đây chưa được gán."))
+                            msg=f"Thiếu nhãn: có 1 '{t['label']}' chưa được gán {where}"))
         elif t["score"] >= MISS_UNSURE:
             out.append(dict(kind="thieu", sure=False, label=t["label"], box=t["box"], ref=None,
-                            msg=f"Có thể thiếu 1 '{t['label']}' ở đây."))
+                            msg=f"Có thể thiếu 1 '{t['label']}' {where}"))
 
     # thua: nguoi gan co box ma tool khong thay gi (ca box diem thap)
     cand = [o["box"] for o in tool] + [o["box"] for o in rejected]
     for i, l in enumerate(lab):
-        if i in ml:
+        if i in ml or i in bad:
             continue
         x1, y1, x2, y2 = l["box"]
         if min(x2 - x1, y2 - y1) < 20 or any(L.iou(l["box"], b) >= 0.3 for b in cand):
@@ -342,6 +363,41 @@ def _check_size(out, l, t, W, H):
     sure = t["sure"] and t["box_ok"]
     out.append(dict(kind="sai_kich_thuoc", sure=sure, label=l["label"], box=l["box"], ref=l["id"],
                     msg=f"Box '{l['label']}' chưa khít: {_size_msg(off)} (IoU {v:.2f}). Box đúng khoảng {_fmt(t['box'])}."))
+
+
+def _check_shape(l, grp, W, H):
+    """Box co ti le rong/cao phi ly voi loai vat (vd car rong 912px cao 14px). Bo qua chieu bi cat o mep anh."""
+    rng = SHAPE_RANGE.get(grp)
+    x1, y1, x2, y2 = l["box"]
+    w, h = x2 - x1, y2 - y1
+    if rng is None or w <= 0 or h <= 0:
+        return None
+    r = w / h
+    if (r > 1 and (y1 <= 2 or y2 >= H - 2)) or (r < 1 and (x1 <= 2 or x2 >= W - 2)):
+        return None           # vat bi mep anh cat -> dep / manh la binh thuong
+    u_lo, u_hi, s_lo, s_hi = rng
+    sure = r > s_hi or r < s_lo or min(w, h) < 3
+    if not (sure or r > u_hi or r < u_lo):
+        return None
+    ratio = f"{r:.0f}:1" if r >= 1 else f"1:{1 / r:.0f}"
+    shape = "quá dẹt" if r > 1 else "quá mảnh"
+    return dict(kind="sai_kich_thuoc", sure=sure, label=l["label"], box=l["box"], ref=l["id"],
+                msg=f"Box '{l['label']}' hình dạng bất thường, {shape}: rộng {w:.0f}px, cao {h:.0f}px (tỉ lệ {ratio}). "
+                    f"Một '{l['label']}' thật không có hình như vậy, có thể kéo nhầm hoặc vẽ trùm nhiều vật. "
+                    f"Xoá và vẽ lại sát đúng 1 vật.")
+
+
+def _miss_where(t, lab, bad):
+    """Mo ta cho vat bi thieu: vi tri, co, va box da gan nam sat ben (de labeler khong nham la box do sai)."""
+    x1, y1, x2, y2 = t["box"]
+    s = f"tại {_fmt(t['box'])}, cỡ {x2 - x1:.0f}×{y2 - y1:.0f}px"
+    if max(x2 - x1, y2 - y1) < 40:
+        s += " (vật nhỏ ở xa, phóng to để thấy)"
+    near = [l for i, l in enumerate(lab) if i not in bad and _inside(t["box"], l["box"]) > 0]
+    if near:
+        n = max(near, key=lambda l: _inside(t["box"], l["box"]))
+        s += f". Vật này nằm sát / khuất sau box '{n['label']}' {_fmt(n['box'])} đã gán: box đó là của vật khác, cần vẽ thêm 1 box riêng cho vật này"
+    return s + "."
 
 
 def _inside(a, b):
@@ -642,6 +698,7 @@ class Review:
         os.makedirs(os.path.join(self.out_dir, "preview"), exist_ok=True)
 
         export = read_export(zip_path) if zip_path else None
+        areas = {}                         # {frame: [polygon / mask]} — chi co khi doc tu CVAT
         if export:
             log(f"File: {export['fmt']}, {len(export['images'])} ảnh", cb)
         items = []                         # (frame | None, name, loader, boxes)
@@ -664,10 +721,15 @@ class Review:
                       ensure_ascii=False)
             log(f"Job {self.job_id} (task {job['task_id']}): {len(frames)} frame, "
                 f"{len(self.before.get('shapes', []))} shape, {len(self.before.get('tracks', []))} track. Đã lưu bản sao.", cb)
-            n_other = sum(1 for s in self.before.get("shapes", []) if s.get("type") != "rectangle")
+            n_area = sum(1 for s in self.before.get("shapes", []) if s.get("type") in ("polygon", "mask"))
+            n_other = sum(1 for s in self.before.get("shapes", []) if s.get("type") not in ("rectangle", "polygon", "mask"))
+            if n_area:
+                log(f"  {n_area} polygon / mask: kiểm tra trùng, và so với mặt đường nếu là nhãn vùng đường.", cb)
             if n_other:
-                log(f"  Lưu ý: {n_other} shape không phải hình chữ nhật (polygon, point...) — không review.", cb)
+                log(f"  Lưu ý: {n_other} shape dạng khác (point, polyline...) — không review.", cb)
             per = boxes_from_cvat(self.before, id2label, [f[0] for f in frames])
+            areas = area_check.areas_from_cvat(self.before, id2label, [f[0] for f in frames],
+                                               {n: (w, h) for n, _, w, h in frames})
             if export and export["ann"] is not None:
                 log("  Dùng nhãn trong file tải lên (ảnh khớp theo tên với frame của job).", cb)
             for n, name, w, h in frames:
@@ -699,13 +761,19 @@ class Review:
             items = items[:int(max_frames)]
 
         tool2job, job_group, self.skipped_labels = build_label_map(label_names)
+        road_names = [n for n in area_check.road_labels(label_names)
+                      if any(a["label"] == n for v in areas.values() for a in v)]
+        self.skipped_labels = [n for n in self.skipped_labels if n not in road_names]
         log("Khớp nhãn: " + ", ".join(f"{c}→{j}" for c, j in tool2job.items() if j), cb)
+        if road_names:
+            log(f"  Nhãn vùng đường: {', '.join(road_names)} — so với model phân vùng mặt đường.", cb)
         if self.skipped_labels:
             log(f"  Tool KHÔNG đánh giá được các nhãn: {', '.join(self.skipped_labels)} (bỏ qua, không ghi chú).", cb)
         if not job_group:
             raise RuntimeError("Không nhãn nào của job khớp với loại tool nhận ra (xe, xe máy, người...).")
 
         runner = runner or ToolRunner(mode, cb)
+        seg = runner.road_seg(cb) if road_names else None
         st = dict(frames=0, boxes=0, ok=0, sure=0, unsure=0)
         from concurrent.futures import ThreadPoolExecutor
         pool = ThreadPoolExecutor(max_workers=4)
@@ -729,6 +797,8 @@ class Review:
             for b in rot:
                 finds.append(dict(kind="sai_kich_thuoc", sure=False, label=b["label"], box=b["box"], ref=b["id"],
                                   msg=f"Box '{b['label']}' bị xoay {b['rotation']:.0f}°, tool chỉ kiểm tra được box không xoay."))
+            if areas.get(n):
+                finds += area_check.check(areas[n], boxes, img, seg, road_names)
             bad_refs = {f["ref"] for f in finds if f["ref"] and f["sure"]}
             st["frames"] += 1
             st["boxes"] += len(lab)
