@@ -41,6 +41,17 @@ def cvat_client(cid):
     return R.Cvat(c["url"], c["token"], c.get("org") or None), c
 
 
+def guess_tool_classes(labels):
+    """{ten nhan: lop tool | 'road'} — de doc guideline biet cau nao noi ve nhan nao."""
+    import area_check
+    names = [lb["name"] for lb in labels]
+    tool2job, _, _ = R.build_label_map(names)
+    out = {j: c for c, j in tool2job.items() if j and c != "GreenSM"}
+    for n in area_check.road_labels(names):
+        out[n] = "road"
+    return out
+
+
 class Worker:
     def __init__(self):
         self.q = queue.Queue()
@@ -171,11 +182,23 @@ class Worker:
             cb(f"Kết nối: {conn['name']} ({conn['url']}{' · tổ chức ' + conn['org'] if conn.get('org') else ''})")
         g = store.get_guideline(run["guideline_id"])
         rules, warn = G.parse_rules(g["rules"]) if g and g.get("rules") else ({}, [])
-        if g:
-            n_rules = len(rules.get("nhan") or {})
-            cb(f"Guideline: {g['name']}" + (f" · file luật {n_rules} nhãn" if rules else " · chưa có file luật (chỉ dùng để tra cứu)"))
+        if g and rules:
+            cb(f"Guideline: {g['name']} · file luật {len(rules.get('nhan') or {})} nhãn (người QC đã soạn)")
+        elif g and conn and g.get("text"):
+            # chua co file luat: tu doc guideline lay yeu cau, ket hop voi nhan cua task
+            try:
+                cv, _ = cvat_client(run.get("connection_id"))
+                labels = cv.labels(run["job_id"], cv.job(run["job_id"])["task_id"])
+                rules, ev = G.extract_rules(g["text"], labels, guess_tool_classes(labels))
+                cb(f"Guideline: {g['name']} · chưa có file luật → tool tự đọc guideline, lấy được {len(ev)} yêu cầu:")
+                for e in ev[:12]:
+                    cb(f"  • {e['luat']}: {e['gia_tri']}" + (f" (mục {e['muc']})" if e["muc"] else "") + f" — \"{e['trich'][:90]}\"")
+            except Exception as e:
+                cb(f"Guideline: {g['name']} · không tự đọc được yêu cầu ({e}), chỉ dùng để tra cứu.")
+        elif g:
+            cb(f"Guideline: {g['name']} · chưa có file luật (chỉ dùng để tra cứu)")
         else:
-            cb("Không dùng guideline: chỉ chạy tầng 2 (so với model).")
+            cb("Không dùng guideline: review dựa vào nhãn của task (so với model).")
         for w in warn:
             cb(f"  Cảnh báo file luật: {w}")
         mode = p.get("mode", "chinh_xac")

@@ -58,6 +58,8 @@ EDGE_REL = 0.10
 SIZE_IOU = 0.85          # IoU >= muc nay coi nhu khit, khong bao
 MIN_CHECK_SIDE = 24      # vat nho hon (px) khong cham kich thuoc (nhieu qua)
 MIN_MISS_SIDE = 14       # vat tool thay nho hon -> khong bao thieu
+MIN_MISS_BY_LABEL = {}   # {ten nhan: px} — guideline bo qua vat nho hon muc nay (guideline.apply_to_core dat)
+AMODAL = True            # guideline: ve toan bo vat (ca phan bi che); False = chi ve phan nhin thay
 # ti le rong/cao hop ly theo nhom: (khong chac duoi, khong chac tren, chac duoi, chac tren)
 SHAPE_RANGE = {"veh": (0.45, 4.5, 0.25, 7.0), "two": (0.25, 2.5, 0.12, 4.0), "person": (0.15, 1.6, 0.08, 3.0)}
 SURE_SCORE = L.REVIEW_SCORE
@@ -176,8 +178,8 @@ class ToolRunner:
             if self.mode != "chinh_xac":
                 L.VOTE_K, L.MODELS = 2, FAST_MODELS
             try:
-                # quy uoc du an: gan TOAN BO vat (ca phan bi che) -> tool cung uoc luong toan bo de so sanh
-                objs, rejected = L.postprocess(img, dets, self.clf, sam=self.sam, amodal=True)
+                # mac dinh gan TOAN BO vat (ca phan bi che); guideline noi chi ve phan nhin thay thi AMODAL = False
+                objs, rejected = L.postprocess(img, dets, self.clf, sam=self.sam, amodal=AMODAL)
             finally:
                 L.VOTE_K, L.MODELS = old_k, old_m
         h, w = img.shape[:2]
@@ -325,8 +327,8 @@ def compare(lab, tool, rejected, W, H, tool2job, job_group, img=None, runner=Non
         if k in mt:
             continue
         x1, y1, x2, y2 = t["box"]
-        if min(x2 - x1, y2 - y1) < MIN_MISS_SIDE:
-            continue
+        if min(x2 - x1, y2 - y1) < max(MIN_MISS_SIDE, MIN_MISS_BY_LABEL.get(t["label"], 0)):
+            continue          # vat qua nho (hoac guideline khong bat gan vat nho nhu vay)
         if any(L.iou(t["box"], l["box"]) >= 0.5 and job_group.get(l["label"]) == t["grp"] for l in lab):
             continue          # da co box cung nhom de len (lech / khac nhan, da xu ly o tren)
         where = _miss_where(t, lab, bad)

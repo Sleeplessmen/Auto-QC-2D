@@ -64,7 +64,9 @@ LOW_CONTRAST = 42      # do lech chuan do sang < muc nay (mua, suong, mo) -> cun
 
 
 def needs_enh(img):
-    if os.environ.get("QC_NO_ENH"):          # de do so sanh truoc / sau
+    # Do tren 735 anh BDD100K: dem bat loi +1.7%, nhung bao nham dem tang 3.8 -> 4.7 / 100 box -> mac dinh TAT.
+    # Bat bang bien moi truong QC_ENH=1 (vd du an toan anh dem rat toi).
+    if not os.environ.get("QC_ENH"):
         return False
     g = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
     return g.mean() < LOW_LIGHT or g.std() < LOW_CONTRAST

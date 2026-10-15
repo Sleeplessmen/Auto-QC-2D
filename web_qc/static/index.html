@@ -6,7 +6,7 @@
 <title>QC nhãn 2D</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=12">
+<link rel="stylesheet" href="style.css?v=13">
 </head>
 <body>
 
@@ -321,7 +321,7 @@
         <div id="gPaneRules" class="gpane">
           <div class="rule-tools">
             <label class="fld w-sm" for="gTask"><span>Task</span><input id="gTask" inputmode="numeric" placeholder="số task"></label>
-            <button id="gTemplate" type="button" class="btn">Lấy nhãn từ task</button>
+            <button id="gTemplate" type="button" class="btn" title="Lấy danh sách nhãn của task, rồi tự đọc guideline để điền yêu cầu (kích thước tối thiểu, vẽ toàn bộ vật, người lái, thuộc tính bắt buộc...)">Đọc guideline + lấy nhãn từ task</button>
             <button id="gAssign" type="button" class="btn">Gán guideline cho task</button>
             <span class="sp"></span>
             <button id="ruleAdd" type="button" class="btn"><svg class="ic"><use href="#i-plus"/></svg>Thêm nhãn</button>
@@ -333,10 +333,12 @@
             <h3>Quy tắc chung</h3>
             <label class="chk" for="qRider"><input type="checkbox" id="qRider"><span>Người lái xe máy phải có box person riêng</span></label>
             <label class="chk" for="qOutside"><input type="checkbox" id="qOutside"><span>Báo lỗi box có nhãn không có trong bảng trên</span></label>
+            <label class="fld w-md" for="qAmodal"><span>Vật bị che</span><select id="qAmodal"><option value="">Mặc định: vẽ toàn bộ vật</option><option value="1">Vẽ toàn bộ vật, cả phần bị che</option><option value="0">Chỉ vẽ phần nhìn thấy</option></select></label>
             <label class="fld w-sm" for="qEdge"><span>Box vượt mép ảnh quá (px)</span><input id="qEdge" inputmode="numeric" placeholder="2"></label>
             <label class="fld w-sm" for="qMuc"><span>Mục chung</span><input id="qMuc" placeholder="vd 2"></label>
           </div>
           <div class="row-actions"><button id="ruleSave" class="btn primary" type="button">Lưu luật</button><span id="ruleMsg" class="meta"></span></div>
+          <div id="ruleEvidence" class="rule-evidence hidden"></div>
         </div>
 
         <div id="gPaneContent" class="gpane hidden">
@@ -456,6 +458,6 @@
   </div>
 </div>
 <div id="modal" class="modal zoom hidden"><img id="modalImg" alt="Ảnh phóng to"></div>
-<script src="app.js?v=15"></script>
+<script src="app.js?v=16"></script>
 </body>
 </html>

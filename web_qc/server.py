@@ -32,7 +32,7 @@ import guideline as G
 
 store.init()
 import review_core as R                             # nap torch + model: cham, de sau store.init
-from worker import Worker, env_config, cvat_client, connection_for
+from worker import Worker, env_config, cvat_client, connection_for, guess_tool_classes
 
 UPLOADS = os.path.join(store.DATA, "uploads")
 GUIDE_DIR = os.path.join(store.DATA, "guidelines")
@@ -768,8 +768,19 @@ def rules_template(gid: int, body: dict, u=Depends(need("qc"))):
     guess.update({j: "GreenSM" for c2, j in tool2job.items() if j and c2 == "GreenSM" and j not in guess})
     txt = G.template_from_labels(labels, guess)
     rules, _ = G.parse_rules(txt)
+    # tu doc yeu cau trong guideline, dien vao mau (nguoi QC kiem lai roi luu)
+    g = store.get_guideline(gid)
+    ev = []
+    if g and g.get("text"):
+        auto, ev = G.extract_rules(g["text"], labels, guess_tool_classes(labels))
+        for n, sp in auto["nhan"].items():
+            base = rules["nhan"].setdefault(n, {}) or {}
+            base.update({k: v for k, v in sp.items() if v not in (None, "", [], 0)})
+            rules["nhan"][n] = base
+        rules["quy_tac"].update(auto["quy_tac"])
+        txt = G.rules_to_yaml(rules)
     attrs = {lb["name"]: [a["name"] for a in lb.get("attributes", [])] for lb in labels}
-    return dict(rules=txt, rules_obj=rules, attributes=attrs, task_id=tid)
+    return dict(rules=txt, rules_obj=rules, attributes=attrs, task_id=tid, evidence=ev)
 
 
 @app.post("/api/guidelines/{gid}/tasks")

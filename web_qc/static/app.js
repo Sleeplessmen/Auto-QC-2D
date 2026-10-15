@@ -733,6 +733,7 @@ function renderRuleTable(obj) {
   $("#ruleTable tbody").innerHTML = Object.entries(nhan).map(([n, sp]) => ruleRow(n, sp || {})).join("")
     || `<tr class="rule-empty"><td colspan="9" class="empty-row">Chưa có nhãn nào. Nhập số task rồi bấm <b>Lấy nhãn từ task</b>, hoặc bấm <b>Thêm nhãn</b>.</td></tr>`;
   $("#qRider").checked = q.nguoi_lai_co_box_rieng ?? true;
+  $("#qAmodal").value = q.toan_bo_vat == null ? "" : q.toan_bo_vat ? "1" : "0";
   $("#qOutside").checked = !!q.nhan_ngoai_guideline;
   $("#qEdge").value = q.box_ra_ngoai_anh_px ?? 2;
   $("#qMuc").value = q.muc_chung || "";
@@ -751,7 +752,8 @@ function collectRules() {
     };
   });
   return { nhan, quy_tac: { nguoi_lai_co_box_rieng: $("#qRider").checked, nhan_ngoai_guideline: $("#qOutside").checked,
-    box_ra_ngoai_anh_px: parseInt($("#qEdge").value) || 0, muc_chung: $("#qMuc").value.trim() || undefined } };
+    box_ra_ngoai_anh_px: parseInt($("#qEdge").value) || 0, muc_chung: $("#qMuc").value.trim() || undefined,
+    toan_bo_vat: $("#qAmodal").value === "" ? undefined : $("#qAmodal").value === "1" } };
 }
 $("#ruleAdd").onclick = () => { $("#ruleTable tbody .rule-empty")?.remove(); $("#ruleTable tbody").insertAdjacentHTML("beforeend", ruleRow("", {})); $("#ruleTable tbody tr:last-child .in-name").focus(); };
 $("#ruleTable tbody").addEventListener("click", e => { if (e.target.classList.contains("rule-del")) e.target.closest("tr").remove(); });
@@ -769,7 +771,12 @@ $("#gTemplate").onclick = async () => {
     const r = await api(`/api/guidelines/${CUR_G.id}/template`, { method: "POST", json: { task_id: $("#gTask").value, connection_id: $("#fConn").value } });
     RULE_ATTRS = r.attributes || {};
     renderRuleTable(r.rules_obj);
-    $("#ruleMsg").textContent = `Đã lấy ${Object.keys(r.rules_obj.nhan || {}).length} nhãn từ task ${r.task_id}. Điền giá trị theo guideline rồi bấm Lưu luật. Gợi ý thuộc tính hiện mờ trong ô.`;
+    const ev = r.evidence || [];
+    $("#ruleMsg").textContent = `Đã lấy ${Object.keys(r.rules_obj.nhan || {}).length} nhãn từ task ${r.task_id}` +
+      (ev.length ? `, tự đọc được ${ev.length} yêu cầu từ guideline (xem bên dưới). Kiểm lại rồi bấm Lưu luật.` : ". Không tìm thấy yêu cầu nào trong guideline, điền tay rồi bấm Lưu luật.");
+    $("#ruleEvidence").classList.toggle("hidden", !ev.length);
+    $("#ruleEvidence").innerHTML = `<h3>Tool đọc được từ guideline</h3><ul>` + ev.map(e =>
+      `<li><b>${esc(e.gia_tri)}</b> <span class="meta">(${esc(e.luat)}${e.muc ? " · mục " + esc(e.muc) : ""})</span><br><q>${esc(e.trich)}</q></li>`).join("") + `</ul>`;
   } catch (err) { $("#ruleMsg").innerHTML = bad(err.message); }
 };
 $("#gAssign").onclick = async () => {

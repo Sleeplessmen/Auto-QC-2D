@@ -59,6 +59,19 @@ Vào **Cài đặt → Tự review khi job chuyển sang validation**, tick **B�
 
 Tool không cần đáp án (ground truth) để review job thật. Tool tự nhìn ảnh bằng model, rồi so với nhãn labeler. Đáp án chỉ dùng để đo độ chính xác của tool (xem dưới).
 
+## Review theo guideline
+
+- **Chưa có guideline:** tool review dựa vào nhãn của task, so nhãn labeler với những gì model thấy.
+- **Có guideline:** tải guideline lên (PDF / DOCX / TXT / MD) ở trang **Guideline**, rồi gán guideline cho task. Tool đọc guideline để lấy yêu cầu:
+  - Kích thước tối thiểu: vật nhỏ hơn thì không đòi gán, box nhỏ hơn thì báo lỗi.
+  - Vẽ toàn bộ vật hay chỉ phần nhìn thấy: tool ước lượng khung theo đúng cách đó.
+  - Người lái xe máy có box riêng không.
+  - Thuộc tính bắt buộc.
+  - Box không ra ngoài ảnh.
+  - Mục guideline của từng nhãn, ghi vào Issue.
+- Nút **Đọc guideline + lấy nhãn từ task** điền sẵn bảng luật kèm câu gốc trong guideline để người QC kiểm lại rồi lưu.
+- Nếu chưa lưu luật, mỗi lần review tool tự đọc guideline và ghi những yêu cầu đọc được vào nhật ký.
+
 Chế độ **Phân tích** trên trang Review job vẽ chồng lên ảnh những gì tool thấy (vật phát hiện, mặt đường), đặt cạnh nhãn của labeler. Người review nhìn vào đó để kiểm chứng kết quả.
 
 ## Đo độ chính xác của tool

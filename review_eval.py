@@ -145,10 +145,17 @@ def main():
     ap.add_argument("-v", "--verbose", action="store_true")
     ap.add_argument("--dump", help="luu ghi chu bao nham ra file json de xem")
     ap.add_argument("--json", help="luu so lieu tung nhom ra file json")
+    ap.add_argument("--visible", action="store_true", help="guideline: chi ve phan nhin thay (vd BDD100K), khong ve toan bo vat")
+    ap.add_argument("--min-px", type=float, default=0, help="guideline: bo qua vat co canh ngan nho hon N px")
     args = ap.parse_args()
 
     meta = json.load(open(args.meta, encoding="utf-8")) if args.meta else {}
     runner = R.ToolRunner(args.mode)
+    if args.visible:
+        R.AMODAL = False
+    if args.min_px:
+        R.MIN_MISS_BY_LABEL.update({c: args.min_px for c in L.CLASSES})
+    tiny = lambda b: args.min_px and min(b[2] - b[0], b[3] - b[1]) < args.min_px
     tool2job, job_group, _ = R.build_label_map(L.CLASSES)
     rng = random.Random(args.seed)
     G = {}
@@ -167,6 +174,8 @@ def main():
         img = degrade(img, args.cond, n)
         H, W = img.shape[:2]
         ign = g.get("ignore", []) + [dict(box=r) for r in g.get("ignore_regions", [])]
+        # guideline bo qua vat nho: vat nho trong dap an khong bat buoc gan -> ghi chu tren do khong tinh bao nham
+        ign += [dict(box=o["box"]) for o in g["objects"] if tiny(o["box"])]
         tool, rej = runner.detect(img, os.path.splitext(g["image"])[0] + ("" if args.cond == "goc" else "__" + args.cond))
 
         # 1) nguoi gan dung het: moi ghi chu la bao nham
@@ -178,6 +187,7 @@ def main():
 
         # 2) cai loi gia
         plab, errs = perturb(g["objects"], W, H, rng)
+        errs = [e for e in errs if not (e[0] in ("thieu", "sai_nhan") and tiny(e[2]))]    # loi tren vat guideline bo qua
         pf = [f for f in R.compare(plab, tool, rej, W, H, tool2job, job_group, img=img, runner=runner) if not _ignored(f, ign)]
         used, res = set(), []
         for e in errs:

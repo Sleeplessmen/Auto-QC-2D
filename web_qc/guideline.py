@@ -196,6 +196,140 @@ def muc_ref(rules, label, extra=""):
     return f" — Guideline mục {m}" if m else (f" — {extra}" if extra else "")
 
 
+# ---------------------------------------------------------------- tu doc yeu cau trong guideline -> file luat
+# ten goi thuong gap (da bo dau) cua tung loai vat, de biet 1 cau guideline dang noi ve nhan nao
+VI_NAMES = {
+    "car": ["o to", "oto", "xe hoi", "xe con", "xe du lich", "car", "cars", "vehicle", "xe 4 banh"],
+    "truck": ["xe tai", "truck", "xe ben", "container"], "bus": ["xe buyt", "xe bus", "xe khach", "bus"],
+    "motorcycle": ["xe may", "xe moto", "motorcycle", "motorbike", "scooter", "xe 2 banh"],
+    "bicycle": ["xe dap", "bicycle", "bike"],
+    "person": ["nguoi di bo", "nguoi", "pedestrian", "person", "khach bo hanh"],
+    "road": ["mat duong", "vung duong", "lan duong", "duong di", "drivable", "road"],
+}
+_NUM_PX = r"(\d{1,3})\s*(?:px|pixel|pixels|diem anh|điểm ảnh)"
+MIN_RE = [re.compile(r"(?:nho hon|be hon|duoi|it hon|< ?|smaller than|less than|under|below)\s*" + _NUM_PX),
+          re.compile(r"(?:toi thieu|it nhat|minimum|min(?:imum)? size|at least|>= ?)\s*(?:la\s*)?" + _NUM_PX)]
+AMODAL_YES = ["toan bo vat", "ca phan bi che", "phan bi che", "uoc luong", "amodal", "full extent", "bao tron vat",
+              "ve het vat", "ve ca phan", "whole object", "entire object"]
+AMODAL_NO = ["chi ve phan nhin thay", "phan nhin thay", "phan nhin thay duoc", "visible part", "only the visible",
+             "khong ve phan bi che", "khong uoc luong"]
+NEG = re.compile(r"(?:khong|ko|không|chua|not|don't|do not|never)\s+(?:\S+\s+){0,3}$")
+
+
+def _sentences(text):
+    """[(muc, cau goc, cau da bo dau, la tieu de?, tieu de muc nay + cac muc cha da bo dau)]"""
+    out, titles, muc = [], {}, ""
+
+    def ctx_of(m):
+        c = []
+        while m:                                   # 2.1 -> tieu de 2.1, roi 2 (muc cha)
+            c.append(titles.get(m, ""))
+            m = m.rsplit(".", 1)[0] if "." in m else ""
+        return c
+
+    for line in (text or "").splitlines():
+        s = line.strip()
+        is_head = bool(s) and len(s) <= 110 and HEAD_RE.match(s) and not s.endswith((",", ";"))
+        if is_head:
+            mm = re.match(r"#*\s*(\d+(\.\d+)*)", s)
+            muc = mm.group(1) if mm else muc
+            titles[muc] = fold(s)
+        for k, part in enumerate(re.split(r"(?<=[.;!?])\s+", s)):
+            p = part.strip(" -•*\t#")
+            if len(p) >= 6:
+                out.append((muc, p, fold(p), is_head and k == 0, ctx_of(muc)))
+    return out
+
+
+def _mentions(fs, label, tool_cls):
+    keys = {fold(label), fold(label.replace("_", " "))} | set(VI_NAMES.get(tool_cls or "", []))
+    return any(re.search(r"(?<![a-z0-9])" + re.escape(k) + r"(?![a-z0-9])", fs) for k in keys if k)
+
+
+def _has(fs, phrases):
+    """co cum tu ma khong bi phu dinh ngay truoc"""
+    for p in phrases:
+        i = fs.find(p)
+        if i >= 0 and not NEG.search(fs[max(0, i - 30):i]):
+            return True
+    return False
+
+
+def extract_rules(text, labels, guess=None):
+    """Doc guideline (van ban) -> (rules dict giong file luat, [dict(luat, gia_tri, muc, trich)]) de nguoi QC kiem lai.
+    labels: nhan cua task tren CVAT. guess: {ten nhan: lop tool | 'road'}."""
+    guess = guess or {}
+    names = [lb["name"] for lb in labels]
+    nhan = {n: {} for n in names}
+    q, ev = {}, []
+
+    def note(rule, val, muc, quote):
+        ev.append(dict(luat=rule, gia_tri=val, muc=muc, trich=quote[:220]))
+
+    for muc, raw, fs, is_title, ctx in _sentences(text or ""):
+        about = [n for n in names if _mentions(fs, n, guess.get(n))]
+        if is_title and about and muc:             # muc co tieu de noi ve nhan -> muc cua nhan do
+            for n in about:
+                nhan[n]["muc"] = muc
+        if not about:                              # cau khong nhac nhan nao -> hieu theo tieu de muc / muc cha
+            for t in ctx:
+                about = [n for n in names if _mentions(t, n, guess.get(n))]
+                if about:
+                    break
+        # 1) kich thuoc toi thieu
+        for rx in MIN_RE:
+            m = rx.search(fs)
+            if not m:
+                continue
+            px = int(m.group(1))
+            if not 2 <= px <= 200 or not any(w in fs for w in ("box", "vat", "doi tuong", "object", "gan", "label", "ve", "bo qua", "ignore", "khong")):
+                continue
+            targets = [n for n in about if guess.get(n) != "road"] or [n for n in names if guess.get(n) not in (None, "road")]
+            for n in targets:
+                if not nhan[n].get("kich_thuoc_toi_thieu_px"):
+                    nhan[n]["kich_thuoc_toi_thieu_px"] = px
+                    nhan[n].setdefault("muc", muc)
+            note("kich_thuoc_toi_thieu_px", f"{px} px" + (f" ({', '.join(targets)})" if about else " (mọi nhãn box)"), muc, raw)
+            break
+        # 2) ve toan bo vat (ca phan bi che) hay chi phan nhin thay
+        if "toan_bo_vat" not in q:
+            if _has(fs, AMODAL_NO):
+                q["toan_bo_vat"] = False
+                note("toan_bo_vat", "chỉ vẽ phần nhìn thấy", muc, raw)
+            elif _has(fs, AMODAL_YES) and any(w in fs for w in ("che", "khuat", "occlu", "box", "ve")):
+                q["toan_bo_vat"] = True
+                note("toan_bo_vat", "vẽ toàn bộ vật, cả phần bị che", muc, raw)
+        # 3) nguoi lai xe may
+        if "nguoi_lai_co_box_rieng" not in q and re.search(r"nguoi (lai|ngoi)|rider|driver|nguoi tren xe", fs):
+            if re.search(r"khong (can )?(gan|ve)|gop chung|chung (1 )?box|khong tach|do not label|not labeled", fs):
+                q["nguoi_lai_co_box_rieng"] = False
+                note("nguoi_lai_co_box_rieng", "không", muc, raw)
+            elif re.search(r"box (\S+ )?rieng|gan (\S+ )?rieng|tach rieng|ve rieng|separate", fs):
+                q["nguoi_lai_co_box_rieng"] = True
+                note("nguoi_lai_co_box_rieng", "có", muc, raw)
+        # 4) box khong ra ngoai anh
+        if "box_ra_ngoai_anh_px" not in q and re.search(r"(khong|not)\s+(\S+\s+){0,3}(ra ngoai|vuot|outside)\s+(\S+\s+){0,2}(anh|khung|image|frame)", fs):
+            q["box_ra_ngoai_anh_px"] = 1
+            note("box_ra_ngoai_anh_px", "box không được ra ngoài ảnh", muc, raw)
+        # 5) thuoc tinh bat buoc
+        if re.search(r"bat buoc|phai chon|phai gan|phai danh dau|luon chon|must|required|mandatory", fs):
+            for lb in labels:
+                for a in lb.get("attributes", []):
+                    an = fold(a["name"])
+                    if re.search(r"(?<![a-z0-9])" + re.escape(an) + r"(?![a-z0-9])", fs) and (not about or lb["name"] in about):
+                        lst = nhan[lb["name"]].setdefault("thuoc_tinh_bat_buoc", [])
+                        if a["name"] not in lst:
+                            lst.append(a["name"])
+                            note("thuoc_tinh_bat_buoc", f"{lb['name']}: {a['name']}", muc, raw)
+    for n in names:
+        if guess.get(n) and guess[n] != "road":
+            nhan[n]["loai_tool"] = guess[n]
+        syn = [w for w in VI_NAMES.get(guess.get(n) or "", []) if w in fold(text or "") and w != fold(n)]
+        if syn:
+            nhan[n]["dong_nghia"] = syn[:4]
+    return dict(nhan=nhan, quy_tac=q), ev
+
+
 # ---------------------------------------------------------------- tang 1: kiem tra theo luat
 def _rect(points):
     xs, ys = points[0::2], points[1::2]
@@ -279,6 +413,14 @@ class apply_to_core:
     def __enter__(self):
         from label_mapping import norm
         self.saved = {k: list(v) for k, v in self.R.SYN.items()}
+        self.saved_amodal, self.saved_min = self.R.AMODAL, dict(self.R.MIN_MISS_BY_LABEL)
+        q = self.rules.get("quy_tac") or {}
+        if q.get("toan_bo_vat") is not None:            # guideline noi ve toan bo vat hay chi phan nhin thay
+            self.R.AMODAL = bool(q["toan_bo_vat"])
+        for name, spec in (self.rules.get("nhan") or {}).items():
+            mn = (spec or {}).get("kich_thuoc_toi_thieu_px")
+            if mn:                                      # guideline bo qua vat nho -> tool khong doi gan vat nho
+                self.R.MIN_MISS_BY_LABEL[name] = float(mn)
         for name, spec in (self.rules.get("nhan") or {}).items():
             lt = (spec or {}).get("loai_tool")
             if lt in self.R.SYN:
@@ -291,6 +433,9 @@ class apply_to_core:
     def __exit__(self, *a):
         self.R.SYN.clear()
         self.R.SYN.update(self.saved)
+        self.R.AMODAL = self.saved_amodal
+        self.R.MIN_MISS_BY_LABEL.clear()
+        self.R.MIN_MISS_BY_LABEL.update(self.saved_min)
 
 
 def rider_rule(rules, default=True):

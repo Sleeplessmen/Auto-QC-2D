@@ -502,3 +502,9 @@ mark { background: #ffe58a; color: #111826; border-radius: 2px; padding: 0 1px; 
   .an-canvas-wrap { min-height: 260px; }
   .an-tbl-wrap { max-height: 420px; }
 }
+
+/* yeu cau tool tu doc tu guideline */
+.rule-evidence { margin-top: 14px; border: 1px solid var(--line); border-radius: var(--r); background: var(--sunken); padding: 10px 14px; }
+.rule-evidence h3 { margin: 0 0 6px; font-size: 13.5px; }
+.rule-evidence ul { margin: 0; padding-left: 18px; display: grid; gap: 8px; font-size: 13px; color: var(--ink-2); }
+.rule-evidence q { color: var(--muted); font-style: italic; }
