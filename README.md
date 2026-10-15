@@ -6,6 +6,8 @@ Bộ tool cho nhãn 2D trên CVAT:
   - Box: sai kích thước, hình dạng phi lý (quá dẹt / quá mảnh), sai nhãn, thiếu, thừa, trùng.
   - Vùng đường (`drivable_area`, polygon / mask): tô thiếu, tô thừa, vẽ trùng. Tool so với model phân vùng mặt đường.
   - Một vật vừa có mask vừa có box.
+  - Nhãn cho cả ảnh (tag, ví dụ `image_info` / `weather`): ảnh chưa gán, hoặc giá trị không hợp với ảnh (so bằng CLIP).
+  - Tool review **mọi nhãn của task trên mọi ảnh**: ảnh có vật hoặc mặt đường mà labeler chưa gán cũng bị báo thiếu.
   - Vi phạm guideline.
 - **Gán nhãn chất lượng cao** (`label_hq_2d.py`): 4 detector + SAM2 + CLIP.
 - Các tool phụ: `review.bat` (QC bằng dòng lệnh), `review_web.bat` (bản QC Gradio cũ), `menu.bat`.

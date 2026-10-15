@@ -27,6 +27,7 @@ import requests
 import torch
 
 import area_check
+import frame_check
 import label_hq_2d as L
 from label_mapping import norm
 
@@ -756,6 +757,8 @@ class Review:
 
         export = read_export(zip_path) if zip_path else None
         areas = {}                         # {frame: [polygon / mask]} — chi co khi doc tu CVAT
+        labels, tags = [], {}              # dinh nghia nhan + tag (nhan cho ca anh) theo frame — chi co khi doc tu CVAT
+        from_cvat = False
         if export:
             log(f"File: {export['fmt']}, {len(export['images'])} ảnh", cb)
         items = []                         # (frame | None, name, loader, boxes)
@@ -787,6 +790,9 @@ class Review:
             per = boxes_from_cvat(self.before, id2label, [f[0] for f in frames])
             areas = area_check.areas_from_cvat(self.before, id2label, [f[0] for f in frames],
                                                {n: (w, h) for n, _, w, h in frames})
+            for t in self.before.get("tags", []):
+                tags.setdefault(t["frame"], []).append(t)
+            from_cvat = not (export and export["ann"] is not None)
             if export and export["ann"] is not None:
                 log("  Dùng nhãn trong file tải lên (ảnh khớp theo tên với frame của job).", cb)
             for n, name, w, h in frames:
@@ -818,12 +824,18 @@ class Review:
             items = items[:int(max_frames)]
 
         tool2job, job_group, self.skipped_labels = build_label_map(label_names)
-        road_names = [n for n in area_check.road_labels(label_names)
-                      if any(a["label"] == n for v in areas.values() for a in v)]
-        self.skipped_labels = [n for n in self.skipped_labels if n not in road_names]
+        # review DU moi nhan cua task tren moi anh: vung duong cham ca khi labeler chua ve polygon nao,
+        # nhan cho ca anh (tag, vd image_info / weather) cham ca khi anh chua gan
+        road_names = area_check.road_labels(label_names) if from_cvat else []
+        flabels = frame_check.frame_labels(labels, set(job_group) | set(road_names)) if from_cvat else []
+        done = set(road_names) | {f["name"] for f in flabels}
+        self.skipped_labels = [n for n in self.skipped_labels if n not in done]
         log("Khớp nhãn: " + ", ".join(f"{c}→{j}" for c, j in tool2job.items() if j), cb)
         if road_names:
             log(f"  Nhãn vùng đường: {', '.join(road_names)} — so với model phân vùng mặt đường.", cb)
+        for fl in flabels:
+            log(f"  Nhãn cho cả ảnh: {fl['name']}" + (f" ({', '.join(a['name'] for a in fl['attrs'])})" if fl["attrs"] else "")
+                + " — kiểm tra mỗi ảnh có gán chưa và giá trị có hợp với ảnh không.", cb)
         if self.skipped_labels:
             log(f"  Tool KHÔNG đánh giá được các nhãn: {', '.join(self.skipped_labels)} (bỏ qua, không ghi chú).", cb)
         if not job_group:
@@ -854,8 +866,10 @@ class Review:
             for b in rot:
                 finds.append(dict(kind="sai_kich_thuoc", sure=False, label=b["label"], box=b["box"], ref=b["id"],
                                   msg=f"Box bị xoay {b['rotation']:.0f}°, tool không kiểm tra được, xem lại."))
-            if areas.get(n):
-                finds += area_check.check(areas[n], boxes, img, seg, road_names)
+            if areas.get(n) or seg is not None:
+                finds += area_check.check(areas.get(n, []), boxes, img, seg, road_names)
+            if flabels:
+                finds += frame_check.check(img, tags.get(n, []), flabels, runner.clf)
             bad_refs = {f["ref"] for f in finds if f["ref"] and f["sure"]}
             st["frames"] += 1
             st["boxes"] += len(lab)
