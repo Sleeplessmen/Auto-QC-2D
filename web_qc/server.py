@@ -156,18 +156,33 @@ def config(u=Depends(user)):
     d = store.default_connection(with_token=False)
     return dict(connections=store.list_connections(), default_connection=d["id"] if d else None,
                 env_task_id=e["task_id"], env_job_id=e["job_id"], device=R.ToolRunner.device(), user=u,
-                pass_threshold=s["pass_threshold"], default_mode=s["default_mode"], webhook_enabled=s["webhook_enabled"])
+                pass_threshold=s["pass_threshold"], default_mode=s["default_mode"], webhook_enabled=s["webhook_enabled"],
+                auto_validation=s["auto_validation"])
 
 
 @app.get("/api/settings")
 def get_settings(request: Request, u=Depends(need("admin"))):
     s = store.get_settings()
     s["webhook_url"] = str(request.base_url).rstrip("/") + "/api/webhook/cvat"
+    s.pop("auto_seen", None)
+    s["auto_error"] = worker.poll_error
     return s
+
+
+@app.post("/api/auto/check")
+def auto_check(u=Depends(need("admin"))):
+    """Hoi CVAT ngay (khong cho 60 giay): job nao vua sang 'validation' thi xep review."""
+    try:
+        made = worker.poll_validation()
+    except Exception as e:
+        raise HTTPException(400, f"Không hỏi được CVAT: {e}")
+    return dict(started=made, last=store.get_settings()["auto_last"])
 
 
 @app.put("/api/settings")
 def put_settings(body: dict, u=Depends(need("admin"))):
+    body.pop("auto_seen", None)
+    body.pop("auto_last", None)
     t = body.get("pass_threshold")
     if t is not None and not (0.5 <= float(t) <= 1):
         raise HTTPException(400, "Ngưỡng đạt phải từ 50% đến 100%.")
@@ -176,7 +191,9 @@ def put_settings(body: dict, u=Depends(need("admin"))):
     if body.get("default_mode") not in (None, "chinh_xac", "nhanh"):
         raise HTTPException(400, "Chế độ không hợp lệ.")
     store.set_settings(**{k: v for k, v in body.items() if k in store.DEFAULT_SETTINGS})
-    return store.get_settings()
+    s = store.get_settings()
+    s.pop("auto_seen", None)
+    return s
 
 
 # ------------------------------------------------------------------ ket noi CVAT
@@ -819,7 +836,9 @@ async def cvat_webhook(request: Request, key: str = ""):
         return dict(ok=True, pong=True)
     job = data.get("job") or {}
     before = data.get("before_update") or {}
-    if ev != "update:job" or job.get("state") != "completed" or before.get("state") == "completed":
+    to_val = job.get("stage") == "validation" and "stage" in before and before.get("stage") != "validation"
+    to_done = job.get("state") == "completed" and "state" in before and before.get("state") != "completed"
+    if ev != "update:job" or not (to_val or to_done):
         return dict(ok=True, skipped=ev or "khong_ro")
     if job.get("dimension") == "3d":
         return dict(ok=True, skipped="job_3d")

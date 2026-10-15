@@ -50,7 +50,60 @@ class Worker:
         self.reviews = {}           # run id -> review_core.Review (de day Issue)
         self.runners = {}
         self.push_lock = threading.Lock()
+        self.poll_error = None
         threading.Thread(target=self._loop, daemon=True).start()
+        threading.Thread(target=self._poll_loop, daemon=True).start()
+
+    # ------------------------------------------------------------ tu review khi job sang 'validation'
+    POLL_SEC = 60
+
+    def _poll_loop(self):
+        while True:
+            time.sleep(self.POLL_SEC)
+            try:
+                self.poll_validation()
+                self.poll_error = None
+            except Exception as e:
+                self.poll_error = str(e)
+                print(f"[tu dong] loi khi hoi CVAT: {e}", flush=True)
+
+    def poll_validation(self):
+        """Hoi CVAT cac job dang o stage 'validation'. Job moi vao validation (lan hoi truoc chua thay) -> xep 1 lan review.
+        Lan dau bat: chi ghi nhan cac job dang co, khong chay (tranh chay don ca loat job cu).
+        Job bi tra ve annotation roi nop lai validation -> review lai."""
+        s = store.get_settings()
+        if not s["auto_validation"]:
+            return []
+        c = connection_for(s["auto_connection_id"])
+        cv, _ = cvat_client(c["id"])
+        jobs, page = [], 1
+        while True:
+            r = cv.get("/api/jobs", stage="validation", page=page, page_size=100).json()
+            jobs += r["results"]
+            if not r.get("next"):
+                break
+            page += 1
+        key = str(c["id"])
+        seen_all = dict(s.get("auto_seen") or {})
+        first = key not in seen_all
+        before = set(seen_all.get(key) or [])
+        now = {j["id"] for j in jobs if j.get("dimension") != "3d"}
+        busy = {store.get_run(r)["job_id"] for r in self.waiting + ([self.current] if self.current else [])}
+        made = []
+        if not first:
+            for j in jobs:
+                if j["id"] not in now or j["id"] in before or j["id"] in busy:
+                    continue
+                params = dict(mode=s["default_mode"], rider=True, max_frames=None, auto_push=bool(s["auto_push"]),
+                              push_unsure=False, frames_hint=j.get("frame_count"))
+                rid = store.new_run(j["id"], j["task_id"], "tự động", params, store.task_guideline(j["task_id"]), c["id"],
+                                    source="validation")
+                self.submit(rid)
+                made.append(rid)
+        seen_all[key] = sorted(now)
+        store.set_settings(auto_seen=seen_all, auto_last=dict(time=time.time(), jobs=len(now), started=len(made),
+                                                              first=first, connection=c["name"]))
+        return made
 
     # ------------------------------------------------------------ hang doi
     def submit(self, run_id):
@@ -245,7 +298,7 @@ class Worker:
                 pct = st["ok"] / st["boxes"] if st.get("boxes") else 0
                 thr = store.get_settings()["pass_threshold"]
                 frame0 = min((f["frame"] for f in pick if f["frame"] is not None), default=rv.frames[0][0] if rv.frames else 0)
-                text = (f"{pct:.0%} box đúng — {'ĐẠT' if pct >= thr else f'CHƯA ĐẠT (cần ≥ {thr:.0%})'}. "
+                text = (f"Tổng kết (không phải lỗi): {pct:.0%} box đúng —{'ĐẠT' if pct >= thr else f'CHƯA ĐẠT (cần ≥ {thr:.0%})'}. "
                         f"{len(pick)} lỗi cần sửa.")
                 if report_url:
                     text += f"\nDanh sách lỗi: {report_url}"

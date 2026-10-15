@@ -264,7 +264,7 @@
 
           <div class="actionbar">
             <label class="chk" for="replaceOld" title="Lỗi vẫn còn: giữ Issue cũ. Lỗi đã hết: xoá Issue cũ, hoặc đóng lại nếu đã có người trả lời."><input type="checkbox" id="replaceOld" checked><span>Đồng bộ với Issue lần trước</span></label>
-            <label class="chk" for="addSummary" title="Thêm 1 Issue tổng kết: % box đúng, đạt hay chưa, kèm link trang lỗi cho labeler"><input type="checkbox" id="addSummary" checked><span>Kèm Issue tổng kết</span></label>
+            <label class="chk" for="addSummary" title="Thêm 1 Issue tổng kết: % box đúng, đạt hay chưa, kèm link trang lỗi cho labeler"><input type="checkbox" id="addSummary"><span>Kèm Issue tổng kết</span></label>
             <span id="pushRes" class="meta push-res"></span>
             <button id="pushBtn" class="btn primary" type="button"><svg class="ic"><use href="#i-upload"/></svg><span id="pushLabel">Đẩy Issue lên CVAT</span></button>
           </div>
@@ -382,13 +382,20 @@
 
     <!-- ============================== CAI DAT ============================== -->
     <section id="tab-settings" class="tab hidden">
-      <header class="pagehead"><div><h1>Cài đặt</h1><p>Ngưỡng đạt, tự chạy khi job hoàn thành, tài khoản.</p></div></header>
+      <header class="pagehead"><div><h1>Cài đặt</h1><p>Ngưỡng đạt, tự review khi job sang validation, tài khoản.</p></div></header>
       <div class="grid2">
         <form class="panel" id="setForm">
           <div class="panel-head"><h2>Đánh giá</h2></div>
           <div class="stack">
             <label class="fld w-md" for="sThr"><span>Ngưỡng đạt (% box đúng)</span><input id="sThr" inputmode="decimal" placeholder="97"></label>
             <label class="fld w-md" for="sMode"><span>Chế độ mặc định</span><select id="sMode"><option value="chinh_xac">Chính xác · 4 model + SAM2</option><option value="nhanh">Nhanh · 2 model</option></select></label>
+          </div>
+          <h3 class="mt">Tự review khi job chuyển sang validation</h3>
+          <div class="stack">
+            <label class="chk" for="sAuto"><input type="checkbox" id="sAuto"><span>Bật: labeler gán xong, chuyển stage sang <b>validation</b> thì tự review</span></label>
+            <label class="fld" for="sAutoConn"><span>CVAT theo dõi</span><select id="sAutoConn"></select></label>
+            <label class="chk" for="sAutoPush"><input type="checkbox" id="sAutoPush" checked><span>Review xong tự đẩy lỗi chắc chắn lên CVAT (lỗi "chưa chắc" chờ người xem)</span></label>
+            <div class="hook-box" id="autoBox"></div>
           </div>
           <h3 class="mt">Tự chạy khi job hoàn thành (webhook CVAT)</h3>
           <div class="stack">
@@ -449,6 +456,6 @@
   </div>
 </div>
 <div id="modal" class="modal zoom hidden"><img id="modalImg" alt="Ảnh phóng to"></div>
-<script src="app.js?v=14"></script>
+<script src="app.js?v=15"></script>
 </body>
 </html>

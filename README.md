@@ -47,6 +47,30 @@ cvat_2d\cai_dat.bat
 4. Vào **Review job**, bấm **Chọn** để chọn job, rồi bấm **Đánh giá**.
 5. Xem lỗi, bấm **Tool nhầm** ở lỗi tool báo sai, rồi bấm **Đẩy Issue lên CVAT**.
 
+## Tự review khi labeler nộp job
+
+Vào **Cài đặt → Tự review khi job chuyển sang validation**, tick **Bật**, chọn CVAT rồi bấm **Lưu cài đặt**.
+
+- Labeler gán xong và chuyển stage của job sang **validation**. Trong vòng 60 giây, web tự đọc job, review, rồi đẩy lỗi chắc chắn lên CVAT thành Issue.
+- Job bị trả về annotation, rồi labeler nộp lại validation, thì tool review lại.
+- Web tự hỏi CVAT nên không cần webhook hay cấu hình mạng.
+
+Tool không cần đáp án (ground truth) để review job thật. Tool tự nhìn ảnh bằng model, rồi so với nhãn labeler. Đáp án chỉ dùng để đo độ chính xác của tool (xem dưới).
+
+Chế độ **Phân tích** trên trang Review job vẽ chồng lên ảnh những gì tool thấy (vật phát hiện, mặt đường), đặt cạnh nhãn của labeler. Người review nhìn vào đó để kiểm chứng kết quả.
+
+## Đo độ chính xác của tool
+
+`review_eval.py` dùng bộ ảnh có đáp án. Nó cố ý cài lỗi vào nhãn đúng (sai kích thước, sai nhãn, thiếu, thừa, trùng, box dẹt), rồi đo tool bắt được bao nhiêu, báo nhầm bao nhiêu, và bao nhiêu % khung hình được review đúng. Kết quả được chia theo điều kiện ảnh: ngày / đêm / hoàng hôn, trời quang / mưa / tuyết.
+
+```
+venv\Scripts\python cvat_2d\review_eval.py --images <thu muc anh> --gt <thu muc dap an json> --meta <dieu_kien.json>
+```
+
+- Mỗi file đáp án có dạng `{"image": "ten.jpg", "objects": [{"cls": "car", "box": [x1, y1, x2, y2]}]}`.
+- `--meta` là file `{ten anh: {timeofday, weather}}`, ví dụ trích từ nhãn của BDD100K.
+- `--cond dem` / `--cond mua` giả lập ảnh đêm / mưa từ ảnh ban ngày.
+
 ## Thử nhanh khi chưa có job thật
 
 Cần một CVAT để thử. Có thể chạy CVAT trên máy bằng Docker theo [hướng dẫn của CVAT](https://docs.cvat.ai/docs/administration/basics/installation/). Tạo tài khoản admin:

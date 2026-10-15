@@ -147,8 +147,9 @@ class ToolRunner:
         """img RGB. key: ten cache (ten anh hoac hash). Tra ve (objs, rejected) — objs da qua toan bo hau xu ly."""
         spec = L.MODELS if self.mode == "chinh_xac" else FAST_MODELS
         dets = []
+        enh = self.mode == "chinh_xac" and L.needs_enh(img)
         for mi, (p, _, _) in enumerate(spec):
-            tag = re.sub(r"[^A-Za-z0-9.-]", "_", p) + ("" if self.mode == "chinh_xac" else "__fast")
+            tag = re.sub(r"[^A-Za-z0-9.-]", "_", p) + ("" if self.mode == "chinh_xac" else "__fast") + ("__enh" if enh else "")
             cp = os.path.join(CACHE, f"{key}__{tag}.json")
             if os.path.exists(cp):
                 part = [tuple(d[:6]) + (mi,) for d in json.load(open(cp))]
@@ -914,6 +915,7 @@ class Review:
             raise RuntimeError("Lần review này không gắn với job CVAT nào (chỉ đánh giá file).")
         todo = [f for f in self.findings if f["frame"] is not None and (f["sure"] or include_unsure)]
         want = {self.fingerprint(f): f for f in todo}
+        text_of = lambda f: f["msg"] + ("" if f["sure"] else " (chưa chắc, xem lại)")
         removed = resolved = kept = 0
         keep_fp = set()
         if replace_old:
@@ -926,11 +928,14 @@ class Review:
                 if ti is None:
                     continue
                 fp = ti[0]
-                if fp and fp in want:
+                replies = self.cvat.comment_count(it["id"]) > 1
+                # loi van con: giu Issue cu. Rieng Issue chua ai tra loi ma loi nhan da doi (vd kieu cu co
+                # "[Review tu dong]") thi xoa di tao lai voi loi nhan moi.
+                if fp and fp in want and (replies or ti[1] == text_of(want[fp])):
                     keep_fp.add(fp)
                     kept += 1
                     continue
-                if self.cvat.comment_count(it["id"]) > 1:
+                if replies:
                     self.cvat.resolve_issue(it["id"])
                     resolved += 1
                 else:
@@ -940,8 +945,7 @@ class Review:
         made = []
         new = [f for fp, f in want.items() if fp not in keep_fp]
         for k, f in enumerate(new, 1):
-            msg = f["msg"] + ("" if f["sure"] else " (chưa chắc, xem lại)")
-            msg += f"\n\n[qc:{self.fingerprint(f)}]"          # ma de lan sau khong tao trung, labeler bo qua
+            msg = text_of(f) + f"\n\n[qc:{self.fingerprint(f)}]"   # ma de lan sau khong tao trung, labeler bo qua
             r = self.cvat.create_issue(self.job_id, f["frame"], f["box"], msg, f.get("poly"))
             made.append(r["id"])
             if k % 20 == 0:

@@ -45,7 +45,10 @@ create table if not exists edits(run_id integer, finding_id integer, msg text, u
 RUN_EXTRA = {"connection_id": "integer", "job_name": "text", "task_name": "text", "project_name": "text",
              "assignee": "text", "job_stage": "text", "job_state": "text", "source": "text"}
 DEFAULT_SETTINGS = {"pass_threshold": 0.97, "default_mode": "chinh_xac", "webhook_enabled": False,
-                    "webhook_secret": "", "webhook_connection_id": None, "webhook_auto_push": False}
+                    "webhook_secret": "", "webhook_connection_id": None, "webhook_auto_push": False,
+                    # tu review khi labeler chuyen job sang stage 'validation' (web tu hoi CVAT dinh ky, khong can webhook)
+                    "auto_validation": False, "auto_connection_id": None, "auto_push": True,
+                    "auto_seen": {}, "auto_last": None}
 
 
 def conn():

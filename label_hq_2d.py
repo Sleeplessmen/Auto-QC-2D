@@ -59,10 +59,36 @@ AMODAL_MAX = 0.15      # noi toi da 15% kich thuoc moi canh
 # Detect
 # -----------------------------------------------------------------------------
 
+LOW_LIGHT = 75         # do sang trung binh < muc nay (anh dem) -> them goc nhin anh da lam sang
+LOW_CONTRAST = 42      # do lech chuan do sang < muc nay (mua, suong, mo) -> cung them
+
+
+def needs_enh(img):
+    if os.environ.get("QC_NO_ENH"):          # de do so sanh truoc / sau
+        return False
+    g = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+    return g.mean() < LOW_LIGHT or g.std() < LOW_CONTRAST
+
+
+def enhance(img):
+    """Lam ro anh toi / mo: CLAHE tren kenh sang + gamma keo do sang trung binh ve ~115."""
+    lab = cv2.cvtColor(img, cv2.COLOR_RGB2LAB)
+    lab[..., 0] = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8)).apply(lab[..., 0])
+    out = cv2.cvtColor(lab, cv2.COLOR_LAB2RGB)
+    m = max(1.0, float(out.mean()))
+    if m < 100:
+        gamma = np.log(115 / 255) / np.log(m / 255)
+        out = cv2.LUT(out, ((np.arange(256) / 255) ** gamma * 255).clip(0, 255).astype(np.uint8))
+    return out
+
+
 def views(img):
     """(anh con, offset x, offset y, lat?, canh trong (de bo box bi cat))"""
     h, w = img.shape[:2]
     out = [(img, 0, 0, False, None), (img[:, ::-1].copy(), 0, 0, True, None)]
+    if needs_enh(img):        # anh dem / mua: model nhin them ban da lam sang (moi model van chi 1 phieu)
+        e = enhance(img)
+        out += [(e, 0, 0, False, None), (e[:, ::-1].copy(), 0, 0, True, None)]
     tw, th = int(w * 0.6), int(h * 0.6)
     for x0 in (0, w - tw):
         for y0 in (0, h - th):

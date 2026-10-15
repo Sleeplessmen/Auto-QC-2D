@@ -95,7 +95,8 @@ function renderSideStatus() {
     `<div class="st-row" title="${esc(c?.url || "")}"><i class="dot ${c ? "ok" : "no"}"></i><span>${esc(host)}</span></div>` +
     (c?.org ? `<div class="st-row"><i class="dot ok"></i><span>Tổ chức ${esc(c.org)}</span></div>` : "") +
     `<div class="st-row" title="${esc(CFG.device)}"><i class="dot ${gpu ? "ok" : "no"}"></i><span>${gpu ? esc(CFG.device.replace(/^GPU \((.*)\)$/, "$1")) : "CPU (chậm)"}</span></div>` +
-    (CFG.webhook_enabled ? `<div class="st-row"><i class="dot ok"></i><span>Webhook đang bật</span></div>` : "");
+    (CFG.webhook_enabled ? `<div class="st-row"><i class="dot ok"></i><span>Webhook đang bật</span></div>` : "") +
+    (CFG.auto_validation ? `<div class="st-row"><i class="dot ok"></i><span>Tự review khi sang validation</span></div>` : "");
 }
 $("#fConn").onchange = () => { renderSideStatus(); refreshJobCtx(); };
 
@@ -216,7 +217,7 @@ $("#rerunBtn").onclick = async () => { try { const r = await api(`/api/runs/${RU
 
 function runMeta(r) {
   return [r.connection?.name, r.assignee ? "Labeler " + r.assignee : "", r.username ? "chạy bởi " + r.username : "", fmtTime(r.created),
-    r.guideline_name ? "Guideline " + r.guideline_name : "không dùng guideline", r.source === "webhook" ? "tự chạy qua webhook" : ""].filter(Boolean).join(" · ");
+    r.guideline_name ? "Guideline " + r.guideline_name : "không dùng guideline", r.source === "webhook" ? "tự chạy qua webhook" : r.source === "validation" ? "tự chạy khi job sang validation" : ""].filter(Boolean).join(" · ");
 }
 
 async function poll() {
@@ -636,7 +637,7 @@ function renderHistory() {
     const s = r.stats || {}, p = r.pct;
     const st = r.status === "xong" && p != null ? (p >= THR() ? ["pass", "Đạt"] : ["fail", "Chưa đạt"]) : [r.status, STATUS[r.status] + (r.position ? " · thứ " + r.position : "")];
     return `<tr data-id="${r.id}"><td class="strong">#${r.id}</td><td>${r.job_id ?? "file"}</td><td>${esc(r.task_name || r.task_id || "—")}</td>
-      <td>${esc(r.assignee || "—")}</td><td>${esc(r.username)}${r.source === "webhook" ? ' <span class="fp-badge">tự động</span>' : ""}</td><td>${fmtTime(r.created)}</td>
+      <td>${esc(r.assignee || "—")}</td><td>${esc(r.username)}${r.source === "webhook" || r.source === "validation" ? ' <span class="fp-badge">tự động</span>' : ""}</td><td>${fmtTime(r.created)}</td>
       <td><span class="pill ${st[0]}">${st[1]}${r.eta != null ? " · ~" + Math.max(1, Math.round(r.eta / 60)) + " phút" : ""}</span></td><td class="r">${pctTxt(p)}</td><td class="r">${s.boxes !== undefined ? `${s.sure} / ${s.unsure}` : "—"}</td>
       <td class="r">${r.fp || "—"}</td><td class="r">${r.pushed ? r.pushed.created + (r.pushed.kept ? " +" + r.pushed.kept : "") : "—"}</td></tr>`;
   }).join("") || `<tr><td colspan="11" class="empty-row">Chưa có lần review nào.</td></tr>`;
@@ -860,9 +861,30 @@ async function loadSettings() {
   $("#sThr").value = (s.pass_threshold * 100).toFixed(1).replace(/\.0$/, "");
   $("#sMode").value = s.default_mode;
   $("#sHook").checked = s.webhook_enabled; $("#sHookPush").checked = s.webhook_auto_push;
+  $("#sAuto").checked = s.auto_validation; $("#sAutoPush").checked = s.auto_push;
+  $("#sAutoConn").innerHTML = `<option value="">Kết nối mặc định</option>` + CFG.connections.map(c => `<option value="${c.id}" ${s.auto_connection_id === c.id ? "selected" : ""}>${esc(c.name)}</option>`).join("");
+  renderAuto(s);
   $("#sHookConn").innerHTML = `<option value="">Kết nối mặc định</option>` + CFG.connections.map(c => `<option value="${c.id}" ${s.webhook_connection_id === c.id ? "selected" : ""}>${esc(c.name)}</option>`).join("");
   renderHook(s);
   loadUsers();
+}
+function renderAuto(s) {
+  const L = s.auto_last;
+  let st = "";
+  if (s.auto_error) st = `<div>${bad("Lần hỏi CVAT gần nhất bị lỗi: " + s.auto_error)}</div>`;
+  else if (s.auto_validation && L) st = `<div>Lần kiểm tra gần nhất ${fmtTime(L.time)} trên <b>${esc(L.connection)}</b>: ${L.jobs} job đang ở validation`
+    + (L.first ? " (lần đầu: chỉ ghi nhận, không chạy job cũ)" : `, xếp ${L.started} lần review mới`) + ".</div>";
+  $("#autoBox").innerHTML = s.auto_validation ? `${st}
+    <div class="meta">Cứ 60 giây web hỏi CVAT một lần. Job nào vừa chuyển sang stage <b>validation</b> thì tự xếp vào hàng review, người chạy hiện là "tự động".
+    Job bị trả về annotation rồi nộp lại validation sẽ được review lại. Không cần cấu hình webhook hay mạng.</div>
+    <div><button type="button" class="btn sm" id="autoNow">Kiểm tra ngay</button> <span id="autoMsg" class="meta"></span></div>`
+    : `<div class="meta">Bật rồi bấm Lưu cài đặt. Từ lúc bật, job nào chuyển sang validation sẽ được tự review.</div>`;
+  const b = $("#autoNow");
+  if (b) b.onclick = async () => {
+    $("#autoMsg").textContent = "Đang hỏi CVAT…";
+    try { const r = await api("/api/auto/check", { method: "POST" }); $("#autoMsg").innerHTML = ok(r.started.length ? `Đã xếp ${r.started.length} lần review` : "Không có job mới vào validation"); renderAuto({ ...s, auto_last: r.last, auto_error: null }); }
+    catch (err) { $("#autoMsg").innerHTML = bad(err.message); }
+  };
 }
 function renderHook(s) {
   $("#hookBox").innerHTML = s.webhook_enabled && s.webhook_secret ? `
@@ -879,9 +901,11 @@ $("#setForm").onsubmit = async e => {
     const s = await api("/api/settings", { method: "PUT", json: {
       pass_threshold: (parseFloat($("#sThr").value) || 97) / 100, default_mode: $("#sMode").value,
       webhook_enabled: $("#sHook").checked, webhook_auto_push: $("#sHookPush").checked,
-      webhook_connection_id: $("#sHookConn").value ? +$("#sHookConn").value : null } });
+      webhook_connection_id: $("#sHookConn").value ? +$("#sHookConn").value : null,
+      auto_validation: $("#sAuto").checked, auto_push: $("#sAutoPush").checked,
+      auto_connection_id: $("#sAutoConn").value ? +$("#sAutoConn").value : null } });
     s.webhook_url = location.origin + "/api/webhook/cvat";
-    renderHook(s); $("#setMsg").innerHTML = ok("Đã lưu ✔"); await loadConfig();
+    renderHook(s); renderAuto(s); $("#setMsg").innerHTML = ok("Đã lưu ✔"); await loadConfig();
   } catch (err) { $("#setMsg").innerHTML = bad(err.message); }
 };
 $("#pwForm").onsubmit = async e => {
