@@ -503,9 +503,14 @@ class Cvat:
         r = self.get("/api/comments", issue_id=issue_id, page_size=1, sort="id").json()["results"]
         return r[0]["message"] if r else ""
 
-    def create_issue(self, job_id, frame, box, message):
-        x1, y1, x2, y2 = [round(float(v), 2) for v in box]
-        payload = dict(job=job_id, frame=frame, position=[x1, y1, x2, y1, x2, y2, x1, y2], message=message)
+    def create_issue(self, job_id, frame, box, message, poly=None):
+        """poly: [x1, y1, x2, y2, ...] — ghim theo dung hinh vung (vd mat duong), khong co thi ghim theo box."""
+        if poly and len(poly) >= 6:
+            pos = [round(float(v), 2) for v in poly]
+        else:
+            x1, y1, x2, y2 = [round(float(v), 2) for v in box]
+            pos = [x1, y1, x2, y1, x2, y2, x1, y2]
+        payload = dict(job=job_id, frame=frame, position=pos, message=message)
         for k in range(4):
             r = self.s.post(f"{self.url}/api/issues", json=payload, timeout=60)
             if r.status_code < 500:
@@ -659,6 +664,12 @@ def draw_review(img, lab, finds, path):
                 cv2.line(out, (x2, i), (x2, min(i + 6, y2)), col, 2)
         else:
             cv2.rectangle(out, (x1, y1), (x2, y2), col, 2)
+        if f.get("poly"):                   # vung (mat duong): to theo dung hinh
+            pts = np.round(np.array(f["poly"]).reshape(-1, 2)).astype(np.int32)
+            ov = out.copy()
+            cv2.fillPoly(ov, [pts], col)
+            out = cv2.addWeighted(ov, 0.25, out, 0.75, 0)
+            cv2.polylines(out, [pts], True, col, 2)
         txt = str(n)
         (tw, th), _ = cv2.getTextSize(txt, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)
         ty = y1 - 4 if y1 > th + 6 else y2 + th + 4
@@ -881,10 +892,8 @@ class Review:
         for k, f in enumerate(new, 1):
             kind = KIND_VI.get(f["kind"], f["kind"])
             msg = f"{PREFIX} [{kind}] {f['msg']}" + ("" if f["sure"] else " (không chắc — nên kiểm tra lại)")
-            if f["ref"]:
-                msg += f" [{f['ref']}]"
-            msg += f" [qc:{self.fingerprint(f)}]"
-            r = self.cvat.create_issue(self.job_id, f["frame"], f["box"], msg)
+            msg += f"\n\n[qc:{self.fingerprint(f)}]"          # ma de lan sau khong tao trung, labeler bo qua
+            r = self.cvat.create_issue(self.job_id, f["frame"], f["box"], msg, f.get("poly"))
             made.append(r["id"])
             if k % 20 == 0:
                 log(f"  đã tạo {k}/{len(new)} Issue", cb)

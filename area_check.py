@@ -112,12 +112,28 @@ def _fmt(b):
 
 
 def _blobs(mask, min_px):
-    """Cac vung lien thong lon: [(so px, box)] lon truoc"""
+    """Cac vung lien thong lon: [(so px, box, mask vung)] lon truoc"""
     m = cv2.morphologyEx(mask.astype(np.uint8), cv2.MORPH_OPEN, np.ones((7, 7), np.uint8))
     n, lab, st, _ = cv2.connectedComponentsWithStats(m, 8)
     out = [(int(st[i, 4]), [float(st[i, 0]), float(st[i, 1]), float(st[i, 0] + st[i, 2]), float(st[i, 1] + st[i, 3])], lab == i)
            for i in range(1, n) if st[i, 4] >= min_px]
     return sorted(out, key=lambda x: -x[0])
+
+
+def outline(mask, max_pts=60):
+    """Duong vien vung lon nhat -> [x1, y1, x2, y2, ...] de ghim Issue dung hinh vung (khong trum sang xe ben canh)."""
+    cs, _ = cv2.findContours(mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if not cs:
+        return None
+    c = max(cs, key=cv2.contourArea)
+    eps = 0.003 * cv2.arcLength(c, True)
+    p = cv2.approxPolyDP(c, eps, True)
+    while len(p) > max_pts:
+        eps *= 1.5
+        p = cv2.approxPolyDP(c, eps, True)
+    if len(p) < 3:
+        return None
+    return [float(v) for v in p.reshape(-1)]
 
 
 def check(areas, boxes, img, seg, road_names):
@@ -141,6 +157,7 @@ def check(areas, boxes, img, seg, road_names):
             if inter and inter / small["mask"].sum() >= DUP_AREA:
                 dup.add(small["id"])
                 out.append(dict(kind="trung", sure=True, label=small["label"], box=small["box"], ref=small["id"],
+                                poly=outline(small["mask"]),
                                 msg=f"Vùng '{small['label']}' bị vẽ trùng: {inter / small['mask'].sum():.0%} diện tích nằm đè lên "
                                     f"vùng '{big['label']}' khác {_fmt(big['box'])}. Xoá vùng thừa, chỉ giữ 1 vùng."))
 
@@ -176,14 +193,16 @@ def check(areas, boxes, img, seg, road_names):
             what = np.bincount(cls[comp], minlength=19)
             top = [CS_VI[k] for k in np.argsort(-what)[:2] if what[k] > 0.2 * px and k in CS_VI]
             out.append(dict(kind="thua", sure=px >= SURE_FRAC * N, label=a["label"], box=box, ref=a["id"],
+                            poly=outline(comp),
                             msg=f"Vùng '{a['label']}' tô thừa lên chỗ không phải mặt đường"
                                 f"{' (' + ', '.join(top) + ')' if top else ''} tại {_fmt(box)}, "
                                 f"khoảng {px / N:.0%} ảnh. Kéo đường viền polygon vào sát mép đường."))
 
     # thieu: mat duong chua duoc to
     miss = road & ~union & ~hood
-    for px, box, _ in _blobs(miss, MIN_FRAC * N):
+    for px, box, comp in _blobs(miss, MIN_FRAC * N):
         out.append(dict(kind="thieu", sure=px >= SURE_FRAC * N, label=road_names[0], box=box, ref=None,
+                        poly=outline(comp),
                         msg=f"Thiếu vùng '{road_names[0]}': mặt đường tại {_fmt(box)} (khoảng {px / N:.0%} ảnh) "
                             f"chưa được tô. Mở rộng polygon cho phủ hết phần đường này."))
     return out

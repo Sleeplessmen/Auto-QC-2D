@@ -245,10 +245,10 @@ class Worker:
                 pct = st["ok"] / st["boxes"] if st.get("boxes") else 0
                 thr = store.get_settings()["pass_threshold"]
                 frame0 = min((f["frame"] for f in pick if f["frame"] is not None), default=rv.frames[0][0] if rv.frames else 0)
-                text = (f"QC lần #{run_id}: {pct:.1%} box không có lỗi chắc chắn, {'ĐẠT' if pct >= thr else 'CHƯA ĐẠT'} ngưỡng {thr:.0%}. "
-                        f"Đẩy {len(pick)} ghi chú cần xem.")
+                text = (f"Kết quả QC lần #{run_id}: {pct:.0%} box đúng — {'ĐẠT' if pct >= thr else f'CHƯA ĐẠT (cần ≥ {thr:.0%})'}. "
+                        f"Có {len(pick)} chỗ cần xem, mỗi chỗ là 1 Issue trên ảnh.")
                 if report_url:
-                    text += f" Danh sách lỗi kèm ảnh: {report_url}"
+                    text += f"\nXem tất cả lỗi kèm ảnh: {report_url}"
                 pick.append(dict(kind="tong_ket", sure=True, label="", box=[4, 4, 64, 64], ref=f"run {run_id}", msg=text, frame=frame0, name=""))
             try:
                 rv.findings = pick
