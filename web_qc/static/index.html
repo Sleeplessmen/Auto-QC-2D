@@ -3,10 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>QC nhãn 2D</title>
+<title>QC nhãn 2D · Review tự động</title>
+<meta name="theme-color" content="#0b1324">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f6bff'/%3E%3Crect x='8' y='10' width='16' height='12' rx='1' fill='none' stroke='white' stroke-width='2.4'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap">
-<link rel="stylesheet" href="style.css?v=13">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="style.css?v=14">
 </head>
 <body>
 
@@ -31,18 +33,28 @@
   <symbol id="i-pen" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13 7l4 4"/></symbol>
   <symbol id="i-link" viewBox="0 0 24 24"><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/></symbol>
   <symbol id="i-note" viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="12" rx="1" stroke-dasharray="3 2"/><path d="M8 21l4-4 4 4"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6z"/></symbol>
+  <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 7.5-7 9-4-1.5-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></symbol>
+  <symbol id="i-return" viewBox="0 0 24 24"><path d="M9 14l-5-5 5-5"/><path d="M4 9h10a6 6 0 0 1 0 12h-3"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></symbol>
 </svg>
+<div id="vizTip" class="viz-tip hidden" role="tooltip"></div>
 
 <!-- ================================ DANG NHAP ================================ -->
 <section id="login" class="login hidden">
   <div class="login-card">
     <div class="login-side">
       <div class="logo"><span class="logo-mark" aria-hidden="true"></span><span>QC nhãn 2D</span></div>
-      <h1>Review nhãn CVAT thay người review, không chạm vào nhãn.</h1>
+      <span class="login-kicker">Object detection + instance segmentation · BDD100K</span>
+      <h1>Annotator nộp job là tool tự review, ghi Issue đúng chỗ, không chạm vào nhãn.</h1>
       <dl class="login-facts">
-        <div><dt>Tìm lỗi bằng model</dt><dd>4 detector + SAM2 + CLIP tìm box chưa khít, sai nhãn, thiếu, thừa, trùng.</dd></div>
-        <div><dt>Đối chiếu guideline</dt><dd>File luật kiểm từng box và ghi số mục guideline vào ghi chú.</dd></div>
-        <div><dt>Chỉ ghi Issue</dt><dd>Người QC duyệt từng lỗi rồi mới đẩy lên CVAT. Nhãn gốc giữ nguyên.</dd></div>
+        <div><dt>Tự review khi sang validation</dt><dd>Trong 60 giây: tìm lỗi, ghi Issue lên CVAT, còn lỗi chắc chắn thì trả job về annotation.</dd></div>
+        <div><dt>Tìm lỗi bằng model + luật</dt><dd>4 detector + SAM2 + CLIP và luật hình học: box chưa khít, sai nhãn, thiếu, thừa, trùng, polygon lẹm, lỗi ID.</dd></div>
+        <div><dt>Lỗi chưa chắc ghi "Đang xem xét"</dt><dd>Kèm lý do để annotator kiểm chứng. Mỗi vật một Issue, nhiều lỗi thì gộp và ghi rõ từng lỗi.</dd></div>
       </dl>
       <svg class="login-art" viewBox="0 0 300 120" aria-hidden="true">
         <rect x="10" y="30" width="110" height="74" class="a-ok"/>
@@ -70,9 +82,14 @@
   <aside class="sidebar">
     <div class="logo"><span class="logo-mark" aria-hidden="true"></span><span>QC nhãn 2D</span></div>
     <nav id="tabs" aria-label="Các trang">
+      <span class="nav-group">Vận hành</span>
       <button data-tab="dash"><svg class="ic"><use href="#i-home"/></svg><span>Tổng quan</span></button>
-      <button data-tab="review" class="active"><svg class="ic"><use href="#i-scan"/></svg><span>Review job</span></button>
+      <button data-tab="auto" class="active"><svg class="ic"><use href="#i-bolt"/></svg><span>Tự review</span><i class="nav-live hidden" id="navLive" title="Đang theo dõi job sang validation"></i></button>
+      <button data-tab="review"><svg class="ic"><use href="#i-scan"/></svg><span>Review job</span></button>
       <button data-tab="history"><svg class="ic"><use href="#i-history"/></svg><span>Lịch sử</span></button>
+      <span class="nav-group">Báo cáo</span>
+      <button data-tab="trust"><svg class="ic"><use href="#i-shield"/></svg><span>Độ tin cậy tool</span></button>
+      <span class="nav-group">Thiết lập</span>
       <button data-tab="guide"><svg class="ic"><use href="#i-book"/></svg><span>Guideline</span></button>
       <button data-tab="conn"><svg class="ic"><use href="#i-plug"/></svg><span>Kết nối CVAT</span></button>
       <button data-tab="settings"><svg class="ic"><use href="#i-gear"/></svg><span>Cài đặt</span></button>
@@ -107,6 +124,12 @@
           <div class="panel-head"><h2>Xu hướng theo ngày</h2><span class="meta">% box đúng trung bình</span></div>
           <div id="dashTrend" class="trend"></div>
         </div>
+        <div class="panel span2">
+          <div class="panel-head"><h2>Hiệu quả Issue (đo trên CVAT)</h2>
+            <span class="meta">So nhãn lúc review với nhãn hiện tại: Issue nào annotator đã sửa theo là Issue đúng
+            · <button type="button" class="btn sm" id="effBtn">Đo</button></span></div>
+          <div id="effBox"><p class="empty-note">Bấm "Đo" để đọc Issue và nhãn hiện tại của các job đã review trên CVAT.</p></div>
+        </div>
         <div class="panel flush span2">
           <div class="panel-head padded"><h2>Theo labeler</h2><span class="meta">Xếp từ % box đúng thấp nhất · lấy từ người được giao job trên CVAT</span></div>
           <div class="tablewrap"><table class="tbl" id="dashAss">
@@ -115,8 +138,54 @@
       </div>
     </section>
 
+    <!-- ============================== TU REVIEW ============================== -->
+    <section id="tab-auto" class="tab">
+      <header class="pagehead">
+        <div><span class="eyebrow">Luồng chính của nhóm</span><h1>Tự review khi annotator nộp job</h1>
+          <p>Annotator gán xong, chuyển stage sang <b>validation</b>: web tự review, ghi Issue lên CVAT, còn lỗi chắc chắn thì trả job về annotation. Không có lỗi chắc chắn thì job chờ reviewer kiểm chéo.</p></div>
+        <div class="pagehead-actions">
+          <span id="autoPill" class="pill"></span>
+          <button type="button" class="btn" id="autoCheckBtn"><svg class="ic"><use href="#i-redo"/></svg>Kiểm tra ngay</button>
+          <button type="button" class="btn" data-goto="settings"><svg class="ic"><use href="#i-gear"/></svg>Cài đặt</button>
+        </div>
+      </header>
+      <p id="autoMsgTop" class="meta auto-msg"></p>
+
+      <ol class="flow" id="autoFlow" aria-label="Các bước tự review">
+        <li class="flow-step"><span class="flow-ic"><svg class="ic"><use href="#i-user"/></svg></span><b>Annotator nộp</b><span>Gán xong, chuyển stage sang validation</span><em data-n="submitted"></em></li>
+        <li class="flow-step"><span class="flow-ic"><svg class="ic"><use href="#i-bolt"/></svg></span><b>Web QC phát hiện</b><span>Cứ 60 giây hỏi CVAT, job mới vào validation thì xếp hàng</span><em data-n="queue"></em></li>
+        <li class="flow-step"><span class="flow-ic"><svg class="ic"><use href="#i-layers"/></svg></span><b>Tool review</b><span>Luật hình học + guideline, 4 detector + SAM2 + CLIP</span><em data-n="runs"></em></li>
+        <li class="flow-step fork">
+          <div class="fork-row bad"><span class="flow-ic"><svg class="ic"><use href="#i-return"/></svg></span><div><b>Còn lỗi chắc chắn</b><span>Đẩy Issue, trả job về annotation</span></div><em data-n="returned"></em></div>
+          <div class="fork-row good"><span class="flow-ic"><svg class="ic"><use href="#i-eye"/></svg></span><div><b>Không lỗi chắc chắn</b><span>Giữ validation, reviewer kiểm chéo</span></div><em data-n="kept"></em></div>
+        </li>
+        <li class="flow-step"><span class="flow-ic"><svg class="ic"><use href="#i-redo"/></svg></span><b>Sửa và nộp lại</b><span>Review vòng sau: lỗi đã sửa tự đóng Issue, lỗi còn giữ Issue cũ</span><em data-n="rounds"></em></li>
+      </ol>
+
+      <div id="autoKpis" class="kpis kpis-6"></div>
+
+      <div class="grid2 auto-grid">
+        <div class="panel flush span2">
+          <div class="panel-head padded"><div><h2>Job đã tự review</h2><p class="meta">Mỗi job một dòng, gộp mọi vòng review. Bấm một dòng để mở lần review gần nhất.</p></div>
+            <div class="seg seg-inline" id="autoFilter" role="group" aria-label="Lọc kết quả">
+              <button type="button" data-f="" class="on">Tất cả</button><button type="button" data-f="tra_ve">Trả về annotation</button><button type="button" data-f="giu">Chờ reviewer</button><button type="button" data-f="chay">Đang chạy</button>
+            </div></div>
+          <div class="tablewrap"><table class="tbl" id="autoTable">
+            <thead><tr><th>Job</th><th>Task</th><th>Labeler</th><th class="r">Vòng</th><th>% box đúng qua các vòng</th><th class="r">Lỗi / Đang xem xét</th><th class="r">Issue</th><th>Kết quả gần nhất</th><th>Lúc</th></tr></thead><tbody></tbody></table></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h2>Chờ reviewer kiểm chéo</h2><p class="meta">Job không còn lỗi chắc chắn. Các mục "Đang xem xét" cần người xem.</p></div></div>
+          <ul id="autoWaitList" class="wait-list"></ul>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h2>Annotator bị trả về nhiều nhất</h2><p class="meta">Số job và số vòng bị trả về annotation.</p></div></div>
+          <div id="autoPeople" class="bars"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- ============================== REVIEW ============================== -->
-    <section id="tab-review" class="tab">
+    <section id="tab-review" class="tab hidden">
       <header class="pagehead">
         <div><h1>Review job</h1><p>Chọn job trên CVAT, chấm nhãn, duyệt từng lỗi rồi ghi Issue. Tool không sửa nhãn.</p></div>
       </header>
@@ -288,6 +357,81 @@
       </div>
     </section>
 
+    <!-- ============================== DO TIN CAY ============================== -->
+    <section id="tab-trust" class="tab hidden">
+      <header class="pagehead">
+        <div><span class="eyebrow">Báo cáo cho reviewer và người chấm</span><h1>Tool đáng tin đến đâu?</h1>
+          <p>Đo trên ảnh có đáp án: cố ý cài lỗi đã biết vào nhãn đúng, cho tool review, rồi đếm tool bắt được bao nhiêu, bỏ lọt bao nhiêu, báo nhầm bao nhiêu. Đây là độ chính xác <b>của tool</b>, không phải của annotator.</p></div>
+        <div class="pagehead-actions">
+          <div class="seg seg-inline" id="trustSet" role="group" aria-label="Bộ dữ liệu">
+            <button type="button" data-s="bdd" class="on">BDD100K</button><button type="button" data-s="vn">Ảnh Việt Nam</button>
+          </div>
+        </div>
+      </header>
+
+      <div id="trustHero" class="hero"></div>
+
+      <div class="panel how">
+        <div class="panel-head"><div><h2>Cách đo và cách đọc số</h2><p class="meta">Biết trước lỗi nằm ở đâu, nên đếm được chính xác.</p></div></div>
+        <ol class="how-steps">
+          <li><b>1. Nhãn đúng</b><span>Ảnh có đáp án (BDD100K, ảnh đường phố Việt Nam, COCO)</span></li>
+          <li><b>2. Cài lỗi</b><span>Sai kích thước, sai nhãn, xoá vật (thiếu), thêm box (thừa), chép box (trùng)</span></li>
+          <li><b>3. Tool review</b><span>Như job thật, không biết lỗi nằm ở đâu</span></li>
+          <li><b>4. So với lỗi đã cài</b><span><i class="key k1"></i>Bắt chắc chắn <i class="key k2"></i>Bắt, ghi "Đang xem xét" <i class="key k3"></i>Bỏ lọt</span></li>
+        </ol>
+        <dl class="defs">
+          <div><dt>Bắt được lỗi</dt><dd>Annotator mắc 100 lỗi thì tool tìm ra bao nhiêu (gồm cả "Đang xem xét").</dd></div>
+          <div><dt>Issue chắc chắn đúng</dt><dd>Tool ghi 100 Issue "lỗi" thì bao nhiêu cái đúng là lỗi thật. Phần còn lại annotator đúng mà tool báo nhầm.</dd></div>
+          <div><dt>Báo nhầm / 100 box đúng</dt><dd>Cho tool review nhãn hoàn toàn đúng: cứ 100 box thì tool ghi nhầm bao nhiêu lỗi chắc chắn.</dd></div>
+        </dl>
+      </div>
+
+      <div class="grid2">
+        <div class="panel">
+          <div class="panel-head"><div><h2>Theo loại lỗi</h2><p class="meta" id="trustTypeMeta"></p></div></div>
+          <div id="trustTypes" class="stackbars"></div>
+          <details class="tbl-toggle"><summary>Xem bảng số</summary><div id="trustTypesTbl"></div></details>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h2>Trước và sau cải tiến (17/10)</h2><p class="meta">Cùng ảnh, cùng lỗi cài vào, chỉ khác phiên bản tool.</p></div>
+            <div class="legend-inline"><span><i class="key k-old"></i>Bản cũ</span><span><i class="key k1"></i>Bản mới</span></div></div>
+          <div id="trustCompare" class="pairbars"></div>
+        </div>
+        <div class="panel span2" id="trustCondPanel">
+          <div class="panel-head"><div><h2>Theo điều kiện ảnh (BDD100K)</h2><p class="meta">Bắt được lỗi và báo nhầm chắc chắn theo thời điểm và thời tiết. Ảnh đêm khó nhất.</p></div></div>
+          <div id="trustCond" class="cond-grid"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h2>Instance segmentation (polygon)</h2><p class="meta" id="trustSegMeta"></p></div></div>
+          <div id="trustSeg" class="stackbars"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><div><h2>Chạy thật trên CVAT</h2><p class="meta">Test đầu cuối: tạo job, cài lỗi, tool tự review, đẩy Issue, annotator sửa, review vòng 2.</p></div></div>
+          <ul id="trustE2e" class="check-list"></ul>
+        </div>
+        <div class="panel span2">
+          <div class="panel-head"><div><h2>Tool kiểm như thế nào</h2><p class="meta">Mỗi lỗi đi qua các tầng dưới đây. Lỗi không đủ bằng chứng không bị bỏ đi mà ghi "Đang xem xét" kèm lý do.</p></div></div>
+          <ol class="tiers">
+            <li><span class="tier-n">1</span><div><b>Luật guideline</b><span>Kích thước tối thiểu, thuộc tính bắt buộc, vẽ toàn bộ vật hay phần nhìn thấy, Shape hay Track. Ghi số mục guideline vào Issue.</span></div></li>
+            <li><span class="tier-n">2</span><div><b>Luật hình học</b><span>Box ra ngoài ảnh, không có diện tích, tỉ lệ phi lý, polygon xoắn / dưới 3 điểm / tràn box, trùng box, người nằm trong xe. Không cần GPU, gần như không nhầm.</span></div></li>
+            <li><span class="tier-n">3</span><div><b>So với model</b><span>4 detector (YOLO11x, RT-DETR-x, YOLOv8x-seg, D-FINE-X) bỏ phiếu, SAM2 thu box sát mép, CLIP phân biệt car / truck / bus và vật giả (biển báo, quảng cáo).</span></div></li>
+            <li><span class="tier-n">4</span><div><b>Chắc chắn hay Đang xem xét</b><span>Chỉ ghi "lỗi" khi đủ bằng chứng: lệch ≥ 20% cạnh vật, CLIP cùng đồng ý loại xe. Vật bị che, vùng quá tối, lệch ít thì ghi "Đang xem xét — có thể …" kèm lý do.</span></div></li>
+            <li><span class="tier-n">5</span><div><b>Ghi Issue lên CVAT</b><span>Mỗi vật một Issue ghim đúng box của vật đó. Nhiều lỗi thì gộp, ghi rõ tên từng lỗi. Lần sau lỗi đã sửa tự đóng Issue, lỗi còn giữ Issue cũ.</span></div></li>
+          </ol>
+        </div>
+        <div class="panel span2">
+          <div class="panel-head"><h2>Giới hạn cần biết</h2></div>
+          <ul class="limits" id="trustLimits">
+            <li><b>Vật nhỏ 10–20 px</b> là chỗ tool bỏ lọt nhiều nhất (thiếu vật, sai nhãn): bắt khoảng một nửa, vật trên 60 px bắt khoảng 90%. Guideline chốt vật dưới 10 px không bắt buộc gán (mục 3.5a); tool phóng to dải giữa ảnh để soi vật xa.</li>
+            <li><b>Ảnh đêm</b>: bắt ít hơn ban ngày khoảng 10 điểm % (70% so với 80%); lỗi kích thước ở vùng quá tối chỉ ghi "Đang xem xét".</li>
+            <li><b>Số đo dùng lỗi cài vào</b>. "% Issue đúng" trên job thật đo ở Tổng quan → Hiệu quả Issue, sau khi annotator sửa theo Issue.</li>
+            <li>Tool <b>không sửa nhãn</b>: chỉ đọc nhãn và ghi Issue. Reviewer vẫn kiểm chéo job không có lỗi chắc chắn.</li>
+          </ul>
+          <p class="meta" id="trustDate"></p>
+        </div>
+      </div>
+    </section>
+
     <!-- ============================== GUIDELINE ============================== -->
     <section id="tab-guide" class="tab hidden">
       <header class="pagehead">
@@ -331,10 +475,13 @@
             <tbody></tbody></table></div>
           <div class="rule-general">
             <h3>Quy tắc chung</h3>
-            <label class="chk" for="qRider"><input type="checkbox" id="qRider"><span>Người lái xe máy phải có box person riêng</span></label>
+            <label class="chk" for="qRider"><input type="checkbox" id="qRider"><span>Người lái xe máy / xe đạp phải có box người riêng (BDD100K: nhãn rider)</span></label>
             <label class="chk" for="qOutside"><input type="checkbox" id="qOutside"><span>Báo lỗi box có nhãn không có trong bảng trên</span></label>
             <label class="fld w-md" for="qAmodal"><span>Vật bị che</span><select id="qAmodal"><option value="">Mặc định: vẽ toàn bộ vật</option><option value="1">Vẽ toàn bộ vật, cả phần bị che</option><option value="0">Chỉ vẽ phần nhìn thấy</option></select></label>
+            <label class="fld w-lg" for="qKieu"><span>Gán bằng Shape hay Track</span><select id="qKieu"><option value="">Để trống: đọc theo guideline</option><option value="shape">Shape (ảnh rời, vd BDD100K)</option><option value="track">Track (video)</option></select></label>
+            <label class="fld w-lg" for="qPair"><span>1 vật vừa có box vừa có polygon/mask</span><select id="qPair"><option value="">Để trống: đọc theo guideline</option><option value="cap">Bình thường: instance segmentation (polygon phải nằm trong box)</option><option value="trung">Lỗi trùng: chỉ cần 1 trong 2</option></select></label>
             <label class="fld w-sm" for="qEdge"><span>Box vượt mép ảnh quá (px)</span><input id="qEdge" inputmode="numeric" placeholder="2"></label>
+            <label class="fld w-sm" for="qMinPx" title="Vật có cạnh ngắn nhỏ hơn mức này thì annotator không bắt buộc gán (tool không báo thiếu). Đã gán thì vẫn hợp lệ."><span>Không bắt buộc gán vật dưới (px)</span><input id="qMinPx" inputmode="numeric" placeholder="vd 10"></label>
             <label class="fld w-sm" for="qMuc"><span>Mục chung</span><input id="qMuc" placeholder="vd 2"></label>
           </div>
           <div class="row-actions"><button id="ruleSave" class="btn primary" type="button">Lưu luật</button><span id="ruleMsg" class="meta"></span></div>
@@ -391,12 +538,14 @@
           <div class="stack">
             <label class="fld w-md" for="sThr"><span>Ngưỡng đạt (% box đúng)</span><input id="sThr" inputmode="decimal" placeholder="97"></label>
             <label class="fld w-md" for="sMode"><span>Chế độ mặc định</span><select id="sMode"><option value="chinh_xac">Chính xác · 4 model + SAM2</option><option value="nhanh">Nhanh · 2 model</option></select></label>
+            <label class="fld w-md" for="sGuide"><span>Guideline mặc định (task chưa gán guideline)</span><select id="sGuide"></select></label>
           </div>
           <h3 class="mt">Tự review khi job chuyển sang validation</h3>
           <div class="stack">
             <label class="chk" for="sAuto"><input type="checkbox" id="sAuto"><span>Bật: labeler gán xong, chuyển stage sang <b>validation</b> thì tự review</span></label>
             <label class="fld" for="sAutoConn"><span>CVAT theo dõi</span><select id="sAutoConn"></select></label>
             <label class="chk" for="sAutoPush"><input type="checkbox" id="sAutoPush" checked><span>Review xong tự đẩy lỗi chắc chắn lên CVAT (lỗi "chưa chắc" chờ người xem)</span></label>
+            <label class="chk" for="sAutoReturn"><input type="checkbox" id="sAutoReturn" checked><span>Có lỗi chắc chắn thì tự <b>trả job về annotation</b> (rejected) cho annotator sửa; không lỗi thì job ở lại validation cho reviewer kiểm chéo</span></label>
             <div class="hook-box" id="autoBox"></div>
           </div>
           <h3 class="mt">Tự chạy khi job hoàn thành (webhook CVAT)</h3>
@@ -411,6 +560,7 @@
         <div class="panel">
           <div class="panel-head"><h2>Đổi mật khẩu</h2></div>
           <form id="pwForm" class="stack">
+            <input type="text" name="username" autocomplete="username" hidden aria-hidden="true" tabindex="-1">
             <label class="fld" for="pwOld"><span>Mật khẩu cũ</span><input id="pwOld" name="old" type="password" autocomplete="current-password" required></label>
             <label class="fld" for="pwNew"><span>Mật khẩu mới <em>ít nhất 6 ký tự</em></span><input id="pwNew" name="new" type="password" minlength="6" autocomplete="new-password" required></label>
             <div class="row-actions"><button type="submit" class="btn primary">Đổi mật khẩu</button><span id="pwMsg" class="meta"></span></div>
@@ -458,6 +608,6 @@
   </div>
 </div>
 <div id="modal" class="modal zoom hidden"><img id="modalImg" alt="Ảnh phóng to"></div>
-<script src="app.js?v=16"></script>
+<script src="app.js?v=18"></script>
 </body>
 </html>

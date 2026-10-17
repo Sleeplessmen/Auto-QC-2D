@@ -60,8 +60,10 @@ async function start() {
   await loadConfig();
   await loadGuideOptions();
   refreshJobCtx();
-  const m = location.hash.match(/run=(\d+)/);
-  if (m) openRun(+m[1]); else if (!CFG.connections.length) showTab("conn");
+  const m = location.hash.match(/run=(\d+)/), t = location.hash.match(/tab=(\w+)/);
+  if (m) openRun(+m[1]);
+  else if (t && $("#tab-" + t[1])) showTab(t[1]);
+  else if (!CFG.connections.length) showTab("conn"); else showTab("auto");
 }
 
 // ============================================================ dieu huong
@@ -70,8 +72,13 @@ document.addEventListener("click", e => { const a = e.target.closest("[data-goto
 function showTab(t) {
   $$("#tabs button").forEach(b => b.classList.toggle("active", b.dataset.tab === t));
   $$(".tab").forEach(s => s.classList.toggle("hidden", s.id !== "tab-" + t));
-  ({ dash: loadDash, history: loadHistory, guide: loadGuides, conn: loadConns, settings: loadSettings })[t]?.();
+  clearInterval(AUTO_POLL);
+  if (t === "auto") AUTO_POLL = setInterval(() => { if (!document.hidden) loadAuto(); }, 15000);
+  if (t !== "review") history.replaceState(null, "", "#tab=" + t);       // link mo thang trang nay (vd #tab=trust)
+  window.scrollTo({ top: 0 });
+  ({ dash: loadDash, auto: loadAuto, trust: loadTrust, history: loadHistory, guide: loadGuides, conn: loadConns, settings: loadSettings })[t]?.();
 }
+let AUTO_POLL = null;
 
 // ============================================================ cau hinh + ket noi
 async function loadConfig() {
@@ -96,7 +103,8 @@ function renderSideStatus() {
     (c?.org ? `<div class="st-row"><i class="dot ok"></i><span>Tổ chức ${esc(c.org)}</span></div>` : "") +
     `<div class="st-row" title="${esc(CFG.device)}"><i class="dot ${gpu ? "ok" : "no"}"></i><span>${gpu ? esc(CFG.device.replace(/^GPU \((.*)\)$/, "$1")) : "CPU (chậm)"}</span></div>` +
     (CFG.webhook_enabled ? `<div class="st-row"><i class="dot ok"></i><span>Webhook đang bật</span></div>` : "") +
-    (CFG.auto_validation ? `<div class="st-row"><i class="dot ok"></i><span>Tự review khi sang validation</span></div>` : "");
+    (CFG.auto_validation ? `<div class="st-row"><i class="dot ok live"></i><span>Tự review khi sang validation</span></div>` : "");
+  $("#navLive").classList.toggle("hidden", !CFG.auto_validation);
 }
 $("#fConn").onchange = () => { renderSideStatus(); refreshJobCtx(); };
 
@@ -373,7 +381,11 @@ function drawOverlay() {
   svg.setAttribute("preserveAspectRatio", "none");
   const rect = (b, cls) => `<rect class="${cls}" x="${b[0]}" y="${b[1]}" width="${Math.max(1, b[2] - b[0])}" height="${Math.max(1, b[3] - b[1])}" rx="2"/>`;
   let html = noteItems().filter(n => n.name === CUR_NAME).map(n => rect(n.box, "ov-note" + (n.id === CUR_F ? " cur" : ""))).join("");
-  if (f && !f.note && f.name === CUR_NAME) html += rect(f.box, "ov-cur");
+  if (f && !f.note && f.name === CUR_NAME) {
+    html += rect(f.box, "ov-cur");
+    // loi vien polygon / vung duong: to dung hinh phan sai (lem / to thua)
+    if (f.poly && f.poly.length >= 6) html += `<polygon class="ov-poly" points="${f.poly.map((v, i) => v + (i % 2 ? " " : ",")).join("").trim()}"/>`;
+  }
   if (DRAFT) html += rect(DRAFT, "ov-draft");
   svg.innerHTML = html;
 }
@@ -390,6 +402,11 @@ function drawZoom() {
   const k = cv.width / sw;
   g.strokeStyle = f.note ? "#a07cff" : "#4d7cff"; g.lineWidth = 3; g.setLineDash([10, 6]);
   g.strokeRect((x1 - sx) * k, (y1 - sy) * k, w * k, h * k);
+  if (f.poly && f.poly.length >= 6) {           // phan sai cua polygon (lem / to thua) to mau
+    g.setLineDash([]); g.beginPath();
+    for (let i = 0; i < f.poly.length; i += 2) { const px = (f.poly[i] - sx) * k, py = (f.poly[i + 1] - sy) * k; i ? g.lineTo(px, py) : g.moveTo(px, py); }
+    g.closePath(); g.fillStyle = "rgba(239, 68, 68, .28)"; g.fill(); g.strokeStyle = "#ef4444"; g.lineWidth = 2; g.stroke();
+  }
 }
 function renderDetail(f) {
   const fb = FEEDBACK[f.id], edited = !f.note && EDITS[f.id];
@@ -627,6 +644,28 @@ async function loadDash() {
     || `<tr><td colspan="7" class="empty-row">Chưa có lần review nào trong khoảng này.</td></tr>`;
 }
 
+// hieu qua Issue: doc tu CVAT (cham), chi chay khi bam "Do"
+$("#effBtn").onclick = loadEffect;
+async function loadEffect() {
+  $("#effBox").innerHTML = `<p class="meta">Đang đọc Issue và nhãn trên CVAT…</p>`;
+  let e;
+  try { e = await api(`/api/hieu_qua?days=${DASH_DAYS}`); }
+  catch (err) { $("#effBox").innerHTML = bad(err.message); return; }
+  const k = (v, label, cls = "") => `<div class="kpi ${cls}"><div class="v">${v}</div><div class="k">${label}</div></div>`;
+  const judged = e.da_sua + e.khong_sua + e.tool_nham;
+  const rows = Object.entries(e.theo_loai).filter(([, v]) => v.da_sua + v.khong_sua + v.tool_nham + v.chua_xu_ly > 0).sort((a, b) => (b[1].da_sua + b[1].khong_sua) - (a[1].da_sua + a[1].khong_sua));
+  $("#effBox").innerHTML = (e.jobs ? `<div class="kpis kpis-4">` +
+      k(e.ti_le_issue_dung == null ? "—" : pctTxt(e.ti_le_issue_dung), `Issue đúng (annotator đã sửa theo) · ${e.da_sua}/${judged}`, e.ti_le_issue_dung < .8 ? "warn" : "") +
+      k(e.bat_truoc_review_cheo == null ? "—" : pctTxt(e.bat_truoc_review_cheo), `Lỗi tool bắt trước review chéo · người review tìm thêm ${e.nguoi_tim}`) +
+      k(e.vong_tra_lai_tb == null ? "—" : e.vong_tra_lai_tb.toFixed(1), `Số vòng bị trả lại / job · ${e.jobs} job`) +
+      k(e.chua_xu_ly, "Issue còn mở, chưa sửa" + (e.khong_ro ? ` · ${e.khong_ro} không rõ (Issue do bản web khác tạo, không tính)` : "")) + `</div>` : `<p class="empty-note">Chưa có job nào đã đẩy Issue trong khoảng này.</p>`) +
+    (rows.length ? `<div class="tablewrap mt"><table class="tbl"><thead><tr><th>Loại lỗi</th><th class="r">Đã sửa (đúng)</th><th class="r">Đóng không sửa</th><th class="r">Tool nhầm</th><th class="r">Còn mở</th><th class="r">% đúng</th></tr></thead><tbody>` +
+      rows.map(([n, v]) => `<tr><td>${esc(n)}</td><td class="r">${v.da_sua}</td><td class="r">${v.khong_sua}</td><td class="r">${v.tool_nham}</td><td class="r">${v.chua_xu_ly}</td><td class="r">${v.ti_le_dung == null ? "—" : pctTxt(v.ti_le_dung)}</td></tr>`).join("") + `</tbody></table></div>` : "") +
+    (e.per_job.length ? `<div class="tablewrap mt"><table class="tbl"><thead><tr><th>Job</th><th>Labeler</th><th class="r">Vòng trả lại</th><th class="r">Issue tool</th><th class="r">% đúng</th><th class="r">Người tìm thêm</th></tr></thead><tbody>` +
+      e.per_job.map(j => `<tr><td>${j.job_id}</td><td>${esc(j.assignee || "—")}</td><td class="r">${j.so_vong_tra_lai}</td><td class="r">${j.so_issue_tool}</td><td class="r">${j.ti_le_issue_dung == null ? "—" : pctTxt(j.ti_le_issue_dung)}</td><td class="r">${j.nguoi_tim}</td></tr>`).join("") + `</tbody></table></div>` : "") +
+    (e.errors.length ? `<div class="mt">${bad("Không đọc được: " + e.errors.join("; "))}</div>` : "");
+}
+
 // ============================================================ lich su
 let HIST = [];
 async function loadHistory() { HIST = await api("/api/runs" + ($("#hJob").value ? `?job_id=${encodeURIComponent($("#hJob").value)}` : "")); renderHistory(); }
@@ -728,15 +767,20 @@ function ruleRow(name, sp = {}) {
     <td><input class="in-muc" value="${esc(sp.muc || "")}" placeholder="3.1" aria-label="Mục guideline"></td>
     <td class="r"><button type="button" class="link-danger rule-del" aria-label="Xoá dòng">Xoá</button></td></tr>`;
 }
+let RULE_Q = {};               // quy tac chung dang soan (giu ca khoa web chua co o sua)
 function renderRuleTable(obj) {
   const nhan = obj.nhan || {}, q = obj.quy_tac || {};
+  RULE_Q = { ...q };
   $("#ruleTable tbody").innerHTML = Object.entries(nhan).map(([n, sp]) => ruleRow(n, sp || {})).join("")
     || `<tr class="rule-empty"><td colspan="9" class="empty-row">Chưa có nhãn nào. Nhập số task rồi bấm <b>Lấy nhãn từ task</b>, hoặc bấm <b>Thêm nhãn</b>.</td></tr>`;
   $("#qRider").checked = q.nguoi_lai_co_box_rieng ?? true;
   $("#qAmodal").value = q.toan_bo_vat == null ? "" : q.toan_bo_vat ? "1" : "0";
   $("#qOutside").checked = !!q.nhan_ngoai_guideline;
   $("#qEdge").value = q.box_ra_ngoai_anh_px ?? 2;
+  $("#qMinPx").value = q.khong_bat_buoc_duoi_px ?? "";
   $("#qMuc").value = q.muc_chung || "";
+  $("#qKieu").value = ["shape", "track"].includes(q.kieu_nhan) ? q.kieu_nhan : "";
+  $("#qPair").value = ["cap", "trung"].includes(q.polygon_kem_box) ? q.polygon_kem_box : "";
 }
 function collectRules() {
   const nhan = {};
@@ -751,9 +795,11 @@ function collectRules() {
       muc: $(".in-muc", tr).value.trim() || undefined,
     };
   });
-  return { nhan, quy_tac: { nguoi_lai_co_box_rieng: $("#qRider").checked, nhan_ngoai_guideline: $("#qOutside").checked,
+  return { nhan, quy_tac: { ...RULE_Q, nguoi_lai_co_box_rieng: $("#qRider").checked, nhan_ngoai_guideline: $("#qOutside").checked,
     box_ra_ngoai_anh_px: parseInt($("#qEdge").value) || 0, muc_chung: $("#qMuc").value.trim() || undefined,
-    toan_bo_vat: $("#qAmodal").value === "" ? undefined : $("#qAmodal").value === "1" } };
+    khong_bat_buoc_duoi_px: parseInt($("#qMinPx").value) || undefined,
+    toan_bo_vat: $("#qAmodal").value === "" ? undefined : $("#qAmodal").value === "1",
+    kieu_nhan: $("#qKieu").value || undefined, polygon_kem_box: $("#qPair").value || undefined } };
 }
 $("#ruleAdd").onclick = () => { $("#ruleTable tbody .rule-empty")?.remove(); $("#ruleTable tbody").insertAdjacentHTML("beforeend", ruleRow("", {})); $("#ruleTable tbody tr:last-child .in-name").focus(); };
 $("#ruleTable tbody").addEventListener("click", e => { if (e.target.classList.contains("rule-del")) e.target.closest("tr").remove(); });
@@ -867,8 +913,13 @@ async function loadSettings() {
   const s = await api("/api/settings");
   $("#sThr").value = (s.pass_threshold * 100).toFixed(1).replace(/\.0$/, "");
   $("#sMode").value = s.default_mode;
+  try {
+    const gs = await api("/api/guidelines");
+    $("#sGuide").innerHTML = `<option value="">Không dùng (chỉ so với nhãn của task)</option>` +
+      gs.map(g => `<option value="${g.id}" ${s.default_guideline_id === g.id ? "selected" : ""}>${esc(g.name)}</option>`).join("");
+  } catch (err) { $("#sGuide").innerHTML = `<option value="">(không đọc được danh sách guideline)</option>`; }
   $("#sHook").checked = s.webhook_enabled; $("#sHookPush").checked = s.webhook_auto_push;
-  $("#sAuto").checked = s.auto_validation; $("#sAutoPush").checked = s.auto_push;
+  $("#sAuto").checked = s.auto_validation; $("#sAutoPush").checked = s.auto_push; $("#sAutoReturn").checked = s.auto_return;
   $("#sAutoConn").innerHTML = `<option value="">Kết nối mặc định</option>` + CFG.connections.map(c => `<option value="${c.id}" ${s.auto_connection_id === c.id ? "selected" : ""}>${esc(c.name)}</option>`).join("");
   renderAuto(s);
   $("#sHookConn").innerHTML = `<option value="">Kết nối mặc định</option>` + CFG.connections.map(c => `<option value="${c.id}" ${s.webhook_connection_id === c.id ? "selected" : ""}>${esc(c.name)}</option>`).join("");
@@ -909,8 +960,9 @@ $("#setForm").onsubmit = async e => {
       pass_threshold: (parseFloat($("#sThr").value) || 97) / 100, default_mode: $("#sMode").value,
       webhook_enabled: $("#sHook").checked, webhook_auto_push: $("#sHookPush").checked,
       webhook_connection_id: $("#sHookConn").value ? +$("#sHookConn").value : null,
-      auto_validation: $("#sAuto").checked, auto_push: $("#sAutoPush").checked,
-      auto_connection_id: $("#sAutoConn").value ? +$("#sAutoConn").value : null } });
+      auto_validation: $("#sAuto").checked, auto_push: $("#sAutoPush").checked, auto_return: $("#sAutoReturn").checked,
+      auto_connection_id: $("#sAutoConn").value ? +$("#sAutoConn").value : null,
+      default_guideline_id: $("#sGuide").value ? +$("#sGuide").value : null } });
     s.webhook_url = location.origin + "/api/webhook/cvat";
     renderHook(s); renderAuto(s); $("#setMsg").innerHTML = ok("Đã lưu ✔"); await loadConfig();
   } catch (err) { $("#setMsg").innerHTML = bad(err.message); }
@@ -990,7 +1042,7 @@ async function loadAnalysis(i) {
 function buildAnItems() {
   const d = AN.data, items = [];
   d.labels.forEach((l, k) => items.push({ key: "l" + k, type: "lab", label: l.label, box: l.box, status: l.status, msgs: l.msgs, iou: l.iou, tool: l.match != null ? d.tool[l.match] : null, id: l.id, occluded: l.occluded }));
-  d.areas.forEach((a, k) => items.push({ key: "a" + k, type: "area", label: a.label, polys: a.polys, status: a.status, msgs: a.msgs, id: a.id, kind: a.kind, road: a.road }));
+  d.areas.forEach((a, k) => items.push({ key: "a" + k, type: "area", label: a.label, polys: a.polys, status: a.status, msgs: a.msgs, id: a.id, kind: a.kind, road: a.road, ref_polys: a.ref_polys, ref_iou: a.ref_iou }));
   d.missing.forEach((m, k) => items.push({ key: "m" + k, type: "miss", label: m.label, box: m.box, poly: m.poly, sure: m.sure, msgs: [m.msg], kind: m.kind }));
   // vat tool thay ma labeler khong co box, va chua thanh loi "Thieu" (tool chua du chac) -> de nguoi review tu xem
   const iou = (a, b) => { const w = Math.max(0, Math.min(a[2], b[2]) - Math.max(a[0], b[0])), h = Math.max(0, Math.min(a[3], b[3]) - Math.max(a[1], b[1])), i = w * h; return i / ((a[2] - a[0]) * (a[3] - a[1]) + (b[2] - b[0]) * (b[3] - b[1]) - i || 1); };
@@ -1023,10 +1075,10 @@ function renderAnSide() {
       : it.type === "area" ? `${ST_VI[it.status]}<span class="sub">${it.kind === "mask" ? "mask" : "polygon"}</span>`
       : it.type === "miss" ? `<span class="err">Không có</span>` : `<span class="meta">Không có</span>`;
     const toolCell = it.type === "lab" ? (it.tool ? `${esc(it.tool.label)} <span class="sub">tin cậy ${Math.round(it.tool.score * 100)}%</span>` : `<span class="meta">Không thấy</span>`)
-      : it.type === "area" ? (it.road ? "so với mặt đường" : "—")
+      : it.type === "area" ? (it.road ? "so với mặt đường" : it.ref_iou != null ? `mask SAM2 <span class="sub">viền nét đứt</span>` : "—")
       : it.type === "tool" ? `${esc(it.label)} <span class="sub">tin cậy ${Math.round(it.score * 100)}%${it.sure ? "" : " · thấp"}</span>`
       : `${esc(it.label)}<span class="sub">${it.sure ? "chắc chắn" : "chưa chắc"}</span>`;
-    const iou = it.type === "lab" && it.tool ? Math.round(it.iou * 100) + "%" : "—";
+    const iou = it.type === "lab" && it.tool ? Math.round(it.iou * 100) + "%" : it.type === "area" && it.ref_iou != null ? Math.round(it.ref_iou * 100) + "%" : "—";
     return `<tr data-key="${it.key}"><td>${n + 1}</td><td><span class="st ${st}"></span>${esc(it.label)}</td><td>${labCell}</td><td>${toolCell}</td><td class="r">${iou}</td></tr>`;
   }).join("") || `<tr><td colspan="5" class="empty-row">Ảnh này không có nhãn nào.</td></tr>`;
   showAnDetail(null);
@@ -1038,6 +1090,7 @@ function anDesc(it) {
     : it.type === "miss" ? `<b>Thiếu ${esc(it.label)}</b>${it.sure ? "" : " (chưa chắc)"}`
     : `Tool thấy <b>${esc(it.label)}</b> (tin cậy ${Math.round(it.score * 100)}%), labeler không có box. Tool chưa đủ chắc để báo thiếu, nên xem bằng mắt.`;
   let body = "";
+  if (it.type === "area" && it.ref_iou != null) body = `<br>Viền nét đứt xanh = mask SAM2 tự tìm cho vật này, trùng ${Math.round(it.ref_iou * 100)}% với polygon của labeler. Chỗ lệch giữa 2 viền là chỗ vẽ lẹm / tô thừa.`;
   if (it.type === "lab") body = it.tool ? `<br>Tool thấy <b>${esc(it.tool.label)}</b> ở đây, tin cậy ${Math.round(it.tool.score * 100)}%, khung trùng ${Math.round(it.iou * 100)}%.` : "<br>Tool không thấy vật nào khớp với box này.";
   const msgs = (it.msgs || []).map(m => `<li>${esc(m)}</li>`).join("");
   return `${head}${body}${msgs ? `<ul style="margin:6px 0 0 16px;padding:0">${msgs}</ul>` : it.type === "lab" && it.status === "dung" ? "<br>Không có lỗi." : ""}`;
@@ -1066,6 +1119,10 @@ function drawAnalysis() {
     anPath(g, it.polys); g.fillStyle = it.road ? "rgba(59,130,246,.16)" : "rgba(59,130,246,.10)"; g.fill("evenodd");
     g.strokeStyle = it.status === "dung" ? AN_COL.area : AN_COL[it.status]; g.lineWidth = lw; g.setLineDash([]); g.stroke();
   }
+  if (AN.layers.tool) for (const it of AN.items) if (it.type === "area" && it.ref_polys) {   // mask SAM2 cua vat
+    anPath(g, it.ref_polys); g.strokeStyle = AN_COL.tool; g.lineWidth = 1.5 / s; g.setLineDash([5 / s, 4 / s]); g.stroke();
+  }
+  g.setLineDash([]);
   if (AN.layers.tool) for (const t of d.tool) {
     const [x1, y1, x2, y2] = t.box; g.strokeStyle = AN_COL.tool; g.lineWidth = 1.5 / s; g.setLineDash([5 / s, 4 / s]); g.strokeRect(x1, y1, x2 - x1, y2 - y1);
   }
@@ -1082,6 +1139,7 @@ function drawAnalysis() {
   if (focus) {                     // to dam vat dang chon / re chuot
     g.lineWidth = 4 / s; g.strokeStyle = "#ffffff"; g.setLineDash([]);
     if (focus.polys || focus.poly) { anPath(g, focus.polys || [focus.poly]); g.stroke(); }
+    if (focus.ref_polys) { anPath(g, focus.ref_polys); g.strokeStyle = AN_COL.tool; g.lineWidth = 3 / s; g.setLineDash([6 / s, 4 / s]); g.stroke(); g.setLineDash([]); }
     else { const [x1, y1, x2, y2] = focus.box; g.strokeRect(x1 - 2 / s, y1 - 2 / s, x2 - x1 + 4 / s, y2 - y1 + 4 / s); }
     if (focus.tool) { const [x1, y1, x2, y2] = focus.tool.box; g.strokeStyle = AN_COL.tool; g.lineWidth = 3 / s; g.setLineDash([5 / s, 4 / s]); g.strokeRect(x1, y1, x2 - x1, y2 - y1); g.setLineDash([]); }
   }
@@ -1127,5 +1185,181 @@ $("#anFrame").onchange = e => loadAnalysis(+e.target.value);
 $("#anPrev").onclick = () => loadAnalysis(AN.idx - 1);
 $("#anNext").onclick = () => loadAnalysis(AN.idx + 1);
 window.addEventListener("resize", debounce(() => { if (VIEW === "analysis") drawAnalysis(); }, 120));
+
+// ============================================================ chu thich khi re chuot (bieu do, o so lieu): phan tu co data-tip
+document.addEventListener("mouseover", e => {
+  const el = e.target.closest("[data-tip]"), tip = $("#vizTip");
+  if (!el) { tip.classList.add("hidden"); return; }
+  tip.innerHTML = el.dataset.tip; tip.classList.remove("hidden");
+  const r = el.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left + r.width / 2 - w / 2)) + "px";
+  tip.style.top = (r.top - h - 8 < 8 ? r.bottom + 8 : r.top - h - 8) + "px";
+});
+document.addEventListener("scroll", () => $("#vizTip").classList.add("hidden"), true);
+const pct0 = p => p == null ? "—" : Math.round(p * 100) + "%";
+
+// ============================================================ tu review khi job sang validation
+const RET = { tra_ve: ["fail", "Trả về annotation"], giu: ["pass", "Chờ reviewer"], chay: ["dang_chay", "Đang review"],
+  loi: ["fail", "Không trả về được"], loi_chay: ["loi", "Review lỗi"], xong: ["xong", "Đã review"] };
+let AUTO = { runs: [], st: null, filter: "" };
+function retOf(r) {                       // ket qua 1 lan tu review (ban cu chua luu 'returned' -> suy tu tham so + so loi)
+  if (r.status === "cho" || r.status === "dang_chay") return "chay";
+  if (r.status === "loi") return "loi_chay";
+  if (r.returned) return r.returned;
+  if (!(r.params || {}).auto_return) return "xong";
+  return (r.stats?.sure || 0) > 0 ? "tra_ve" : "giu";
+}
+async function loadAuto() {
+  let st, runs;
+  try { [st, runs] = await Promise.all([api("/api/auto/status"), api("/api/runs")]); }
+  catch (err) { $("#autoMsgTop").innerHTML = bad(err.message); return; }
+  AUTO.st = st;
+  AUTO.runs = runs.filter(r => r.source === "validation" || r.source === "webhook");
+  renderAutoStatus(st);
+  renderAuto();
+}
+function renderAutoStatus(st) {
+  const p = $("#autoPill");
+  p.className = "pill " + (st.enabled ? (st.error ? "fail" : "pass live") : "");
+  p.textContent = st.enabled ? (st.error ? "Lỗi khi hỏi CVAT" : `Đang theo dõi · ${st.connection || "kết nối mặc định"}`) : "Đang tắt";
+  const L = st.last;
+  $("#autoMsgTop").innerHTML = st.error ? bad("Lần hỏi CVAT gần nhất bị lỗi: " + st.error)
+    : !st.enabled ? `Chưa bật. Vào <a href="#" data-goto="settings">Cài đặt</a> → <b>Tự review khi job chuyển sang validation</b>, tick Bật rồi Lưu.`
+    : L ? `Lần kiểm tra gần nhất ${fmtTime(L.time)}: ${L.jobs} job đang ở validation${L.first ? " (lần đầu chỉ ghi nhận, không chạy job cũ)" : `, xếp ${L.started} lần review mới`}. ` +
+          `${st.auto_push ? "Tự đẩy lỗi chắc chắn lên CVAT" : "Không tự đẩy Issue"}${st.auto_return ? ", còn lỗi chắc chắn thì trả job về annotation" : ""}.`
+    : "Đang chờ lần kiểm tra đầu tiên (tối đa 60 giây).";
+  $("#autoCheckBtn").classList.toggle("hidden", !st.can_check || !st.enabled);
+}
+$("#autoCheckBtn").onclick = async () => {
+  const b = $("#autoCheckBtn"); b.disabled = true;
+  try { const r = await api("/api/auto/check", { method: "POST" }); await loadAuto(); $("#autoMsgTop").insertAdjacentHTML("afterbegin", ok(r.started.length ? `Đã xếp ${r.started.length} lần review mới. ` : "Không có job mới vào validation. ")); }
+  catch (err) { $("#autoMsgTop").innerHTML = bad(err.message); }
+  b.disabled = false;
+};
+$$("#autoFilter button").forEach(b => b.onclick = () => { $$("#autoFilter button").forEach(x => x.classList.toggle("on", x === b)); AUTO.filter = b.dataset.f; renderAuto(); });
+
+function renderAuto() {
+  const R_ = AUTO.runs, st = AUTO.st || {};
+  const byJob = new Map();
+  [...R_].sort((a, b) => a.id - b.id).forEach(r => { if (r.job_id == null) return; (byJob.get(r.job_id) || byJob.set(r.job_id, []).get(r.job_id)).push(r); });
+  const jobs = [...byJob.entries()].map(([job, rs]) => {
+    const done = rs.filter(r => r.status === "xong"), last = rs[rs.length - 1];
+    return { job, rs, done, last, ret: retOf(last), rounds: done.length, returned: done.filter(r => retOf(r) === "tra_ve").length };
+  }).sort((a, b) => b.last.id - a.last.id);
+  const done = R_.filter(r => r.status === "xong"), ret = done.filter(r => retOf(r) === "tra_ve").length, kept = done.filter(r => retOf(r) === "giu").length;
+  const issues = R_.reduce((a, r) => a + (r.pushed?.created || 0), 0);
+  const secs = done.map(r => r.stats?.giay).filter(Boolean);
+  const avgRounds = jobs.length ? jobs.reduce((a, j) => a + j.rounds, 0) / jobs.length : null;
+  // so tren so do luong
+  const n = (k, v, sub) => { const el = $(`#autoFlow em[data-n="${k}"]`); if (el) el.innerHTML = v == null ? "" : `<strong>${v}</strong>${sub ? " " + sub : ""}`; };
+  n("submitted", jobs.length, "job"); n("queue", (st.waiting || 0) + (st.current ? 1 : 0), "đang chờ / chạy"); n("runs", done.length, "lần review");
+  n("returned", ret, "lần"); n("kept", kept, "lần"); n("rounds", avgRounds == null ? null : avgRounds.toFixed(1), "vòng / job");
+  const k = (v, label, cls = "", tip = "") => `<div class="kpi ${cls}"${tip ? ` data-tip="${esc(tip)}"` : ""}><div class="v">${v}</div><div class="k">${label}</div></div>`;
+  $("#autoKpis").innerHTML =
+    k(jobs.length, "Job đã tự review") +
+    k(done.length, "Lần review tự động", "", "Mỗi lần annotator nộp validation là 1 lần.") +
+    k(done.length ? pct0(ret / done.length) : "—", "Lần bị trả về annotation", ret / Math.max(1, done.length) > .5 ? "warn" : "", "Lần review còn lỗi chắc chắn nên job bị trả về cho annotator sửa.") +
+    k(avgRounds == null ? "—" : avgRounds.toFixed(1), "Vòng review / job", "", "Số lần một job được review cho tới nay.") +
+    k(issues, "Issue tự đẩy lên CVAT") +
+    k(secs.length ? (secs.reduce((a, b) => a + b, 0) / secs.length / 60).toFixed(1) + "m" : "—", "Thời gian TB / lần review");
+  // bang job
+  const rows = jobs.filter(j => !AUTO.filter || j.ret === AUTO.filter);
+  $("#autoTable tbody").innerHTML = rows.map(j => {
+    const L = j.last, s = L.stats || {}, [cls, txt] = RET[j.ret] || ["", j.ret];
+    const trend = j.done.map((r, i) => `<span class="rnd ${r.pct != null && r.pct >= THR() ? "ok" : "low"}" data-tip="Vòng ${i + 1} · lần #${r.id}: ${pctTxt(r.pct)} box đúng · ${r.stats?.sure ?? 0} lỗi chắc, ${r.stats?.unsure ?? 0} đang xem xét">${pct0(r.pct)}</span>`).join('<svg class="ic rnd-arrow"><use href="#i-arrow"/></svg>');
+    return `<tr data-id="${L.id}"><td class="strong">${j.job}</td><td>${esc(L.task_name || (L.task_id ? "Task " + L.task_id : "—"))}</td><td>${esc(L.assignee || "—")}</td>
+      <td class="r">${j.rounds}</td><td><div class="rounds">${trend || '<span class="meta">—</span>'}</div></td>
+      <td class="r">${s.boxes !== undefined ? `<span class="${s.sure ? "err" : ""}">${s.sure}</span> / ${s.unsure}` : "—"}</td>
+      <td class="r">${L.pushed ? L.pushed.created + (L.pushed.kept ? " +" + L.pushed.kept : "") : "—"}</td>
+      <td><span class="pill ${cls}">${txt}</span></td><td class="meta">${fmtTime(L.finished || L.created)}</td></tr>`;
+  }).join("") || `<tr><td colspan="9" class="empty-row">${AUTO.runs.length ? "Không có job nào với bộ lọc này." : "Chưa có lần tự review nào. Bật ở <b>Cài đặt → Tự review khi job chuyển sang validation</b>, rồi cho annotator chuyển job sang validation."}</td></tr>`;
+  // cho reviewer
+  const wait = jobs.filter(j => j.ret === "giu");
+  $("#autoWaitList").innerHTML = wait.map(j => `<li data-id="${j.last.id}"><span class="wl-job">Job ${j.job}</span><span class="wl-who">${esc(j.last.assignee || "—")}</span>
+      <span class="tag ${j.last.stats?.unsure ? "s0" : "k"}">${j.last.stats?.unsure || 0} đang xem xét</span><svg class="ic"><use href="#i-arrow"/></svg></li>`).join("")
+    || `<li class="wl-empty">Không có job nào đang chờ reviewer.</li>`;
+  // annotator bi tra ve
+  const ppl = {};
+  jobs.forEach(j => { const a = j.last.assignee || "(chưa giao)"; const p = ppl[a] || (ppl[a] = { jobs: 0, ret: 0 }); p.jobs++; p.ret += j.returned; });
+  const top = Object.entries(ppl).filter(([, v]) => v.ret).sort((a, b) => b[1].ret - a[1].ret).slice(0, 8), mx = Math.max(1, ...top.map(x => x[1].ret));
+  $("#autoPeople").innerHTML = top.map(([a, v]) => `<div class="bar-row" data-tip="${esc(a)}: ${v.ret} lần bị trả về trên ${v.jobs} job"><span>${esc(a)}</span><span class="bar"><i style="width:${(v.ret / mx * 100).toFixed(1)}%"></i></span><span class="n">${v.ret}</span></div>`).join("")
+    || `<p class="empty-note">Chưa có job nào bị trả về.</p>`;
+}
+$("#autoTable tbody").addEventListener("click", e => { const tr = e.target.closest("tr[data-id]"); if (tr) openRun(+tr.dataset.id); });
+$("#autoWaitList").addEventListener("click", e => { const li = e.target.closest("li[data-id]"); if (li) openRun(+li.dataset.id); });
+
+// ============================================================ do tin cay cua tool (static/do_tin_cay.json, tao bang tao_do_tin_cay.py)
+let TRUST = null, TRUST_SET = "bdd";
+const COND_VI = { daytime: "Ban ngày", "dawn/dusk": "Bình minh / hoàng hôn", night: "Ban đêm", clear: "Trời quang", overcast: "U ám",
+  "partly cloudy": "Có mây", rainy: "Mưa", snowy: "Tuyết" };
+const SEG_VI = { "co lem vien": "Vẽ lẹm viền", "phinh ra nen": "Phình ra nền", "lech vi tri": "Lệch vị trí", "mat 1 phan vat": "Mất 1 phần vật", "ve tho (it diem)": "Vẽ thô (ít điểm)" };
+$$("#trustSet button").forEach(b => b.onclick = () => { $$("#trustSet button").forEach(x => x.classList.toggle("on", x === b)); TRUST_SET = b.dataset.s; renderTrust(); });
+async function loadTrust() {
+  if (!TRUST) {
+    try { const r = await fetch("do_tin_cay.json", { cache: "no-store" }); if (!r.ok) throw new Error(); TRUST = await r.json(); }
+    catch { $("#trustHero").innerHTML = `<p class="empty-note">Chưa có số đo. Chạy <code>review_eval.py --json</code> rồi <code>web_qc/tao_do_tin_cay.py</code> để tạo <code>static/do_tin_cay.json</code>.</p>`; return; }
+  }
+  renderTrust();
+}
+// 1 thanh chong: bat chac | dang xem xet | bo lot (cung 1 mau xanh dam -> nhat, bo lot xam)
+function stackBar(name, v, extra = "") {
+  const a = v.chac * 100, b = v.khong_chac * 100, c = Math.max(0, 100 - a - b);
+  const seg = (w, cls, t) => w > 0 ? `<i class="${cls}" style="width:${w.toFixed(2)}%" data-tip="<b>${esc(name)}</b><br>${t}: ${w.toFixed(1)}%${v.tong ? ` · ${Math.round(w * v.tong / 100)}/${v.tong} lỗi` : ""}"></i>` : "";
+  return `<div class="sb-row"><span class="sb-name">${esc(name)}${extra}</span><span class="sb-bar">${seg(a, "k1", "Bắt chắc chắn")}${seg(b, "k2", "Bắt, ghi Đang xem xét")}${seg(c, "k3", "Bỏ lọt")}</span><span class="sb-val">${Math.round(a + b)}%</span></div>`;
+}
+function renderTrust() {
+  const T = TRUST, D = T.bo_du_lieu[TRUST_SET] || Object.values(T.bo_du_lieu)[0];
+  if (!D) return;
+  const m = D.moi, o = D.cu;
+  const delta = (nv, ov, lowerBetter = false, fmt = pct0) => {
+    if (ov == null || nv == null) return "";
+    const better = lowerBetter ? nv < ov : nv > ov, same = Math.abs(nv - ov) < 1e-3;
+    return `<span class="delta ${same ? "" : better ? "up" : "down"}">trước: ${fmt(ov)}</span>`;
+  };
+  const f1 = v => v.toFixed(1);
+  $("#trustHero").innerHTML = `
+    <div class="hero-tile main" data-tip="Annotator mắc 100 lỗi thì tool tìm ra bao nhiêu (gồm cả lỗi ghi Đang xem xét)."><span class="hero-k">Bắt được lỗi</span><span class="hero-v">${pct0(m.bat)}</span><span class="hero-s">${pct0(m.bat_chac)} bắt chắc chắn ${delta(m.bat, o?.bat)}</span></div>
+    <div class="hero-tile" data-tip="Tool ghi 100 Issue lỗi chắc chắn thì bao nhiêu cái đúng là lỗi thật."><span class="hero-k">Issue chắc chắn đúng</span><span class="hero-v">${pct0(m.issue_chac_dung)}</span><span class="hero-s">${delta(m.issue_chac_dung, o?.issue_chac_dung)}</span></div>
+    <div class="hero-tile" data-tip="Review nhãn hoàn toàn đúng: cứ 100 box thì tool ghi nhầm bao nhiêu lỗi chắc chắn. Càng thấp càng tốt."><span class="hero-k">Báo nhầm / 100 box đúng</span><span class="hero-v">${f1(m.bao_nham_chac)}</span><span class="hero-s">+ ${f1(m.bao_nham_kc)} mục Đang xem xét ${delta(m.bao_nham_chac, o?.bao_nham_chac, true, f1)}</span></div>
+    <div class="hero-tile" data-tip="Ảnh tool nói không có lỗi: bao nhiêu % thật sự sạch."><span class="hero-k">Tool nói "sạch" thì đúng</span><span class="hero-v">${pct0(m.sach_dung)}</span><span class="hero-s">${D.ten} · ${m.anh} ảnh · ${m.box.toLocaleString("vi-VN")} box · ${m.loi_cai} lỗi cài</span></div>`;
+  // theo loai loi
+  const types = Object.entries(m.theo_loai).sort((a, b) => (b[1].chac + b[1].khong_chac) - (a[1].chac + a[1].khong_chac));
+  $("#trustTypeMeta").textContent = `${D.ten} · ${m.loi_cai} lỗi cài vào`;
+  $("#trustTypes").innerHTML = `<div class="legend-inline"><span><i class="key k1"></i>Bắt chắc chắn</span><span><i class="key k2"></i>Bắt, ghi "Đang xem xét"</span><span><i class="key k3"></i>Bỏ lọt</span></div>` +
+    types.map(([n, v]) => stackBar(n, v, ` <em>${v.tong}</em>`)).join("");
+  $("#trustTypesTbl").innerHTML = `<table class="tbl"><thead><tr><th>Loại lỗi</th><th class="r">Số lỗi</th><th class="r">Bắt chắc</th><th class="r">Đang xem xét</th><th class="r">Bỏ lọt</th></tr></thead><tbody>` +
+    types.map(([n, v]) => `<tr><td>${esc(n)}</td><td class="r">${v.tong}</td><td class="r">${pctTxt(v.chac)}</td><td class="r">${pctTxt(v.khong_chac)}</td><td class="r">${pctTxt(1 - v.chac - v.khong_chac)}</td></tr>`).join("") + `</tbody></table>`;
+  // truoc / sau
+  const rowsC = [["Bắt được lỗi", o?.bat, m.bat, 1, pct0, false], ["Issue chắc chắn đúng", o?.issue_chac_dung, m.issue_chac_dung, 1, pct0, false],
+    ["Báo nhầm chắc chắn / 100 box", o?.bao_nham_chac, m.bao_nham_chac, Math.max(o?.bao_nham_chac || 0, m.bao_nham_chac, 1), f1, true]];
+  $("#trustCompare").innerHTML = o ? rowsC.map(([n, a, b, mx, fmt, low]) => `<div class="pb-row"><span class="pb-name">${n}${low ? ' <em>càng thấp càng tốt</em>' : ""}</span>
+      <span class="pb-bars"><span class="pb-line"><i class="k-old" style="width:${(a / mx * 100).toFixed(1)}%" data-tip="Bản cũ · ${n}: ${fmt(a)}"></i><b>${fmt(a)}</b></span>
+      <span class="pb-line"><i class="k1" style="width:${(b / mx * 100).toFixed(1)}%" data-tip="Bản mới · ${n}: ${fmt(b)}"></i><b>${fmt(b)}</b></span></span></div>`).join("")
+    : `<p class="empty-note">Chưa có số đo bản cũ cho bộ này.</p>`;
+  // theo dieu kien
+  const cond = (T.dieu_kien?.moi) || {}, condOld = (T.dieu_kien?.cu) || {};
+  $("#trustCondPanel").classList.toggle("hidden", TRUST_SET !== "bdd" || !Object.keys(cond).length);
+  const groups = [["Thời điểm", ["daytime", "dawn/dusk", "night"]], ["Thời tiết", ["clear", "partly cloudy", "overcast", "rainy", "snowy"]]];
+  $("#trustCond").innerHTML = groups.map(([g, keys]) => `<div class="cond-col"><h3>${g}</h3>` + keys.filter(k => cond[k]).map(k => {
+    const c = cond[k], co = condOld[k];
+    return `<div class="cond-row" data-tip="<b>${COND_VI[k]}</b> · ${c.anh} ảnh<br>Bắt được ${pctTxt(c.bat)} (chắc chắn ${pctTxt(c.bat_chac)})<br>Báo nhầm chắc chắn ${c.bao_nham_chac.toFixed(1)} / 100 box${co ? `<br>Bản cũ: bắt ${pctTxt(co.bat)}, báo nhầm ${co.bao_nham_chac.toFixed(1)}` : ""}">
+      <span class="cr-name">${COND_VI[k] || k}<em>${c.anh} ảnh</em></span>
+      <span class="cr-bar"><i class="k1" style="width:${(c.bat_chac * 100).toFixed(1)}%"></i><i class="k2" style="width:${((c.bat - c.bat_chac) * 100).toFixed(1)}%"></i></span>
+      <span class="cr-val">${pct0(c.bat)}</span><span class="cr-fp">${c.bao_nham_chac.toFixed(1)}<em>nhầm/100</em></span></div>`;
+  }).join("") + `</div>`).join("");
+  // segmentation
+  const S = T.seg;
+  if (S) {
+    $("#trustSegMeta").textContent = `COCO val2017 · ${S.anh} ảnh · ${S.polygon} polygon người vẽ · ${S.loi_cai} lỗi cài · bắt ${pct0(S.bat)} · báo nhầm ${S.bao_nham_chac.toFixed(1)} / 100 polygon`;
+    $("#trustSeg").innerHTML = Object.entries(S.theo_loai).sort((a, b) => (b[1].chac + b[1].khong_chac) - (a[1].chac + a[1].khong_chac))
+      .map(([n, v]) => stackBar(SEG_VI[n] || n, v, ` <em>${v.tong}</em>`)).join("");
+  }
+  // e2e tren CVAT
+  const E = T.e2e || {}, NAME = { bdd: "Job BDD100K: box + polygon, 10 lỗi cài", id: "Lỗi ID của track", track: "Job video gán bằng Track" };
+  $("#trustE2e").innerHTML = Object.entries(E).map(([k, v]) => `<li class="${v.dat === v.tong ? "ok" : "bad"}"><svg class="ic"><use href="#i-check"/></svg>
+      <div><b>${NAME[k] || k}</b><span>${v.dat}/${v.tong} kịch bản đạt${v.hieu_qua != null ? ` · % Issue đúng (annotator sửa theo) ${pct0(v.hieu_qua)}` : ""} · chạy ${v.ngay}</span>
+      <small>${Object.entries(v.chi_tiet).map(([n, okv]) => `${okv ? "✓" : "✗"} ${esc(n.replace(/^E\d+_/, "").replace(/_/g, " "))}`).join(" · ")}</small></div></li>`).join("") || `<li class="wl-empty">Chưa có kết quả test trên CVAT.</li>`;
+  $("#trustDate").textContent = `Số đo cập nhật ${T.ngay}. Đánh giá lại: chạy review_eval.py --json cho từng bộ rồi tao_do_tin_cay.py.`;
+}
 
 start();

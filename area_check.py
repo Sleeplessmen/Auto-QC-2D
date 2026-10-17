@@ -28,14 +28,27 @@ MIN_FRAC = 0.012        # vung loi nho hon (ti le dien tich anh) -> bo qua
 SURE_FRAC = 0.03        # lon hon -> loi chac chan
 DUP_AREA = 0.6          # 2 polygon cung nhan: phan giao / polygon nho >= muc nay -> trung
 MASK_BOX_IOU = 0.7
+# quy uoc job: 1 vat vua co box vua co polygon/mask la
+#   "trung" -> loi trung (job chi can 1 trong 2)
+#   "cap"   -> binh thuong (instance segmentation: box + polygon cho moi vat; rule_tier kiem polygon nam trong box)
+MASK_WITH_BOX = "trung"
 
 
 def road_labels(label_names):
     return [n for n in label_names if norm(n) in ROAD_SYN or any(s in norm(n) for s in ("drivable", "road"))]
 
 
+def _pbox(k):
+    p = [float(v) for v in k["points"]]
+    if k.get("type") == "mask":
+        return [p[-4], p[-3], p[-2] + 1, p[-1] + 1]
+    return [min(p[0::2]), min(p[1::2]), max(p[0::2]), max(p[1::2])]
+
+
 def areas_from_cvat(ann, id2label, frames, W_H):
-    """{frame: [dict(id, label, kind, mask(bool HxW), box)]} — polygon + mask (shape, khong track)."""
+    """{frame: [dict(id, label, kind, mask(bool HxW) | None, box, keyframe)]} — polygon + mask cua shape VA track.
+    Track: keyframe (khung annotator tu ve) co mask day du de cham vien. Khung noi suy chi co box uoc luong (mask=None):
+    CVAT tu sinh hinh o do nen khong cham vien, nhung van tinh la vat da co nhan (tool khong bao 'thieu' oan)."""
     want = set(frames)
     per = {f: [] for f in frames}
     for s in ann.get("shapes", []):
@@ -49,7 +62,36 @@ def areas_from_cvat(ann, id2label, frames, W_H):
             continue
         ys, xs = np.nonzero(m)
         per[s["frame"]].append(dict(id=f"shape {s['id']}", label=id2label[s["label_id"]], kind=s["type"], mask=m,
-                                    box=[float(xs.min()), float(ys.min()), float(xs.max() + 1), float(ys.max() + 1)]))
+                                    box=[float(xs.min()), float(ys.min()), float(xs.max() + 1), float(ys.max() + 1)],
+                                    points=s["points"] if s["type"] == "polygon" else None, keyframe=True))
+    for t in ann.get("tracks", []):
+        if t["label_id"] not in id2label:
+            continue
+        ks = sorted([k for k in t.get("shapes", []) if k.get("type") in ("polygon", "mask")], key=lambda k: k["frame"])
+        if not ks:
+            continue
+        lb = id2label[t["label_id"]]
+        for f in frames:
+            prev = [k for k in ks if k["frame"] <= f]
+            if not prev or prev[-1].get("outside"):
+                continue
+            k = prev[-1]
+            if k["frame"] == f:                     # keyframe: hinh annotator ve that
+                W, H = W_H.get(f) or (None, None)
+                m = _to_mask(dict(type=k["type"], points=k["points"]), W, H) if W and H else None
+                if m is None or not m.any():
+                    continue
+                ys, xs = np.nonzero(m)
+                per[f].append(dict(id=f"track {t['id']}", label=lb, kind=k["type"], mask=m, keyframe=True,
+                                   box=[float(xs.min()), float(ys.min()), float(xs.max() + 1), float(ys.max() + 1)],
+                                   points=k["points"] if k["type"] == "polygon" else None))
+            else:                                   # khung noi suy: box noi suy tuyen tinh giua 2 keyframe
+                b0, nxt = _pbox(k), [x for x in ks if x["frame"] > f]
+                if nxt and not nxt[0].get("outside"):
+                    r = (f - k["frame"]) / (nxt[0]["frame"] - k["frame"])
+                    b0 = [p + r * (q - p) for p, q in zip(b0, _pbox(nxt[0]))]
+                per[f].append(dict(id=f"track {t['id']}", label=lb, kind=k["type"], mask=None, keyframe=False,
+                                   box=b0, points=None))
     return per
 
 
@@ -158,6 +200,7 @@ def outline(mask, max_pts=60):
 def check(areas, boxes, img, seg, road_names):
     """areas: [dict(id,label,kind,mask,box)] cua 1 frame. boxes: box nguoi gan (dict id,label,box). seg: RoadSeg | None."""
     out = []
+    areas = [a for a in areas if a.get("mask") is not None]     # khung noi suy cua track: khong co hinh that
     H, W = img.shape[:2]
     N = H * W
     road_set = set(road_names)
@@ -179,9 +222,9 @@ def check(areas, boxes, img, seg, road_names):
                                 poly=outline(small["mask"]),
                                 msg=f"Trùng: vùng '{small['label']}' này nằm đè lên vùng khác, xoá vùng này."))
 
-    # trung: mask / polygon va box cung nhan tren 1 vat
+    # trung: mask / polygon va box cung nhan tren 1 vat (chi khi quy uoc job khong dung cap box + polygon)
     for a in areas:
-        if a["label"] in road_set:
+        if a["label"] in road_set or MASK_WITH_BOX == "cap":
             continue
         for b in boxes:
             if b["label"] == a["label"] and _iou(a["box"], b["box"]) >= MASK_BOX_IOU:

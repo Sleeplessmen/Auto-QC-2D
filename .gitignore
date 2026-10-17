@@ -24,3 +24,5 @@ __pycache__/
 *.pyc
 venv/
 .venv/
+
+kiem_thu/ket_qua/

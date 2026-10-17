@@ -1,0 +1,51 @@
+# File luat cho web QC (trang Guideline -> tai GUIDELINE_BDD100K.md len, roi dan file nay vao o "File luat").
+# Muc nao de trong thi tool tu doc theo chu trong guideline.
+nhan:
+  pedestrian:
+    loai_tool: person
+    dong_nghia: [nguoi di bo, person]
+    thuoc_tinh_bat_buoc: []
+    muc: "2"
+  rider:                      # khong dat loai_tool: tool tu hieu "rider" = nguoi tren xe 2 banh
+    dong_nghia: [nguoi lai, nguoi lai xe]
+    muc: "3.3"
+  car:
+    loai_tool: car
+    dong_nghia: [o to, xe con]
+    muc: "2"
+  truck:
+    loai_tool: truck
+    dong_nghia: [xe tai]
+    muc: "2"
+  bus:
+    loai_tool: bus
+    dong_nghia: [xe buyt, xe khach]
+    muc: "2"
+  train:                      # tool chua co model cho tau: chi kiem theo luat (ra ngoai anh, polygon hong...)
+    muc: "2"
+  motorcycle:
+    loai_tool: motorcycle
+    dong_nghia: [xe may]
+    ti_le_rong_cao: [0.25, 4.0]
+    muc: "2"
+  bicycle:
+    loai_tool: bicycle
+    dong_nghia: [xe dap]
+    muc: "2"
+  traffic light:
+    thuoc_tinh_bat_buoc: [trafficLightColor]
+    muc: "6.1"
+  traffic sign:
+    muc: "2"
+  image_info:
+    thuoc_tinh_bat_buoc: [weather, scene, timeofday]
+    muc: "5.1"
+quy_tac:
+  kieu_nhan: shape            # anh roi -> moi vat la Shape, Track bi bao loi (muc 1.2)
+  polygon_kem_box: cap        # instance segmentation: moi vat box + polygon (muc 1.3)
+  toan_bo_vat: false          # chi ve phan nhin thay (muc 3.1)
+  nguoi_lai_co_box_rieng: true
+  box_ra_ngoai_anh_px: 2
+  khong_bat_buoc_duoi_px: 10  # vat canh ngan < 10 px khong bat buoc gan, da gan van hop le (muc 3.5a, chot 2026-10-17)
+  nhan_ngoai_guideline: true  # nhan khong co trong guideline -> loi
+  muc_chung: "1"

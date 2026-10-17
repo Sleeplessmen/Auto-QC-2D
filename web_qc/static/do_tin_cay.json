@@ -1,0 +1,876 @@
+{
+ "ngay": "2026-10-17",
+ "bo_du_lieu": {
+  "bdd": {
+   "ten": "BDD100K (335 ảnh giữ riêng, vật từ 10 px)",
+   "moi": {
+    "anh": 335,
+    "box": 4280,
+    "loi_cai": 916,
+    "bat": 0.7740174672489083,
+    "bat_chac": 0.36026200873362446,
+    "bao_nham_chac": 1.4485981308411215,
+    "bao_nham_kc": 18.714953271028037,
+    "issue_chac_dung": 0.8418367346938775,
+    "sach_dung": 0.9636363636363636,
+    "theo_loai": {
+     "Thừa": {
+      "tong": 136,
+      "chac": 0.22058823529411764,
+      "khong_chac": 0.6838235294117647
+     },
+     "Sai kích thước": {
+      "tong": 255,
+      "chac": 0.40784313725490196,
+      "khong_chac": 0.41568627450980394
+     },
+     "Thiếu": {
+      "tong": 287,
+      "chac": 0.3240418118466899,
+      "khong_chac": 0.36585365853658536
+     },
+     "Trùng": {
+      "tong": 52,
+      "chac": 0.9615384615384616,
+      "khong_chac": 0.019230769230769232
+     },
+     "Sai nhãn": {
+      "tong": 186,
+      "chac": 0.2849462365591398,
+      "khong_chac": 0.3978494623655914
+     }
+    }
+   },
+   "cu": {
+    "anh": 335,
+    "box": 4280,
+    "loi_cai": 916,
+    "bat": 0.74235807860262,
+    "bat_chac": 0.42467248908296945,
+    "bao_nham_chac": 3.9953271028037385,
+    "bao_nham_kc": 11.542056074766355,
+    "issue_chac_dung": 0.6946428571428571,
+    "sach_dung": 0.9629629629629629,
+    "theo_loai": {
+     "Thừa": {
+      "tong": 136,
+      "chac": 0.22058823529411764,
+      "khong_chac": 0.6838235294117647
+     },
+     "Sai kích thước": {
+      "tong": 255,
+      "chac": 0.5294117647058824,
+      "khong_chac": 0.29411764705882354
+     },
+     "Thiếu": {
+      "tong": 287,
+      "chac": 0.3554006968641115,
+      "khong_chac": 0.24738675958188153
+     },
+     "Trùng": {
+      "tong": 52,
+      "chac": 0.9423076923076923,
+      "khong_chac": 0.0
+     },
+     "Sai nhãn": {
+      "tong": 186,
+      "chac": 0.3924731182795699,
+      "khong_chac": 0.27956989247311825
+     }
+    }
+   }
+  },
+  "vn": {
+   "ten": "Ảnh đường phố Việt Nam (123 ảnh D:\\DATA)",
+   "moi": {
+    "anh": 123,
+    "box": 1804,
+    "loi_cai": 433,
+    "bat": 0.7043879907621247,
+    "bat_chac": 0.3856812933025404,
+    "bao_nham_chac": 0.6651884700665188,
+    "bao_nham_kc": 6.208425720620843,
+    "issue_chac_dung": 0.9329608938547486,
+    "sach_dung": 0.8923076923076924,
+    "theo_loai": {
+     "Trùng": {
+      "tong": 29,
+      "chac": 0.5517241379310345,
+      "khong_chac": 0.034482758620689655
+     },
+     "Thiếu": {
+      "tong": 142,
+      "chac": 0.38028169014084506,
+      "khong_chac": 0.23943661971830985
+     },
+     "Sai kích thước": {
+      "tong": 131,
+      "chac": 0.3816793893129771,
+      "khong_chac": 0.4122137404580153
+     },
+     "Sai nhãn": {
+      "tong": 80,
+      "chac": 0.3875,
+      "khong_chac": 0.2625
+     },
+     "Thừa": {
+      "tong": 51,
+      "chac": 0.3137254901960784,
+      "khong_chac": 0.5490196078431373
+     }
+    }
+   },
+   "cu": {
+    "anh": 123,
+    "box": 1804,
+    "loi_cai": 433,
+    "bat": 0.6905311778290993,
+    "bat_chac": 0.48498845265588914,
+    "bao_nham_chac": 0.8314855875831485,
+    "bao_nham_kc": 1.9401330376940134,
+    "issue_chac_dung": 0.9333333333333333,
+    "sach_dung": 0.9175257731958762,
+    "theo_loai": {
+     "Trùng": {
+      "tong": 29,
+      "chac": 0.5517241379310345,
+      "khong_chac": 0.0
+     },
+     "Thiếu": {
+      "tong": 142,
+      "chac": 0.4225352112676056,
+      "khong_chac": 0.16901408450704225
+     },
+     "Sai kích thước": {
+      "tong": 131,
+      "chac": 0.6335877862595419,
+      "khong_chac": 0.16030534351145037
+     },
+     "Sai nhãn": {
+      "tong": 80,
+      "chac": 0.4375,
+      "khong_chac": 0.2
+     },
+     "Thừa": {
+      "tong": 51,
+      "chac": 0.3137254901960784,
+      "khong_chac": 0.5490196078431373
+     }
+    }
+   }
+  }
+ },
+ "dieu_kien": {
+  "moi": {
+   "dawn/dusk": {
+    "anh": 112,
+    "box": 1503,
+    "loi_cai": 286,
+    "bat": 0.8041958041958042,
+    "bat_chac": 0.4825174825174825,
+    "bao_nham_chac": 1.2641383898868928,
+    "bao_nham_kc": 15.103127079174982,
+    "issue_chac_dung": 0.8789808917197452,
+    "sach_dung": 0.9666666666666667,
+    "theo_loai": {
+     "Thừa": {
+      "tong": 42,
+      "chac": 0.21428571428571427,
+      "khong_chac": 0.6904761904761905
+     },
+     "Sai kích thước": {
+      "tong": 79,
+      "chac": 0.569620253164557,
+      "khong_chac": 0.2911392405063291
+     },
+     "Thiếu": {
+      "tong": 92,
+      "chac": 0.44565217391304346,
+      "khong_chac": 0.2717391304347826
+     },
+     "Trùng": {
+      "tong": 19,
+      "chac": 1.0,
+      "khong_chac": 0.0
+     },
+     "Sai nhãn": {
+      "tong": 54,
+      "chac": 0.4444444444444444,
+      "khong_chac": 0.2777777777777778
+     }
+    }
+   },
+   "daytime": {
+    "anh": 134,
+    "box": 1839,
+    "loi_cai": 389,
+    "bat": 0.7994858611825193,
+    "bat_chac": 0.34704370179948585,
+    "bao_nham_chac": 1.5225666122892878,
+    "bao_nham_kc": 18.92332789559543,
+    "issue_chac_dung": 0.8282208588957055,
+    "sach_dung": 1.0,
+    "theo_loai": {
+     "Sai nhãn": {
+      "tong": 82,
+      "chac": 0.2682926829268293,
+      "khong_chac": 0.45121951219512196
+     },
+     "Sai kích thước": {
+      "tong": 101,
+      "chac": 0.43564356435643564,
+      "khong_chac": 0.40594059405940597
+     },
+     "Thiếu": {
+      "tong": 132,
+      "chac": 0.30303030303030304,
+      "khong_chac": 0.4318181818181818
+     },
+     "Thừa": {
+      "tong": 57,
+      "chac": 0.22807017543859648,
+      "khong_chac": 0.7017543859649122
+     },
+     "Trùng": {
+      "tong": 17,
+      "chac": 0.9411764705882353,
+      "khong_chac": 0.058823529411764705
+     }
+    }
+   },
+   "night": {
+    "anh": 89,
+    "box": 938,
+    "loi_cai": 241,
+    "bat": 0.6970954356846473,
+    "bat_chac": 0.23651452282157676,
+    "bao_nham_chac": 1.5991471215351813,
+    "bao_nham_kc": 24.093816631130064,
+    "issue_chac_dung": 0.7916666666666666,
+    "sach_dung": 0.875,
+    "theo_loai": {
+     "Sai kích thước": {
+      "tong": 75,
+      "chac": 0.2,
+      "khong_chac": 0.56
+     },
+     "Thiếu": {
+      "tong": 63,
+      "chac": 0.19047619047619047,
+      "khong_chac": 0.36507936507936506
+     },
+     "Sai nhãn": {
+      "tong": 50,
+      "chac": 0.14,
+      "khong_chac": 0.44
+     },
+     "Thừa": {
+      "tong": 37,
+      "chac": 0.21621621621621623,
+      "khong_chac": 0.6486486486486487
+     },
+     "Trùng": {
+      "tong": 16,
+      "chac": 0.9375,
+      "khong_chac": 0.0
+     }
+    }
+   },
+   "clear": {
+    "anh": 85,
+    "box": 1057,
+    "loi_cai": 222,
+    "bat": 0.7657657657657657,
+    "bat_chac": 0.2972972972972973,
+    "bao_nham_chac": 1.4191106906338695,
+    "bao_nham_kc": 19.867549668874172,
+    "issue_chac_dung": 0.8148148148148148,
+    "sach_dung": 1.0,
+    "theo_loai": {
+     "Sai nhãn": {
+      "tong": 52,
+      "chac": 0.2692307692307692,
+      "khong_chac": 0.4807692307692308
+     },
+     "Thiếu": {
+      "tong": 64,
+      "chac": 0.234375,
+      "khong_chac": 0.390625
+     },
+     "Sai kích thước": {
+      "tong": 55,
+      "chac": 0.2545454545454545,
+      "khong_chac": 0.5454545454545454
+     },
+     "Thừa": {
+      "tong": 37,
+      "chac": 0.24324324324324326,
+      "khong_chac": 0.6486486486486487
+     },
+     "Trùng": {
+      "tong": 14,
+      "chac": 1.0,
+      "khong_chac": 0.0
+     }
+    }
+   },
+   "overcast": {
+    "anh": 53,
+    "box": 756,
+    "loi_cai": 157,
+    "bat": 0.8280254777070064,
+    "bat_chac": 0.445859872611465,
+    "bao_nham_chac": 0.7936507936507936,
+    "bao_nham_kc": 15.343915343915343,
+    "issue_chac_dung": 0.9210526315789473,
+    "sach_dung": 0.9333333333333333,
+    "theo_loai": {
+     "Thừa": {
+      "tong": 21,
+      "chac": 0.23809523809523808,
+      "khong_chac": 0.7142857142857143
+     },
+     "Sai kích thước": {
+      "tong": 44,
+      "chac": 0.4318181818181818,
+      "khong_chac": 0.4772727272727273
+     },
+     "Thiếu": {
+      "tong": 52,
+      "chac": 0.4807692307692308,
+      "khong_chac": 0.3076923076923077
+     },
+     "Trùng": {
+      "tong": 8,
+      "chac": 1.0,
+      "khong_chac": 0.0
+     },
+     "Sai nhãn": {
+      "tong": 32,
+      "chac": 0.40625,
+      "khong_chac": 0.25
+     }
+    }
+   },
+   "partly cloudy": {
+    "anh": 60,
+    "box": 875,
+    "loi_cai": 156,
+    "bat": 0.8397435897435898,
+    "bat_chac": 0.3782051282051282,
+    "bao_nham_chac": 1.8285714285714287,
+    "bao_nham_kc": 15.771428571428572,
+    "issue_chac_dung": 0.7866666666666666,
+    "sach_dung": 1.0,
+    "theo_loai": {
+     "Sai kích thước": {
+      "tong": 44,
+      "chac": 0.5454545454545454,
+      "khong_chac": 0.3181818181818182
+     },
+     "Sai nhãn": {
+      "tong": 24,
+      "chac": 0.2916666666666667,
+      "khong_chac": 0.5416666666666666
+     },
+     "Thiếu": {
+      "tong": 60,
+      "chac": 0.2833333333333333,
+      "khong_chac": 0.4666666666666667
+     },
+     "Thừa": {
+      "tong": 20,
+      "chac": 0.15,
+      "khong_chac": 0.85
+     },
+     "Trùng": {
+      "tong": 8,
+      "chac": 1.0,
+      "khong_chac": 0.0
+     }
+    }
+   },
+   "rainy": {
+    "anh": 83,
+    "box": 980,
+    "loi_cai": 216,
+    "bat": 0.7453703703703703,
+    "bat_chac": 0.37962962962962965,
+    "bao_nham_chac": 1.4285714285714286,
+    "bao_nham_kc": 19.897959183673468,
+    "issue_chac_dung": 0.8541666666666666,
+    "sach_dung": 1.0,
+    "theo_loai": {
+     "Sai kích thước": {
+      "tong": 64,
+      "chac": 0.5,
+      "khong_chac": 0.359375
+     },
+     "Thiếu": {
+      "tong": 64,
+      "chac": 0.328125,
+      "khong_chac": 0.265625
+     },
+     "Sai nhãn": {
+      "tong": 43,
+      "chac": 0.3023255813953488,
+      "khong_chac": 0.37209302325581395
+     },
+     "Trùng": {
+      "tong": 11,
+      "chac": 1.0,
+      "khong_chac": 0.0
+     },
+     "Thừa": {
+      "tong": 34,
+      "chac": 0.14705882352941177,
+      "khong_chac": 0.6764705882352942
+     }
+    }
+   },
+   "snowy": {
+    "anh": 54,
+    "box": 612,
+    "loi_cai": 165,
+    "bat": 0.7090909090909091,
+    "bat_chac": 0.3212121212121212,
+    "bao_nham_chac": 1.7973856209150325,
+    "bao_nham_kc": 23.202614379084967,
+    "issue_chac_dung": 0.828125,
+    "sach_dung": 0.8571428571428571,
+    "theo_loai": {
+     "Thiếu": {
+      "tong": 47,
+      "chac": 0.3191489361702128,
+      "khong_chac": 0.40425531914893614
+     },
+     "Sai nhãn": {
+      "tong": 35,
+      "chac": 0.17142857142857143,
+      "khong_chac": 0.34285714285714286
+     },
+     "Thừa": {
+      "tong": 24,
+      "chac": 0.3333333333333333,
+      "khong_chac": 0.5833333333333334
+     },
+     "Sai kích thước": {
+      "tong": 48,
+      "chac": 0.3125,
+      "khong_chac": 0.375
+     },
+     "Trùng": {
+      "tong": 11,
+      "chac": 0.8181818181818182,
+      "khong_chac": 0.09090909090909091
+     }
+    }
+   }
+  },
+  "cu": {
+   "dawn/dusk": {
+    "anh": 112,
+    "box": 1503,
+    "loi_cai": 286,
+    "bat": 0.7762237762237763,
+    "bat_chac": 0.541958041958042,
+    "bao_nham_chac": 3.592814371257485,
+    "bao_nham_kc": 8.84896872920825,
+    "issue_chac_dung": 0.7416267942583732,
+    "sach_dung": 0.972972972972973,
+    "theo_loai": {
+     "Thừa": {
+      "tong": 42,
+      "chac": 0.21428571428571427,
+      "khong_chac": 0.6904761904761905
+     },
+     "Sai kích thước": {
+      "tong": 79,
+      "chac": 0.6835443037974683,
+      "khong_chac": 0.17721518987341772
+     },
+     "Thiếu": {
+      "tong": 92,
+      "chac": 0.4673913043478261,
+      "khong_chac": 0.17391304347826086
+     },
+     "Trùng": {
+      "tong": 19,
+      "chac": 1.0,
+      "khong_chac": 0.0
+     },
+     "Sai nhãn": {
+      "tong": 54,
+      "chac": 0.5555555555555556,
+      "khong_chac": 0.14814814814814814
+     }
+    }
+   },
+   "daytime": {
+    "anh": 134,
+    "box": 1839,
+    "loi_cai": 389,
+    "bat": 0.7712082262210797,
+    "bat_chac": 0.42159383033419023,
+    "bao_nham_chac": 4.4589450788472,
+    "bao_nham_kc": 10.54921152800435,
+    "issue_chac_dung": 0.6666666666666666,
+    "sach_dung": 1.0,
+    "theo_loai": {
+     "Sai nhãn": {
+      "tong": 82,
+      "chac": 0.4146341463414634,
+      "khong_chac": 0.3048780487804878
+     },
+     "Sai kích thước": {
+      "tong": 101,
+      "chac": 0.5544554455445545,
+      "khong_chac": 0.2871287128712871
+     },
+     "Thiếu": {
+      "tong": 132,
+      "chac": 0.3409090909090909,
+      "khong_chac": 0.3181818181818182
+     },
+     "Thừa": {
+      "tong": 57,
+      "chac": 0.22807017543859648,
+      "khong_chac": 0.7017543859649122
+     },
+     "Trùng": {
+      "tong": 17,
+      "chac": 0.9411764705882353,
+      "khong_chac": 0.0
+     }
+    }
+   },
+   "night": {
+    "anh": 89,
+    "box": 938,
+    "loi_cai": 241,
+    "bat": 0.6556016597510373,
+    "bat_chac": 0.29045643153526973,
+    "bao_nham_chac": 3.731343283582089,
+    "bao_nham_kc": 17.803837953091683,
+    "issue_chac_dung": 0.6666666666666666,
+    "sach_dung": 0.8666666666666667,
+    "theo_loai": {
+     "Sai kích thước": {
+      "tong": 75,
+      "chac": 0.3333333333333333,
+      "khong_chac": 0.4266666666666667
+     },
+     "Thiếu": {
+      "tong": 63,
+      "chac": 0.2222222222222222,
+      "khong_chac": 0.20634920634920634
+     },
+     "Sai nhãn": {
+      "tong": 50,
+      "chac": 0.18,
+      "khong_chac": 0.38
+     },
+     "Thừa": {
+      "tong": 37,
+      "chac": 0.21621621621621623,
+      "khong_chac": 0.6486486486486487
+     },
+     "Trùng": {
+      "tong": 16,
+      "chac": 0.875,
+      "khong_chac": 0.0
+     }
+    }
+   },
+   "clear": {
+    "anh": 85,
+    "box": 1057,
+    "loi_cai": 222,
+    "bat": 0.7342342342342343,
+    "bat_chac": 0.36486486486486486,
+    "bao_nham_chac": 4.635761589403973,
+    "bao_nham_kc": 13.055818353831599,
+    "issue_chac_dung": 0.6230769230769231,
+    "sach_dung": 1.0,
+    "theo_loai": {
+     "Sai nhãn": {
+      "tong": 52,
+      "chac": 0.38461538461538464,
+      "khong_chac": 0.36538461538461536
+     },
+     "Thiếu": {
+      "tong": 64,
+      "chac": 0.265625,
+      "khong_chac": 0.25
+     },
+     "Sai kích thước": {
+      "tong": 55,
+      "chac": 0.38181818181818183,
+      "khong_chac": 0.41818181818181815
+     },
+     "Thừa": {
+      "tong": 37,
+      "chac": 0.24324324324324326,
+      "khong_chac": 0.6486486486486487
+     },
+     "Trùng": {
+      "tong": 14,
+      "chac": 1.0,
+      "khong_chac": 0.0
+     }
+    }
+   },
+   "overcast": {
+    "anh": 53,
+    "box": 756,
+    "loi_cai": 157,
+    "bat": 0.802547770700637,
+    "bat_chac": 0.5031847133757962,
+    "bao_nham_chac": 2.91005291005291,
+    "bao_nham_kc": 8.068783068783068,
+    "issue_chac_dung": 0.7821782178217822,
+    "sach_dung": 0.9444444444444444,
+    "theo_loai": {
+     "Thừa": {
+      "tong": 21,
+      "chac": 0.23809523809523808,
+      "khong_chac": 0.7142857142857143
+     },
+     "Sai kích thước": {
+      "tong": 44,
+      "chac": 0.5454545454545454,
+      "khong_chac": 0.36363636363636365
+     },
+     "Thiếu": {
+      "tong": 52,
+      "chac": 0.5192307692307693,
+      "khong_chac": 0.21153846153846154
+     },
+     "Trùng": {
+      "tong": 8,
+      "chac": 1.0,
+      "khong_chac": 0.0
+     },
+     "Sai nhãn": {
+      "tong": 32,
+      "chac": 0.46875,
+      "khong_chac": 0.15625
+     }
+    }
+   },
+   "partly cloudy": {
+    "anh": 60,
+    "box": 875,
+    "loi_cai": 156,
+    "bat": 0.8141025641025641,
+    "bat_chac": 0.4551282051282051,
+    "bao_nham_chac": 3.6571428571428575,
+    "bao_nham_kc": 8.571428571428571,
+    "issue_chac_dung": 0.6893203883495146,
+    "sach_dung": 1.0,
+    "theo_loai": {
+     "Sai kích thước": {
+      "tong": 44,
+      "chac": 0.6590909090909091,
+      "khong_chac": 0.20454545454545456
+     },
+     "Sai nhãn": {
+      "tong": 24,
+      "chac": 0.5,
+      "khong_chac": 0.3333333333333333
+     },
+     "Thiếu": {
+      "tong": 60,
+      "chac": 0.31666666666666665,
+      "khong_chac": 0.36666666666666664
+     },
+     "Thừa": {
+      "tong": 20,
+      "chac": 0.15,
+      "khong_chac": 0.85
+     },
+     "Trùng": {
+      "tong": 8,
+      "chac": 1.0,
+      "khong_chac": 0.0
+     }
+    }
+   },
+   "rainy": {
+    "anh": 83,
+    "box": 980,
+    "loi_cai": 216,
+    "bat": 0.7083333333333334,
+    "bat_chac": 0.4444444444444444,
+    "bao_nham_chac": 3.6734693877551026,
+    "bao_nham_kc": 13.26530612244898,
+    "issue_chac_dung": 0.7272727272727273,
+    "sach_dung": 0.9444444444444444,
+    "theo_loai": {
+     "Sai kích thước": {
+      "tong": 64,
+      "chac": 0.609375,
+      "khong_chac": 0.25
+     },
+     "Thiếu": {
+      "tong": 64,
+      "chac": 0.34375,
+      "khong_chac": 0.140625
+     },
+     "Sai nhãn": {
+      "tong": 43,
+      "chac": 0.4418604651162791,
+      "khong_chac": 0.20930232558139536
+     },
+     "Trùng": {
+      "tong": 11,
+      "chac": 1.0,
+      "khong_chac": 0.0
+     },
+     "Thừa": {
+      "tong": 34,
+      "chac": 0.14705882352941177,
+      "khong_chac": 0.6764705882352942
+     }
+    }
+   },
+   "snowy": {
+    "anh": 54,
+    "box": 612,
+    "loi_cai": 165,
+    "bat": 0.6727272727272727,
+    "bat_chac": 0.37575757575757573,
+    "bao_nham_chac": 5.228758169934641,
+    "bao_nham_kc": 14.705882352941178,
+    "issue_chac_dung": 0.6595744680851063,
+    "sach_dung": 0.9,
+    "theo_loai": {
+     "Thiếu": {
+      "tong": 47,
+      "chac": 0.3617021276595745,
+      "khong_chac": 0.2765957446808511
+     },
+     "Sai nhãn": {
+      "tong": 35,
+      "chac": 0.2,
+      "khong_chac": 0.3142857142857143
+     },
+     "Thừa": {
+      "tong": 24,
+      "chac": 0.3333333333333333,
+      "khong_chac": 0.5833333333333334
+     },
+     "Sai kích thước": {
+      "tong": 48,
+      "chac": 0.4583333333333333,
+      "khong_chac": 0.22916666666666666
+     },
+     "Trùng": {
+      "tong": 11,
+      "chac": 0.7272727272727273,
+      "khong_chac": 0.0
+     }
+    }
+   }
+  }
+ },
+ "e2e": {
+  "bdd": {
+   "dat": 10,
+   "tong": 10,
+   "chi_tiet": {
+    "E1_co_vien": true,
+    "E2_rider_thanh_pedestrian": true,
+    "E3_mat_phan": true,
+    "E4_thieu_xe": true,
+    "E5_dung_track": true,
+    "E6_phinh": true,
+    "E7_polygon_xoan": true,
+    "E9_ra_ngoai_anh": true,
+    "E10_lech": true,
+    "E8_thieu_tag_anh": true
+   },
+   "hieu_qua": 0.75,
+   "ngay": "2026-10-16"
+  },
+  "id": {
+   "dat": 7,
+   "tong": 7,
+   "chi_tiet": {
+    "S1 tráo ID (K/J)": true,
+    "S2 đổi vật (M)": true,
+    "S3 1 vật 2 ID (B)": true,
+    "S4 2 ID 1 vật (V1/V2)": true,
+    "S5 track kết thúc sớm (X)": true,
+    "S6 kích thước không đồng bộ (W, khung 3-4)": true,
+    "Track đúng không bị báo lỗi ID / kích thước": true
+   },
+   "hieu_qua": null,
+   "ngay": "2026-10-16"
+  },
+  "track": {
+   "dat": 6,
+   "tong": 6,
+   "chi_tiet": {
+    "T1 lem o keyframe 3": true,
+    "T1 khung noi suy khong bao oan (1,2,4)": true,
+    "T1 xe A khong bi bao 'thieu' o khung noi suy": true,
+    "T2 dut track": true,
+    "T3 nhay vi tri": true,
+    "Khong bao 'can Shape' (guideline dung Track)": true
+   },
+   "hieu_qua": null,
+   "ngay": "2026-10-16"
+  }
+ },
+ "seg": {
+  "anh": 80,
+  "polygon": 445,
+  "loi_cai": 179,
+  "bat": 0.7486033519553073,
+  "bat_chac": 0.39106145251396646,
+  "bao_nham_chac": 1.348314606741573,
+  "bao_nham_kc": 9.213483146067416,
+  "theo_loai": {
+   "co lem vien": {
+    "tong": 45,
+    "chac": 0.4888888888888889,
+    "khong_chac": 0.28888888888888886
+   },
+   "phinh ra nen": {
+    "tong": 41,
+    "chac": 0.5121951219512195,
+    "khong_chac": 0.2926829268292683
+   },
+   "lech vi tri": {
+    "tong": 35,
+    "chac": 0.45714285714285713,
+    "khong_chac": 0.45714285714285713
+   },
+   "mat 1 phan vat": {
+    "tong": 39,
+    "chac": 0.1794871794871795,
+    "khong_chac": 0.48717948717948717
+   },
+   "ve tho (it diem)": {
+    "tong": 19,
+    "chac": 0.21052631578947367,
+    "khong_chac": 0.21052631578947367
+   }
+  },
+  "theo_co": {
+   "nho <64px": {
+    "tong": 89,
+    "bat": 0.6292134831460674
+   },
+   "vua 64-160px": {
+    "tong": 63,
+    "bat": 0.8571428571428571
+   },
+   "lon >=160px": {
+    "tong": 27,
+    "bat": 0.8888888888888888
+   }
+  }
+ }
+}

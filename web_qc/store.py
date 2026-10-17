@@ -43,12 +43,18 @@ create table if not exists edits(run_id integer, finding_id integer, msg text, u
   primary key(run_id, finding_id));
 """
 RUN_EXTRA = {"connection_id": "integer", "job_name": "text", "task_name": "text", "project_name": "text",
-             "assignee": "text", "job_stage": "text", "job_state": "text", "source": "text"}
+             "assignee": "text", "job_stage": "text", "job_state": "text", "source": "text",
+             # tu review: 'tra_ve' = co loi chac, da tra job ve annotation; 'giu' = giu validation cho reviewer; 'loi' = tra khong duoc
+             "returned": "text"}
 DEFAULT_SETTINGS = {"pass_threshold": 0.97, "default_mode": "chinh_xac", "webhook_enabled": False,
                     "webhook_secret": "", "webhook_connection_id": None, "webhook_auto_push": False,
                     # tu review khi labeler chuyen job sang stage 'validation' (web tu hoi CVAT dinh ky, khong can webhook)
                     "auto_validation": False, "auto_connection_id": None, "auto_push": True,
-                    "auto_seen": {}, "auto_last": None}
+                    # nhu LetmeQC: co loi chac chan -> tra job ve annotation (rejected); khong loi -> giu validation cho reviewer
+                    "auto_return": True,
+                    "auto_seen": {}, "auto_last": None,
+                    # task chua gan guideline -> dung guideline nay (QC luon doc guideline neu co)
+                    "default_guideline_id": None}
 
 
 def conn():
@@ -402,4 +408,7 @@ def task_guideline(task_id):
         return None
     with conn() as c:
         r = c.execute("select guideline_id from task_guideline where task_id=?", (task_id,)).fetchone()
-    return r["guideline_id"] if r else None
+    if r:
+        return r["guideline_id"]
+    d = get_settings().get("default_guideline_id")
+    return d if d and get_guideline(d) else None

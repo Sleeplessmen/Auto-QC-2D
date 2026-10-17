@@ -32,6 +32,14 @@ from dotenv import load_dotenv
 
 from cvat_client import CvatClient
 
+
+def _imwrite(path, img, params=None):
+    """cv2.imwrite khong ghi duoc duong dan co dau (Windows) -> encode roi ghi bang numpy."""
+    ok, buf = cv2.imencode(os.path.splitext(path)[1] or ".jpg", img, params or [])
+    if ok:
+        buf.tofile(path)
+    return ok
+
 # Ban exe (PyInstaller): du lieu nam canh file exe
 HERE = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.abspath(__file__))
 SHAPES = ("rectangle", "polygon", "polyline", "mask", "skeleton")
@@ -286,7 +294,7 @@ def draw_preview(img, shapes, id2name, path):
                 continue
         cv2.putText(out, name, (int(anchor[0]), max(12, int(anchor[1]) - 4)), cv2.FONT_HERSHEY_SIMPLEX, 0.5, col, 1,
                     cv2.LINE_AA)
-    cv2.imwrite(path, out)
+    _imwrite(path, out)
 
 
 # -----------------------------------------------------------------------------
@@ -359,7 +367,7 @@ def main():
             fd, tmp = tempfile.mkstemp(suffix=".jpg")
             os.close(fd)
             try:
-                cv2.imwrite(tmp, img[:, :, ::-1])
+                _imwrite(tmp, img[:, :, ::-1])
                 det = keypoints.detect(tmp, kinds=kinds)
             finally:
                 os.remove(tmp)

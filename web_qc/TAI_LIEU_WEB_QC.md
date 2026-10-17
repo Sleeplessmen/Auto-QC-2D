@@ -59,7 +59,11 @@ Mục 1–7 là hướng dẫn dùng. Mục 8–14 giải thích cách tool làm
 | Tầng 2: so với model (4 detector + SAM2 + CLIP) | Đã có, đã đo trên 123 ảnh có đáp án (GT) |
 | Tầng 1: kiểm tra theo file luật guideline | Đã có, mới thử trên dữ liệu giả |
 | Box hình dạng phi lý (quá dẹt / quá mảnh so với loại vật) | Đã có (2026-10-15), thử trên job e2e 3 ảnh |
-| Vùng đường (`drivable_area`, polygon / mask): thiếu, tô thừa, trùng, so với SegFormer Cityscapes; trùng mask + box | Đã có (2026-10-15), thử trên job e2e 3 ảnh. Chỉ khi đọc job từ CVAT, chưa đọc polygon từ file .zip |
+| Vùng đường (`drivable_area`, polygon / mask): thiếu, tô thừa, trùng, so với SegFormer Cityscapes; trùng mask + box | Đã có (2026-10-15). Từ 2026-10-16 đọc cả polygon / mask trong file .zip (CVAT XML, COCO) |
+| **Segmentation từng vật**: polygon / mask của xe, người... so viền với SAM2 (lẹm, tô thừa, co / phình, lệch) | Đã có (2026-10-16), đo trên 200 ảnh COCO val2017 polygon người vẽ (mục 12) |
+| Tầng luật hình học gộp từ LetmeQC (ra ngoài ảnh, polygon xoắn / < 3 điểm, polygon tràn box, rider / pedestrian...) | Đã có (2026-10-16), LetmeQC `app.py` đã tắt |
+| Shape hay track theo guideline; guideline mặc định cho task chưa gán | Đã có (2026-10-16) |
+| Đo hiệu quả Issue trên job thật: % Issue đúng, % lỗi bắt trước review chéo, số vòng trả lại / job | Đã có (2026-10-16), thử đầu cuối trên CVAT localhost |
 | Đọc guideline PDF / DOCX / TXT / MD, tra cứu đoạn liên quan theo nhãn | Đã có, đã thử |
 | Đổi job chỉ bằng file `.env` | Đã có |
 | Review job 2D qua API và đẩy Issue thật lên CVAT | Có code, **chưa thử trên job thật** vì chưa có job 2D để thử |
@@ -233,9 +237,19 @@ Bấm **Link cho labeler** (hoặc mở link trong Issue tổng kết) để có
 | **Lịch sử** | Mọi vai trò | Mọi lần review: job, task, labeler, người chạy (hoặc "tự động" nếu qua webhook), kết quả, % box đúng, lỗi, số tool nhầm, số Issue. Lọc theo job và theo tên |
 | **Guideline** | Xem: mọi vai trò. Sửa: qc, admin | Tải guideline lên; mỗi guideline có 3 tab: **Luật kiểm tra** (trình soạn dạng bảng), **Nội dung guideline** (tra cứu), **YAML** (nâng cao) |
 | **Kết nối CVAT** | Xem, thử: mọi vai trò. Thêm/sửa/xoá: qc, admin | Danh sách kết nối, thử kết nối, đặt mặc định, thêm / sửa |
-| **Cài đặt** | Đổi mật khẩu: mọi vai trò. Còn lại: admin | Ngưỡng đạt, chế độ mặc định, **webhook CVAT** (bật, chọn kết nối, tự đẩy, địa chỉ và secret để dán vào CVAT), tài khoản |
+| **Cài đặt** | Đổi mật khẩu: mọi vai trò. Còn lại: admin | Ngưỡng đạt, chế độ mặc định, **guideline mặc định**, **tự review khi job sang validation** (tự đẩy lỗi chắc chắn, tự trả job về annotation khi còn lỗi), **webhook CVAT**, tài khoản |
 
 Thanh bên trái luôn hiện trạng thái: máy CVAT đang chọn, tổ chức, GPU, webhook. Link một lần review dạng `http://<máy chủ>:8000/#run=12` gửi cho người khác được.
+
+### Tự review khi job chuyển sang validation (luồng chính của nhóm)
+
+Cài đặt → **Tự review khi job chuyển sang validation** → tick Bật, chọn CVAT → Lưu.
+
+- Labeler gán xong và chuyển stage của job sang **validation**. Trong vòng 60 giây, web tự đọc job, review theo guideline, rồi đẩy lỗi chắc chắn lên CVAT thành Issue.
+- **Còn lỗi chắc chắn** thì web tự trả job về **annotation (rejected)** cho labeler sửa, giống LetmeQC trước đây. **Không còn lỗi chắc chắn** thì job ở lại validation để reviewer kiểm chéo. Lỗi "không chắc" không làm job bị trả về. Tắt việc trả về bằng ô "Có lỗi chắc chắn thì tự trả job về annotation".
+- Labeler sửa xong, nộp lại validation, thì tool review lại. Issue có lỗi đã hết được đóng, lỗi còn thì giữ Issue cũ (không tạo trùng). Mỗi lần trả về được tính là một vòng ở Tổng quan → Hiệu quả Issue.
+- Web tự hỏi CVAT nên không cần webhook hay cấu hình mạng.
+- Đã thử trên CVAT localhost (2026-10-16): chuyển job sang validation, không bấm gì. Web tự review, giữ 12 Issue cũ còn lỗi, rồi trả job về `annotation / rejected`.
 
 ### Webhook CVAT (tự review khi job hoàn thành)
 
@@ -383,6 +397,85 @@ Sau đó tool ghép box của tool với box của người gán theo độ trù
 
 Các ngưỡng trên là hằng số ở đầu `review_core.py`, đã chỉnh trên 123 ảnh GT. Khi đổi ngưỡng thì chạy lại `review_eval.py` để xem tỉ lệ báo nhầm và bỏ sót thay đổi ra sao.
 
+**rider / pedestrian (BDD100K):** job có nhãn `rider` thì người tool thấy đang ngồi trên xe 2 bánh (≥ 25% box người nằm trên box xe, chân người ở tầm xe) được hiểu là `rider`, còn lại là `pedestrian`. Gán ngược thì báo sai nhãn, chỉ chắc khi người nằm hẳn trên xe (≥ 40%).
+
+### Tầng luật hình học (luôn bật, gộp từ LetmeQC)
+
+Chạy **trước** model, không cần GPU, không cần file luật (`rule_tier.py`). Đây là các luật của LetmeQC (`src/rules.py` của nhóm) đã gộp vào web QC, nên chỉ còn một server, một bộ Issue. `app.py` của LetmeQC đã tắt.
+
+| Lỗi | Quy tắc | Mức |
+| --- | --- | --- |
+| Box gần như không có diện tích | Rộng hoặc cao dưới 1 px | Lỗi |
+| Box / polygon vượt ra ngoài ảnh | Vượt mép quá 2 px | Lỗi |
+| Box rất nhỏ | Diện tích < 25 px² (LetmeQC dùng 100, nhưng BDD100K gán cả xe xa khoảng 9×10 px) | Không chắc |
+| Tỉ lệ rộng/cao phi lý | > 10 hoặc < 0.1, chỉ với nhãn tool không hiểu. Nhãn tool hiểu thì dùng khoảng theo từng loại vật | Lỗi |
+| Polygon hỏng | Ít hơn 3 điểm, hoặc viền tự cắt nhau (xoắn) | Lỗi |
+| Polygon tràn ra ngoài box của nó | Chỉ khi job vẽ box + polygon cho mỗi vật (`polygon_kem_box: cap`). Cho phép lệch max(3 px, 3% cạnh), quá max(8 px, 8%) thì là lỗi | Lỗi / Không chắc |
+| `pedestrian` đang ngồi trên xe 2 bánh | Job có nhãn `rider`: box người nằm trên box xe máy / xe đạp của chính labeler | Lỗi / Không chắc |
+| `rider` không có xe bên dưới | Job có nhãn `rider` mà không có box xe 2 bánh dưới người | Không chắc |
+| Người trùng box xe | Box `pedestrian` / `person` gần như trùng box `car` / `truck` / `bus` (IoU > 0.5) | Không chắc |
+
+Luật trùng box, box lệch, thiếu, thừa nằm ở tầng 2, nên không lặp lại ở đây. Một vật một loại lỗi chỉ ra một Issue.
+
+### Segmentation từng vật (polygon / mask): so viền với SAM2
+
+File `seg_check.py`. Áp dụng cho polygon / mask của mọi nhãn tool hiểu (xe, người, xe 2 bánh), đọc từ job CVAT hoặc từ file export (CVAT for images 1.1, COCO).
+
+1. Mỗi polygon được cho SAM2 xem bằng **2 prompt**: box của vật mà detector thấy (khớp theo vị trí), và box của chính polygon nới rộng 8%. Nếu mask SAM từ box detector gần như không chạm polygon (IoU < 0.2), thì box đó là vật khác và bị bỏ.
+2. So mask labeler với mask SAM. Bỏ qua một dải mép rộng max(2 px, 2% kích thước), vì viền vẽ tay không thể khít từng px:
+   - **vẽ lẹm**: phần vật SAM thấy mà polygon không phủ, ≥ 15% vật và ≥ 150 px;
+   - **tô thừa ra nền**: phần polygon nằm ngoài vật;
+   - **co vào / phình ra cả vòng**: viền lệch đều ≥ 1.5 px quanh ≥ 60% chu vi. Lỗi này khó thấy bằng diện tích khi vật nhỏ;
+   - **lệch vật**: vừa thiếu vừa thừa, trùng dưới 50%.
+3. Chỉ báo **chắc chắn** khi lỗi nặng (≥ 22%), SAM tự tin (≥ 0.85), vật đủ lớn (≥ 40 px) **và** cả 2 prompt cùng thấy sai. Riêng lỗi tô thừa: nếu một trong 3 phương án mask của SAM khớp polygon (SAM hay chỉ lấy một phần người, ví dụ áo), thì hạ xuống không chắc.
+4. Issue ghim đúng hình phần sai (polygon). Trang **Phân tích** vẽ viền mask SAM2 (nét đứt) chồng lên polygon của labeler, kèm % trùng.
+
+Polygon của vật được tính là một nhãn khi so với tool. Job chỉ vẽ polygon (không box) không bị báo "thiếu" oan. Polygon thì không bị chấm kích thước kiểu box.
+
+**Một vật vừa có box vừa có polygon** là quy ước của job, đặt trong file luật bằng `polygon_kem_box`:
+- `trung` (mặc định cũ): báo trùng, vì job chỉ cần một trong hai.
+- `cap`: instance segmentation (BDD100K của nhóm). Mỗi vật có cả hai, polygon phải nằm trong box của nó.
+
+Nếu file luật để trống mục này, tool đọc guideline: câu có "instance segmentation" hoặc "box kèm polygon" thì hiểu là `cap`.
+
+### Shape hay track
+
+Đặt trong file luật bằng `kieu_nhan: shape | track`. Để trống thì tool đọc guideline ("gán bằng Shape, không dùng Track", "ảnh rời / độc lập" → shape; "track", "nội suy qua các frame" → track).
+- **shape** (ảnh rời, ví dụ BDD100K): mọi track trong job bị báo "cần gán bằng Shape". Issue ghim tại keyframe đầu.
+- **track** (video): shape trong job nhiều khung bị báo "cần gán bằng Track".
+- Không có guideline mà task CVAT là ảnh rời (mode `annotation`): track bị báo ở mức không chắc.
+
+**Job dùng Track (video) được review như sau:**
+- **Box dạng track**: chấm ở mọi khung, box mỗi khung tính theo nội suy của CVAT.
+- **Polygon / mask dạng track**: viền được so với SAM2 **chỉ ở keyframe**, vì keyframe là khung annotator tự vẽ. Ở khung nội suy, CVAT tự sinh hình nên tool không chấm viền, nhưng vẫn tính vật là đã có nhãn, để không báo "thiếu" oan. Tầng luật (polygon xoắn, polygon dưới 3 điểm...) cũng chạy trên keyframe.
+- **Lỗi riêng của track** (mức không chắc, Issue loại "Track bất thường"):
+  - **Đứt track**: một track bắt đầu trong vòng 3 khung sau khi track khác cùng nhãn kết thúc, ở cùng chỗ (IoU ≥ 0.4). Có thể là 1 vật bị tách làm 2 track.
+  - **Nhảy vị trí**: giữa 2 keyframe gần nhau, tâm box nhảy xa hơn cạnh dài của box và hai box gần như không chạm nhau. Có thể track đã chuyển nhầm sang vật khác. Nhảy đi rồi nhảy về thì chỉ báo 1 lần.
+- **Kiểm tra lỗi ID** (`id_check.py`, chạy khi job có track và không phải job ảnh rời):
+  - Cách làm: tool tự dựng **track riêng của tool**, bằng cách nối vật detector thấy qua từng khung theo độ trùng vị trí và độ giống hình dạng (embedding CLIP, ghép tối ưu bằng thuật toán Hungarian). Rồi tool đối chiếu ID của annotator với ID của tool, giống chỉ số IDSW của bài toán theo dõi nhiều vật (MOT).
+
+  | Lỗi | Khi nào báo | Mức |
+  | --- | --- | --- |
+  | **Tráo ID** | Hai track đổi vật cho nhau ở cùng một khung, ví dụ 2 xe đi sát hoặc cắt qua nhau. Bắt được cả khi detector không thấy vật ban đầu của một trong hai track | Lỗi |
+  | **Đổi vật (ID switch)** | Track rời vật đang theo, trong khi vật đó vẫn còn: theo ID của tool, hoặc theo vị trí dự đoán (box trước + vận tốc). Hoặc hình vật đổi hẳn | Lỗi khi tool vẫn theo được vật cũ, còn lại là không chắc |
+  | **1 vật 2 ID** | Một vật bị tách thành 2 track nối tiếp mà tool theo dõi liên tục, kể cả khi vật đã đi chỗ khác hoặc 2 track khác nhãn. Thay cho luật "đứt track" theo vị trí | Lỗi |
+  | **2 ID 1 vật** | Hai track cùng nằm trên một vật từ 2 khung trở lên, kể cả khi 2 box không trùng sát tới mức báo "trùng" | Lỗi |
+  | **Track kết thúc sớm** | Track đã outside mà vật vẫn còn trong ảnh, detector thấy chắc ≥ 3 khung liền | Không chắc |
+  | **Kích thước không đồng bộ** | Mỗi khung lấy tỉ lệ box annotator / box của vật mà tool thấy, so riêng chiều cao và chiều rộng. Vật lại gần hay ra xa thì cả 2 box cùng đổi nên tỉ lệ giữ nguyên. Khung nào lệch > 20% (và ≥ 6 px) so với trung vị của track thì bị báo, kèm kích thước đúng ước lượng và cho biết là keyframe vẽ lệch hay khung nội suy lệch (cần thêm keyframe). Khung annotator đánh dấu `occluded` không bị chấm | Lỗi khi lệch > 35%, còn lại là không chắc |
+  | **Kích thước nhảy** (khi detector không thấy vật) | Đoạn 1–3 keyframe liền nhau cao hoặc rộng khác > 30% so với keyframe hai bên, trong khi hai bên gần bằng nhau | Không chắc |
+
+  - Ghi chú "thiếu" lặp trên cùng một vật qua nhiều khung được gộp thành 1 ("thiếu ở 4 khung: 0–3, cùng 1 vật: gán 1 track cho cả đoạn"). Đoạn đã có ghi chú "track kết thúc sớm" thì không báo "thiếu" nữa.
+  - Đã thử trên CVAT localhost (2026-10-16, video 8 khung có vật chuyển động, 13 track, `kiem_thu/test_e2e_id.py`). Đạt 7/7: bắt đủ 5 kiểu lỗi ID và lỗi kích thước không đồng bộ, không báo nhầm track đúng nào.
+  - Giới hạn: vật mà detector gần như không thấy (bị che nhiều, quá nhỏ) thì tool không có bằng chứng, nên lỗi ID trên vật đó có thể bị bỏ sót. Video mới thử trên cảnh dựng (camera lia ngang), chưa thử trên video thật có vật đi cắt nhau. Nên đo thêm khi nhóm có video thật.
+- **Cùng một lỗi trên cùng một track lặp ở nhiều khung** (thường là khung nội suy) được gộp thành **1 Issue** ở khung đầu, kèm "lặp ở N khung: a–b". Annotator sửa một lần là hết.
+- Đã thử trên CVAT localhost (2026-10-16, job video 6 khung, 16 track, `kiem_thu/test_e2e_track.py`). Đạt 6/6: bắt lỗi lẹm ở keyframe, không báo oan ở khung nội suy, không báo "thiếu" oan, bắt đứt track, bắt nhảy vị trí, không báo "cần Shape".
+
+### QC luôn đọc guideline
+
+- Task chưa gán guideline thì dùng **guideline mặc định** (Cài đặt → Đánh giá → Guideline mặc định).
+- Có file luật thì file luật được ưu tiên. Mục nào file luật để trống thì tool **đọc thêm từ chữ trong guideline** và ghi vào log ("+ theo guideline: ...").
+- Bộ guideline + tập nhãn + file luật cho BDD100K nằm trong `guideline_bdd100k/` (xem [mục 7](#7-guideline-và-file-luật)).
+
 **Nhãn tool không đánh giá được:** tầng 2 chỉ hiểu 7 loại: car, truck, bus, motorcycle, bicycle, person, GreenSM. Nhãn khác (ví dụ Animal, Obstacle) được liệt kê trong kết quả là "Tool không đánh giá được". Các nhãn này chỉ được kiểm ở tầng 1.
 
 ---
@@ -422,16 +515,22 @@ Mỗi lỗi được chọn thành một Issue ghim đúng frame, đúng vị tr
 Issue chỉ ghi lỗi, ngắn gọn (bản 2026-10-15 bỏ tiền tố `[Review tự động]`, mã box, IoU và toạ độ). Issue đã ghim đúng chỗ nên không cần toạ độ. Nội dung gồm:
 
 1. Câu mô tả lỗi.
-2. "(chưa chắc, xem lại)", nếu là lỗi không chắc.
-3. Dòng cuối là mã `[qc:frame|loại|box]`. Tool dùng mã này để nhận Issue của mình và không tạo trùng; labeler bỏ qua.
+2. Lỗi không chắc (nhãn gần đúng, lệch ít, hoặc tool có thể nhầm) ghi **"Đang xem xét — có thể ..."** kèm lý do, và nhắc labeler kiểm tra: nhãn đúng thì giữ nguyên và trả lời Issue, sai thì sửa.
+3. **Mỗi vật một Issue** (bản 2026-10-17). Một box / polygon / track có nhiều lỗi thì gộp vào một Issue, đánh số từng lỗi, lỗi chắc lên trước. Issue ghim vào đúng box của vật đó (vật ra ngoài ảnh thì ghim phần nằm trong ảnh), không ghim sang vật khác. Vật bị thiếu thì ghim ở chỗ tool thấy vật.
+4. Dòng cuối là mã `[qc:frame|loại|box]`, Issue gộp thì nhiều mã nối bằng `;`. Tool dùng mã này để nhận Issue của mình và không tạo trùng; labeler bỏ qua. Trang Hiệu quả Issue vẫn tính từng lỗi trong Issue gộp theo đúng loại.
 
 Ví dụ:
 
 - `Box chưa khít: cạnh dưới thừa 11px.`
-- `Box 'car' quá dẹt (912×14px), không đúng 1 vật. Xoá và vẽ lại.`
 - `Thiếu box 'car' ở đây (vật nhỏ ở xa, phóng to để thấy).`
-- `Trùng: 2 box 'car' cho cùng 1 vật, xoá 1 box.`
-- `Thiếu 'drivable_area': phần đường này chưa tô. (chưa chắc, xem lại)`
+- `Đang xem xét — có thể box thừa: không thấy 'car' ở đây. Kiểm tra lại: nhãn đúng thì giữ nguyên và trả lời Issue này, sai thì sửa.`
+- Một vật có 2 lỗi:
+  ```
+  'car' này có 3 lỗi: Sai kích thước, Lỗi ID: đổi vật (ID switch), Sai nhãn.
+  1. [Sai kích thước] Box chưa khít: cạnh dưới thừa 14px.
+  2. [Lỗi ID: đổi vật (ID switch)] Đổi vật: tới khung 3, track 7 chuyển sang xe bên cạnh. Mỗi track chỉ theo 1 vật.
+  3. [Sai nhãn] Đang xem xét — có thể sai nhãn: giống 'truck' hơn. Kiểm tra lại: nhãn đúng thì giữ nguyên và trả lời Issue này, sai thì sửa.
+  ```
 
 Issue vùng đường được ghim theo đúng đường viền vùng, không theo khung chữ nhật. Issue kiểu cũ (có `[Review tự động]`) vẫn được nhận ra khi đồng bộ.
 
@@ -490,6 +589,35 @@ Logic này đã được kiểm với một CVAT giả qua 3 lần chạy liên 
 
 ---
 
+### Đo hiệu quả trên job thật (Tổng quan → Hiệu quả Issue)
+
+Bấm **Đo** trên trang Tổng quan. Web đọc Issue và nhãn hiện tại của các job đã đẩy Issue trên CVAT (`web_qc/hieu_qua.py`). Mỗi Issue của tool mang mã `[qc:frame|loại|vật]`. Web so nhãn **lúc review** (`annotations_truoc_review.json` của lần review đã tạo Issue đó) với nhãn **hiện tại**:
+
+| Kết quả | Khi nào | Tính là |
+| --- | --- | --- |
+| Đã sửa | Vật bị Issue chỉ ra đã được sửa / xoá, hoặc chỗ báo thiếu đã có vật mới | Issue **đúng** |
+| Đóng không sửa | Issue đã resolved mà nhãn không đổi | Issue **sai** (tool báo nhầm) |
+| Tool nhầm | Người review đánh dấu "tool nhầm" trên web | Issue **sai** |
+| Còn mở | Issue chưa đóng, nhãn chưa đổi | Chưa tính |
+
+| Chỉ số | Công thức |
+| --- | --- |
+| **% Issue đúng** (annotator sửa theo) | Đã sửa / (Đã sửa + Đóng không sửa + Tool nhầm) |
+| **% lỗi bắt được trước review chéo** | Đã sửa / (Đã sửa + Issue do người review tạo thêm). Issue người tạo là Issue không có mã qc: lỗi tool bỏ sót |
+| **Số vòng bị trả lại / job** | Số lần review có đẩy Issue (mỗi lần job quay lại annotator một vòng) |
+
+Kèm bảng theo loại lỗi (để biết loại nào tool hay đúng, loại nào hay nhầm) và bảng theo job / labeler.
+
+Để số liệu đúng: khi review lại, Issue có lỗi đã hết được **đóng (resolved)**, không xoá, nên vẫn còn để đo. Chỉ xoá khi cùng lỗi đó cần tạo lại với nội dung mới.
+
+Đã thử đầu cuối trên CVAT localhost (2026-10-16, task BDD100K 4 ảnh, 10 lỗi cài vào, chạy lại được bằng `venv\Scripts\python cvat_2d\kiem_thu\test_e2e_bdd.py`, ảnh ở `du_lieu_danh_gia/bdd_e2e`):
+- Tool bắt **10/10** lỗi (9 chắc chắn, 1 không chắc).
+- Giả lập annotator sửa 5 lỗi (6 Issue), đóng 1 Issue mà không sửa. Reviewer đánh "tool nhầm" 1 ghi chú và tự thêm 1 Issue.
+- Web tính ra: % Issue đúng **75%** (6/8), % lỗi bắt trước review chéo **85.7%** (6/7), số vòng trả lại **2**.
+- Nhãn gốc không đổi sau khi đẩy Issue.
+
+---
+
 ## 12. Độ tin cậy, giới hạn và rủi ro
 
 Tool đủ tin để thay phần lớn công kiểm tra thô, nhưng **chưa thay hoàn toàn người review**. Số đo bằng `review_eval.py` trên 123 ảnh GT, ngày 2026-10-12:
@@ -506,7 +634,24 @@ Tool đủ tin để thay phần lớn công kiểm tra thô, nhưng **chưa tha
 - Vật nhỏ hơn khoảng 30 px, và vật tool cho điểm thấp: đây là phần lớn số lỗi bị bỏ sót.
 - Ban đêm và cảnh xe máy dày đặc: ảnh ví dụ ban đêm mới tìm được khoảng 6 xe máy và 23 người trong hàng trăm. Ảnh đám đông ở Hà Nội mới tìm được khoảng 40% số người.
 - Box amodal: bộ GT đóng box theo phần nhìn thấy, nên chưa đo được độ đúng kiểu amodal. Tool chấp nhận cả hai kiểu box, nên lỗi amodal thường bị bỏ qua.
-- Chỉ kiểm box chữ nhật 2D. Chưa chấm polygon, mask, keypoint. Job 3D bị từ chối.
+- Chấm box và polygon / mask 2D. Chưa chấm keypoint, polyline, polygon dạng track. Job 3D bị từ chối.
+- Tool chưa có model cho `train`, `traffic light`, `traffic sign`. Các nhãn này chỉ được kiểm bằng luật (ra ngoài ảnh, thuộc tính bắt buộc...), không bị báo thiếu.
+- Segmentation: lỗi "mất 1 phần vật" và "vẽ thô ít điểm" bỏ lọt khoảng một nửa. Vật nhỏ dưới 64 px chỉ bắt được khoảng 56%.
+
+### Số đo segmentation (2026-10-16)
+
+`review_eval.py --seg` trên COCO val2017: ảnh đường phố có xe, polygon do người vẽ thật (`tao_bo_seg_eval.py`). Ngưỡng chỉnh trên 120 ảnh, kiểm lại trên **80 ảnh không dùng để chỉnh**.
+
+| Chỉ số | 80 ảnh kiểm | 120 ảnh chỉnh |
+| --- | --- | --- |
+| Polygon được chấm | 445 | 699 |
+| Báo nhầm trên polygon đúng / 100 | 1.3 lỗi + 9.2 không chắc | 1.3 lỗi + 7.0 không chắc |
+| Lỗi polygon cài vào bắt được | **74.9%** (chắc 39.1%) / 179 lỗi | 66.4% (chắc 35.9%) / 262 lỗi |
+| Co lẹm viền / phình ra nền / lệch vị trí | 78% / 80% / 91% | 71% / 73% / 83% |
+| Mất 1 phần vật / vẽ thô | 67% / 42% | 47% / 48% |
+| Vật nhỏ < 64 px / 64–160 px / ≥ 160 px | 63% / 86% / 89% | 52% / 84% / 94% |
+
+SAM2 so với polygon COCO cũng chỉ trùng trung vị 0.85: một phần ba polygon người vẽ lệch SAM quá 20%. Vì vậy phần lớn ghi chú segmentation ở mức không chắc, cần người xem. Trước 2026-10-16, polygon / mask của từng vật **không được kiểm** (0%).
 
 ### Rủi ro vận hành
 
@@ -621,7 +766,13 @@ Bộ đẩy Issue là nơi duy nhất ghi lên CVAT. Sau khi ghi, nó tải lạ
 | `web_qc/static/` | `index.html`, `app.js`, `style.css`. JS thuần, không cần build, tự đổi theo chế độ sáng/tối |
 | `cvat_2d/review_core.py` | Bộ chấm dùng chung với bản Gradio và dòng lệnh: kết nối CVAT, đọc file export, so sánh, vẽ ảnh, lưu báo cáo, đẩy Issue |
 | `cvat_2d/label_hq_2d.py` | Bộ model tìm vật (4 detector + SAM2 + CLIP + amodal) |
-| `cvat_2d/review_eval.py` | Đo độ tin của bộ chấm trên GT bằng cách cài lỗi giả |
+| `cvat_2d/review_eval.py` | Đo độ tin của bộ chấm trên GT bằng cách cài lỗi giả. `--seg <thư mục>`: đo phần segmentation |
+| `cvat_2d/id_check.py` | Lỗi ID của track: tool tự dựng track (vị trí + CLIP + Hungarian), đối chiếu ID annotator (tráo ID, đổi vật, 1 vật 2 ID, 2 ID 1 vật, kết thúc sớm) |
+| `cvat_2d/seg_check.py` | Segmentation từng vật: so polygon / mask với mask SAM2 (2 prompt, dải mép, lệch đều cả vòng) |
+| `cvat_2d/rule_tier.py` | Tầng luật hình học gộp từ LetmeQC, chạy trước model |
+| `cvat_2d/tao_bo_seg_eval.py` | Tạo bộ đo segmentation từ COCO val2017 (ảnh đường phố, polygon người vẽ) |
+| `cvat_2d/web_qc/hieu_qua.py` | Đo hiệu quả Issue trên job thật (% Issue đúng, % lỗi bắt trước review chéo, số vòng trả lại) |
+| `cvat_2d/guideline_bdd100k/` | Guideline BDD100K (det + ins-seg), tập nhãn CVAT `labels_bdd100k.json`, file luật `luat_bdd100k.yaml` |
 
 ### API
 

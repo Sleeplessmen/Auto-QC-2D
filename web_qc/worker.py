@@ -106,6 +106,7 @@ class Worker:
                 if j["id"] not in now or j["id"] in before or j["id"] in busy:
                     continue
                 params = dict(mode=s["default_mode"], rider=True, max_frames=None, auto_push=bool(s["auto_push"]),
+                              auto_return=bool(s["auto_push"] and s.get("auto_return")),
                               push_unsure=False, frames_hint=j.get("frame_count"))
                 rid = store.new_run(j["id"], j["task_id"], "tự động", params, store.task_guideline(j["task_id"]), c["id"],
                                     source="validation")
@@ -184,6 +185,20 @@ class Worker:
         rules, warn = G.parse_rules(g["rules"]) if g and g.get("rules") else ({}, [])
         if g and rules:
             cb(f"Guideline: {g['name']} · file luật {len(rules.get('nhan') or {})} nhãn (người QC đã soạn)")
+            if conn and g.get("text"):
+                # file luat de trong muc nao (vd shape/track, polygon kem box) thi lay theo chu trong guideline
+                try:
+                    cv, _ = cvat_client(run.get("connection_id"))
+                    labels = cv.labels(run["job_id"], cv.job(run["job_id"])["task_id"])
+                    auto, ev = G.extract_rules(g["text"], labels, guess_tool_classes(labels))
+                    q = rules.setdefault("quy_tac", {})
+                    add = {k: v for k, v in (auto.get("quy_tac") or {}).items() if q.get(k) in (None, "")}
+                    q.update(add)
+                    for e in ev:
+                        if e["luat"] in add:
+                            cb(f"  + theo guideline: {e['luat']}: {e['gia_tri']}" + (f" (mục {e['muc']})" if e["muc"] else ""))
+                except Exception as e:
+                    cb(f"  (Không đọc thêm được yêu cầu từ chữ trong guideline: {e})")
         elif g and conn and g.get("text"):
             # chua co file luat: tu doc guideline lay yeu cau, ket hop voi nhan cua task
             try:
@@ -236,6 +251,10 @@ class Worker:
             done = {f[0] for f in rv.frames}
             frames = [f for f in frames if f[0] in done]
             f1, w1 = G.rule_check(rv.before, labels, frames, rules)
+            # tang luat hinh hoc (rule_tier) da bao cung chuyen (ra ngoai anh / khong co dien tich) -> bo ban trung
+            topic = lambda m: "ngoai" if "ngoài ảnh" in m else "dt" if "không có diện tích" in m else None
+            had = {(f["frame"], f.get("ref"), topic(f["msg"])) for f in rv.findings if topic(f["msg"])}
+            f1 = [f for f in f1 if (f["frame"], f.get("ref"), topic(f["msg"])) not in had]
             for w in w1:
                 cb(f"  {w}")
             by_frame = {f[0]: f[4] for f in rv.frames}
@@ -262,6 +281,27 @@ class Worker:
         if p.get("auto_push") and rv.job_id:
             ids = [i for i, f in enumerate(rv.findings) if f["sure"] or p.get("push_unsure")]
             self.push(run_id, ids, replace_old=True)
+            if p.get("auto_return"):
+                self.return_job(rv, cb, run_id)
+
+    def return_job(self, rv, cb, run_id=None):
+        """Nhu LetmeQC: con loi chac chan (tru loi nguoi review danh 'tool nham') -> tra job ve annotation, trang thai
+        rejected, giu nguoi duoc giao. Khong co loi chac chan -> giu job o validation de reviewer kiem cheo.
+        Ket qua luu vao run.returned ('tra_ve' / 'giu' / 'loi') cho trang Tu review."""
+        n = sum(1 for f in rv.findings if f["sure"])
+        if not n:
+            cb("Không có lỗi chắc chắn: job ở lại validation để reviewer kiểm chéo.")
+            res = "giu"
+        else:
+            r = rv.cvat.s.patch(f"{rv.cvat.url}/api/jobs/{rv.job_id}", json=dict(stage="annotation", state="rejected"), timeout=60)
+            if r.ok:
+                cb(f"Có {n} lỗi chắc chắn: đã trả job {rv.job_id} về annotation (rejected) cho annotator sửa.")
+                res = "tra_ve"
+            else:
+                cb(f"  Không trả được job về annotation ({r.status_code}: {r.text[:200]}). Reviewer trả tay trên CVAT.")
+                res = "loi"
+        if run_id is not None:
+            store.update_run(run_id, returned=res)
 
     # ------------------------------------------------------------ ket qua + day Issue
     def review_obj(self, run_id):
@@ -335,6 +375,39 @@ class Worker:
         res["time"] = time.time()
         store.update_run(run_id, pushed=res)
         return res
+
+    def effect(self, job_ids=None, days=30):
+        """Hieu qua Issue tren CVAT (hieu_qua.py) cho cac job da day Issue trong `days` ngay. Nho ket qua 5 phut."""
+        import hieu_qua
+        since = time.time() - max(1, days) * 86400
+        runs = [r for r in store.list_runs(limit=5000) if r["job_id"] and r["created"] >= since]
+        jobs = {}
+        for r in runs:
+            jobs.setdefault(r["job_id"], []).append(r)
+        if job_ids:
+            jobs = {j: v for j, v in jobs.items() if j in set(job_ids)}
+        cache = self.__dict__.setdefault("_effect_cache", {})
+        items, errors = [], []
+        for jid, rs in jobs.items():
+            if not any(r.get("pushed") for r in rs):
+                continue
+            key = (jid, max(r["id"] for r in rs))
+            hit = cache.get(key)
+            if hit and time.time() - hit[0] < 300:
+                items.append(hit[1])
+                continue
+            try:
+                cv, _ = cvat_client(rs[0].get("connection_id"))
+                fb = {r["id"]: store.get_feedback(r["id"]) for r in rs}
+                e = hieu_qua.job_effect(cv, jid, rs, fb)
+                e["assignee"] = next((r.get("assignee") for r in rs if r.get("assignee")), None)
+                cache[key] = (time.time(), e)
+                items.append(e)
+            except Exception as ex:
+                errors.append(f"job {jid}: {ex}")
+        out = hieu_qua.summary(items)
+        out["errors"] = errors
+        return out
 
     def job_issues(self, run_id):
         """Issue do tool tao tren job cua lan review nay (de theo doi da sua hay chua)."""

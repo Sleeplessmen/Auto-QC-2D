@@ -19,6 +19,14 @@ import cv2
 import numpy as np
 from PIL import Image
 
+
+def _imwrite(path, img, params=None):
+    """cv2.imwrite khong ghi duoc duong dan co dau (Windows) -> encode roi ghi bang numpy."""
+    ok, buf = cv2.imencode(os.path.splitext(path)[1] or ".jpg", img, params or [])
+    if ok:
+        buf.tofile(path)
+    return ok
+
 # Ban exe (PyInstaller): models/ nam canh file exe
 MODELS = os.path.join(os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.abspath(__file__)), "models")
 UPSCALE_TO = 1600          # ảnh nhỏ được phóng lên chừng này px chiều ngang cho model bắt tốt hơn
@@ -183,7 +191,7 @@ def draw(path, data, out_path, scale=3):
                 c = tuple(int(v * scale) for v in pt["xy"])
                 cv2.circle(vis, c, 3, col if pt["visible"] else (128, 128, 128), -1)
                 cv2.putText(vis, str(pt["id"]), (c[0] + 3, c[1] - 3), cv2.FONT_HERSHEY_SIMPLEX, fs, (255, 255, 255), 1)
-    cv2.imwrite(out_path, vis)
+    _imwrite(out_path, vis)
 
 
 if __name__ == "__main__":

@@ -169,6 +169,21 @@ def get_settings(request: Request, u=Depends(need("admin"))):
     return s
 
 
+@app.get("/api/auto/status")
+def auto_status(u=Depends(user)):
+    """Trang thai tu review (moi tai khoan xem duoc, khong lo token / secret): bat chua, theo doi CVAT nao,
+    lan hoi gan nhat, hang doi dang chay."""
+    s = store.get_settings()
+    c = None
+    try:
+        c = connection_for(s["auto_connection_id"]) if s["auto_validation"] else None
+    except Exception:
+        pass
+    return dict(enabled=bool(s["auto_validation"]), auto_push=bool(s["auto_push"]), auto_return=bool(s.get("auto_return")),
+                connection=c["name"] if c else None, last=s.get("auto_last"), error=worker.poll_error, interval=60,
+                waiting=len(worker.waiting), current=worker.current, can_check=u["role"] == "admin")
+
+
 @app.post("/api/auto/check")
 def auto_check(u=Depends(need("admin"))):
     """Hoi CVAT ngay (khong cho 60 giay): job nao vua sang 'validation' thi xep review."""
@@ -190,6 +205,8 @@ def put_settings(body: dict, u=Depends(need("admin"))):
         body["webhook_secret"] = secrets.token_urlsafe(18)
     if body.get("default_mode") not in (None, "chinh_xac", "nhanh"):
         raise HTTPException(400, "Chế độ không hợp lệ.")
+    if body.get("default_guideline_id") is not None and not store.get_guideline(body["default_guideline_id"]):
+        raise HTTPException(400, "Guideline mặc định không tồn tại.")
     store.set_settings(**{k: v for k, v in body.items() if k in store.DEFAULT_SETTINGS})
     s = store.get_settings()
     s.pop("auto_seen", None)
@@ -434,6 +451,7 @@ def run_detail(run_id: int, request: Request, u=Depends(user)):
                 d["findings"].append(dict(id=i, frame=f["frame"], name=f["name"], kind=f["kind"],
                                           kind_vi=R.KIND_VI.get(f["kind"], f["kind"]), sure=f["sure"], label=f["label"],
                                           box=[round(v) for v in f["box"]], msg=f["msg"], ref=f.get("ref"),
+                                          poly=[round(v, 1) for v in f["poly"]] if f.get("poly") else None,
                                           tang=f.get("tang", 2), preview=pv_of.get((f["frame"], f["name"]))))
             if g:
                 rules, _ = G.parse_rules(g["rules"]) if g.get("rules") else ({}, [])
@@ -578,6 +596,7 @@ def public_run(run_id: int, t: str = ""):
             continue
         items.append(dict(frame=f["frame"], name=f["name"], kind_vi=R.KIND_VI.get(f["kind"], f["kind"]), sure=f["sure"],
                           label=f["label"], box=[round(v) for v in f["box"]], msg=edits.get(i, f["msg"]),
+                          poly=[round(v, 1) for v in f["poly"]] if f.get("poly") else None,
                           preview=pv_name.get(f["name"])))
     for n in store.get_notes(run_id):
         items.append(dict(frame=n["frame"], name=n["name"], kind_vi="Ghi chú người review", sure=True, label="", box=n["box"],
@@ -656,6 +675,12 @@ def dashboard(days: int = 30, u=Depends(user)):
         trend=[dict(day=k, runs=v["runs"], avg_pct=v["pct"] / v["runs"]) for k, v in sorted(by_day.items())],
         recent=[_run_public(r) for r in rs[:8]],
     )
+
+
+@app.get("/api/hieu_qua")
+def effect(days: int = 30, job_id: int = None, u=Depends(user)):
+    """% Issue dung (annotator da sua theo), % loi bat duoc truoc review cheo, so vong tra lai / job — doc tu CVAT."""
+    return worker.effect([job_id] if job_id else None, days)
 
 
 # ------------------------------------------------------------------ guideline
@@ -854,7 +879,8 @@ async def cvat_webhook(request: Request, key: str = ""):
     if job.get("dimension") == "3d":
         return dict(ok=True, skipped="job_3d")
     tid = job.get("task_id")
-    params = dict(mode=s["default_mode"], rider=True, max_frames=None, auto_push=bool(s["webhook_auto_push"]), push_unsure=False)
+    params = dict(mode=s["default_mode"], rider=True, max_frames=None, auto_push=bool(s["webhook_auto_push"]), push_unsure=False,
+                  auto_return=bool(s["webhook_auto_push"] and s.get("auto_return")))
     rid = store.new_run(job["id"], tid, "webhook", params, store.task_guideline(tid), s["webhook_connection_id"] or None, source="webhook")
     worker.submit(rid)
     return dict(ok=True, run_id=rid)

@@ -28,6 +28,14 @@ import cv2
 import numpy as np
 import torch
 
+
+def _imwrite(path, img, params=None):
+    """cv2.imwrite khong ghi duoc duong dan co dau (Windows) -> encode roi ghi bang numpy."""
+    ok, buf = cv2.imencode(os.path.splitext(path)[1] or ".jpg", img, params or [])
+    if ok:
+        buf.tofile(path)
+    return ok
+
 HERE = os.path.dirname(sys.executable) if getattr(sys, "frozen", False) else os.path.dirname(os.path.abspath(__file__))
 CLASSES = ["GreenSM", "car", "truck", "bus", "motorcycle", "bicycle", "person"]
 COCO = {0: "person", 1: "bicycle", 2: "car", 3: "motorcycle", 5: "bus", 7: "truck"}
@@ -392,7 +400,7 @@ def draw(img, objs, path):
         ty = y1 - 3 if y1 > th + 4 else y1 + th + 3
         cv2.rectangle(out, (x1, ty - th - 2), (x1 + tw + 2, ty + 2), col, -1)
         cv2.putText(out, txt, (x1 + 1, ty), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 1, cv2.LINE_AA)
-    cv2.imwrite(path, out, [cv2.IMWRITE_JPEG_QUALITY, 92])
+    _imwrite(path, out, [cv2.IMWRITE_JPEG_QUALITY, 92])
 
 
 def draw_debug(img, objs, rejected, path):
@@ -413,7 +421,7 @@ def draw_debug(img, objs, rejected, path):
         ty = y1 - 3 if y1 > th + 4 else y1 + th + 3
         cv2.rectangle(out, (x1, ty - th - 2), (x1 + tw + 2, ty + 2), col, -1)
         cv2.putText(out, txt, (x1 + 1, ty), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 0, 0), 1, cv2.LINE_AA)
-    cv2.imwrite(path, out, [cv2.IMWRITE_JPEG_QUALITY, 90])
+    _imwrite(path, out, [cv2.IMWRITE_JPEG_QUALITY, 90])
 
 
 # -----------------------------------------------------------------------------
@@ -437,15 +445,29 @@ class SamRefiner:
         self.dev = dev
         self.pred = SAM2ImagePredictor(build_sam2("configs/sam2.1/sam2.1_hiera_l.yaml", ckpt, device=dev))
 
+    def _set(self, img):
+        """Tinh embedding anh 1 lan; goi lai cung anh (refine roi seg_check) thi dung lai."""
+        key = (img.__array_interface__["data"][0], img.shape, img[::53, ::53].tobytes())
+        if getattr(self, "_key", None) != key:
+            self.pred.set_image(img)
+            self._key = key
+
+    def predict_boxes(self, img, boxes, multimask=False):
+        """boxes [[x1,y1,x2,y2]] -> (masks bool NxHxW, scores N). multimask: 3 phuong an moi box (Nx3xHxW, Nx3)"""
+        if not len(boxes):
+            return np.zeros((0,) + img.shape[:2], bool), np.zeros(0)
+        b = np.array(boxes, np.float32)
+        with torch.inference_mode(), torch.autocast(self.dev, dtype=torch.bfloat16, enabled=self.dev == "cuda"):
+            self._set(img)
+            masks, scores, _ = self.pred.predict(point_coords=None, point_labels=None, box=b, multimask_output=multimask)
+        masks = np.asarray(masks).reshape(len(b), -1, *np.asarray(masks).shape[-2:]) > 0
+        scores = np.asarray(scores, np.float32).reshape(len(b), -1)
+        return (masks, scores) if multimask else (masks[:, 0], scores[:, 0])
+
     def refine(self, img, objs):
         if not objs:
             return
-        boxes = np.array([o["box"] for o in objs], np.float32)
-        with torch.inference_mode(), torch.autocast(self.dev, dtype=torch.bfloat16, enabled=self.dev == "cuda"):
-            self.pred.set_image(img)
-            masks, scores, _ = self.pred.predict(point_coords=None, point_labels=None, box=boxes, multimask_output=False)
-        masks = np.asarray(masks).reshape(len(objs), -1, *np.asarray(masks).shape[-2:])[:, 0]
-        scores = np.asarray(scores).reshape(len(objs), -1)[:, 0]
+        masks, scores = self.predict_boxes(img, [o["box"] for o in objs])
         H, W = img.shape[:2]
         for o, mk, sc in zip(objs, masks, scores):
             x1, y1, x2, y2 = o["box"]

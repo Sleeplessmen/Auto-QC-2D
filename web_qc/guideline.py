@@ -14,8 +14,13 @@ File luat (vi du):
       muc: "3.1"                      # muc guideline noi ve nhan nay (ghi vao Issue)
   quy_tac:
     nguoi_lai_co_box_rieng: true      # nguoi lai xe may phai co box person rieng
+    khong_bat_buoc_duoi_px: 10        # vat co canh ngan nho hon -> KHONG bat buoc gan (tool khong bao thieu),
+                                      #   da gan thi van hop le (khac kich_thuoc_toi_thieu_px: box nho hon la loi)
     box_ra_ngoai_anh_px: 2            # box vuot mep anh qua N px -> loi
     nhan_ngoai_guideline: false       # true -> moi box co nhan khong co trong guideline deu bi ghi chu
+    kieu_nhan: shape                  # shape = anh roi (moi vat 1 shape, vd BDD100K) | track = video (1 vat 1 track)
+    polygon_kem_box: trung            # 1 vat vua co box vua co polygon/mask: trung = loi trung (chi can 1),
+                                      #   cap = instance segmentation (moi vat box + polygon, polygon phai nam trong box)
     muc_chung: "2"
 """
 
@@ -169,7 +174,7 @@ def template_from_labels(labels, guess=None):
             "# Thuoc tinh cua tung nhan tren CVAT: " +
             "; ".join(f"{lb['name']}: {', '.join(a['name'] for a in lb.get('attributes', [])) or '-'}" for lb in labels) + "\n")
     body = dict(nhan=nhan, quy_tac=dict(nguoi_lai_co_box_rieng=True, box_ra_ngoai_anh_px=2,
-                                        nhan_ngoai_guideline=False, muc_chung=""))
+                                        nhan_ngoai_guideline=False, kieu_nhan="", polygon_kem_box="trung", muc_chung=""))
     return head + yaml.safe_dump(body, allow_unicode=True, sort_keys=False)
 
 
@@ -284,6 +289,11 @@ def extract_rules(text, labels, guess=None):
             px = int(m.group(1))
             if not 2 <= px <= 200 or not any(w in fs for w in ("box", "vat", "doi tuong", "object", "gan", "label", "ve", "bo qua", "ignore", "khong")):
                 continue
+            # "vat nho hon N px KHONG BAT BUOC gan" -> chi bo yeu cau gan, box nho da gan khong phai loi
+            if any(w in fs for w in ("khong bat buoc", "not required", "optional", "tuy chon")) and "khong_bat_buoc_duoi_px" not in q:
+                q["khong_bat_buoc_duoi_px"] = px
+                note("khong_bat_buoc_duoi_px", f"vật dưới {px} px không bắt buộc gán", muc, raw)
+                break
             targets = [n for n in about if guess.get(n) != "road"] or [n for n in names if guess.get(n) not in (None, "road")]
             for n in targets:
                 if not nhan[n].get("kich_thuoc_toi_thieu_px"):
@@ -311,7 +321,24 @@ def extract_rules(text, labels, guess=None):
         if "box_ra_ngoai_anh_px" not in q and re.search(r"(khong|not)\s+(\S+\s+){0,3}(ra ngoai|vuot|outside)\s+(\S+\s+){0,2}(anh|khung|image|frame)", fs):
             q["box_ra_ngoai_anh_px"] = 1
             note("box_ra_ngoai_anh_px", "box không được ra ngoài ảnh", muc, raw)
-        # 5) thuoc tinh bat buoc
+        # 5) instance segmentation: moi vat vua box vua polygon / mask
+        if "polygon_kem_box" not in q:
+            if re.search(r"instance segmentation|(box|bbox) (va|kem|cung) (polygon|mask)|(polygon|mask) (va|kem|cung) (box|bbox)", fs) \
+                    and not NEG.search(fs[:40]):
+                q["polygon_kem_box"] = "cap"
+                note("polygon_kem_box", "mỗi vật vừa box vừa polygon/mask (instance segmentation)", muc, raw)
+            elif re.search(r"(chi|only) (\S+ )?(1|mot|one) (trong 2|loai)|khong (ve|gan) (ca )?(box|bbox) (cho|voi) (vat|doi tuong) (da )?(co )?(polygon|mask)", fs):
+                q["polygon_kem_box"] = "trung"
+                note("polygon_kem_box", "mỗi vật chỉ box HOẶC polygon/mask", muc, raw)
+        # 6) shape hay track
+        if "kieu_nhan" not in q and re.search(r"\b(shape|track|interpolation|noi suy)\b", fs):
+            if re.search(r"(dung|gan|ve|use|annotate)\s+(\S+\s+){0,3}shape|khong (dung|gan) (\S+ )?track|(anh|image)s? (roi|rieng|doc lap|independent)", fs):
+                q["kieu_nhan"] = "shape"
+                note("kieu_nhan", "gán bằng Shape (ảnh rời)", muc, raw)
+            elif re.search(r"(dung|gan|ve|use|annotate)\s+(\S+\s+){0,3}(track|interpolation)|noi suy|qua cac (frame|khung)", fs):
+                q["kieu_nhan"] = "track"
+                note("kieu_nhan", "gán bằng Track (video)", muc, raw)
+        # 7) thuoc tinh bat buoc
         if re.search(r"bat buoc|phai chon|phai gan|phai danh dau|luon chon|must|required|mandatory", fs):
             for lb in labels:
                 for a in lb.get("attributes", []):
@@ -336,6 +363,13 @@ def _rect(points):
     return [min(xs), min(ys), max(xs), max(ys)]
 
 
+def _bbox(points, kind):
+    p = [float(v) for v in points]
+    if kind == "mask":                  # RLE + [left, top, right, bottom]
+        return [p[-4], p[-3], p[-2] + 1, p[-1] + 1]
+    return [min(p[0::2]), min(p[1::2]), max(p[0::2]), max(p[1::2])]
+
+
 def rule_check(ann, labels, frames, rules):
     """ann: annotations cua job (CVAT API). labels: nhan cua task. frames: [(so frame, ten anh, w, h)].
     Tra ve (findings, canh bao). Moi finding giong review_core: kind, sure, label, box, ref, msg, frame, name."""
@@ -351,13 +385,14 @@ def rule_check(ann, labels, frames, rules):
     if missing and rules.get("nhan"):
         warn.append("Nhãn có trong task nhưng không có trong file luật: " + ", ".join(missing))
 
-    def check(obj_id, label_id, frame, points, attrs, rotation):
+    def check(obj_id, label_id, frame, points, attrs, rotation, kind="rectangle"):
         if frame not in fr or label_id not in id2lb:
             return
         name, W, H = fr[frame]
         lb = id2lb[label_id]["name"]
-        box = _rect(points)
+        box = _rect(points) if kind == "rectangle" else _bbox(points, kind)
         bw, bh = box[2] - box[0], box[3] - box[1]
+        what = {"rectangle": "Box", "polygon": "Polygon", "mask": "Mask"}[kind]
         spec = _spec_for(rules, lb)
         ref = muc_ref(rules, lb)
         base = dict(kind="guideline", label=lb, box=box, ref=obj_id, frame=frame, name=os.path.basename(name), tang=1)
@@ -366,18 +401,18 @@ def rule_check(ann, labels, frames, rules):
                 out.append(dict(base, sure=True, msg=f"Nhãn '{lb}' không có trong guideline{muc_ref(rules, '')}."))
             return
         if bw < 1 or bh < 1:
-            out.append(dict(base, sure=True, msg=f"Box '{lb}' gần như không có diện tích ({bw:.0f}x{bh:.0f} px){ref}."))
+            out.append(dict(base, sure=True, msg=f"{what} '{lb}' gần như không có diện tích ({bw:.0f}x{bh:.0f} px){ref}."))
             return
         if W and H and tol and (box[0] < -tol or box[1] < -tol or box[2] > W + tol or box[3] > H + tol):
-            out.append(dict(base, sure=True, msg=f"Box '{lb}' vượt ra ngoài ảnh{ref}."))
+            out.append(dict(base, sure=True, msg=f"{what} '{lb}' vượt ra ngoài ảnh{ref}."))
         mn = float(spec.get("kich_thuoc_toi_thieu_px") or 0)
         if mn and min(bw, bh) < mn:
-            out.append(dict(base, sure=True, msg=f"Box '{lb}' nhỏ hơn mức tối thiểu ({min(bw, bh):.0f} < {mn:.0f} px){ref}."))
+            out.append(dict(base, sure=True, msg=f"{what} '{lb}' nhỏ hơn mức tối thiểu ({min(bw, bh):.0f} < {mn:.0f} px){ref}."))
         rr = spec.get("ti_le_rong_cao")
         if isinstance(rr, list) and len(rr) == 2 and not abs(rotation or 0) > 0.5:
             ar = bw / max(bh, 1e-6)
             if ar < rr[0] or ar > rr[1]:
-                out.append(dict(base, sure=False, msg=f"Box '{lb}' có tỉ lệ rộng/cao {ar:.2f}, ngoài khoảng {rr[0]}–{rr[1]}{ref}."))
+                out.append(dict(base, sure=False, msg=f"{what} '{lb}' có tỉ lệ rộng/cao {ar:.2f}, ngoài khoảng {rr[0]}–{rr[1]}{ref}."))
         vals = {}
         for a in attrs or []:
             sp = spec2attr.get(a.get("spec_id"))
@@ -386,20 +421,21 @@ def rule_check(ann, labels, frames, rules):
         for an in spec.get("thuoc_tinh_bat_buoc") or []:
             v = vals.get(an)
             if v is None or str(v[0]).strip() == "":
-                out.append(dict(base, sure=True, msg=f"Box '{lb}' thiếu thuộc tính '{an}'{ref}."))
+                out.append(dict(base, sure=True, msg=f"{what} '{lb}' thiếu thuộc tính '{an}'{ref}."))
         for an in spec.get("khong_de_mac_dinh") or []:
             v = vals.get(an)
             if v is not None and str(v[0]) == str(v[1].get("default_value")):
-                out.append(dict(base, sure=False, msg=f"Box '{lb}': thuộc tính '{an}' vẫn để mặc định '{v[0]}', kiểm tra đã chọn chưa{ref}."))
+                out.append(dict(base, sure=False, msg=f"{what} '{lb}': thuộc tính '{an}' vẫn để mặc định '{v[0]}', kiểm tra đã chọn chưa{ref}."))
 
     for s in ann.get("shapes", []):
-        if s.get("type") == "rectangle":
-            check(f"shape {s['id']}", s["label_id"], s["frame"], s["points"], s.get("attributes"), s.get("rotation"))
+        if s.get("type") in ("rectangle", "polygon", "mask"):
+            check(f"shape {s['id']}", s["label_id"], s["frame"], s["points"], s.get("attributes"), s.get("rotation"), s["type"])
     for t in ann.get("tracks", []):
         for k in t.get("shapes", []):
-            if k.get("type", "rectangle") == "rectangle" and not k.get("outside"):
+            if k.get("type", "rectangle") in ("rectangle", "polygon", "mask") and not k.get("outside"):
                 check(f"track {t['id']}", t["label_id"], k["frame"], k["points"],
-                      list(t.get("attributes") or []) + list(k.get("attributes") or []), k.get("rotation"))
+                      list(t.get("attributes") or []) + list(k.get("attributes") or []), k.get("rotation"),
+                      k.get("type", "rectangle"))
     return out, warn
 
 
@@ -413,10 +449,24 @@ class apply_to_core:
     def __enter__(self):
         from label_mapping import norm
         self.saved = {k: list(v) for k, v in self.R.SYN.items()}
+        import area_check
+        self.area_check = area_check
         self.saved_amodal, self.saved_min = self.R.AMODAL, dict(self.R.MIN_MISS_BY_LABEL)
+        self.saved_side = self.R.MIN_MISS_SIDE
+        self.saved_pair, self.saved_kieu = area_check.MASK_WITH_BOX, self.R.KIEU_NHAN
         q = self.rules.get("quy_tac") or {}
+        if q.get("polygon_kem_box") in ("cap", "trung"):   # quy uoc 1 vat vua box vua polygon
+            area_check.MASK_WITH_BOX = q["polygon_kem_box"]
+        if q.get("kieu_nhan") in ("shape", "track"):        # guideline noi gan bang shape hay track
+            self.R.KIEU_NHAN = q["kieu_nhan"]
         if q.get("toan_bo_vat") is not None:            # guideline noi ve toan bo vat hay chi phan nhin thay
             self.R.AMODAL = bool(q["toan_bo_vat"])
+        try:                                            # vat nho hon N px khong bat buoc gan -> tool bao thieu tu N px
+            px = float(q.get("khong_bat_buoc_duoi_px") or 0)
+        except (TypeError, ValueError):
+            px = 0
+        if px > 0:
+            self.R.MIN_MISS_SIDE = px
         for name, spec in (self.rules.get("nhan") or {}).items():
             mn = (spec or {}).get("kich_thuoc_toi_thieu_px")
             if mn:                                      # guideline bo qua vat nho -> tool khong doi gan vat nho
@@ -434,8 +484,11 @@ class apply_to_core:
         self.R.SYN.clear()
         self.R.SYN.update(self.saved)
         self.R.AMODAL = self.saved_amodal
+        self.area_check.MASK_WITH_BOX = self.saved_pair
+        self.R.KIEU_NHAN = self.saved_kieu
         self.R.MIN_MISS_BY_LABEL.clear()
         self.R.MIN_MISS_BY_LABEL.update(self.saved_min)
+        self.R.MIN_MISS_SIDE = self.saved_side
 
 
 def rider_rule(rules, default=True):

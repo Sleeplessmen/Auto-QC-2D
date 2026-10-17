@@ -19,15 +19,22 @@ PROMPTS = {
     "residential": "a dashcam photo in a residential area", "tunnel": "a dashcam photo inside a tunnel",
     "parkinglot": "a dashcam photo of a parking lot", "gasstations": "a dashcam photo at a gas station",
 }
+SHAPE_TYPES = {"rectangle", "polygon", "polyline", "points", "ellipse", "cuboid", "mask", "skeleton"}
+# vat co box du co thuoc tinh chon (vd traffic light: trafficLightColor) -> khong phai nhan cho ca anh
+OBJECT_NAMES = {"trafficlight", "trafficsign", "dengiaothong", "biengiaothong", "denduong", "bienbao"}
+NO_GUESS = {"undefined", "unknown", "khongro", "other", "khac"}   # gia tri "khong xac dinh": tool khong goi y / khong cham
 WRONG_P = 0.6           # CLIP chon gia tri khac voi xac suat >= muc nay (va gia tri dang gan <= 0.15) -> co the sai
 GUESS_P = 0.4           # du chac de goi y gia tri cho anh thieu tag
 
 
-def frame_labels(labels, used_names):
-    """Nhan gan cho ca anh: kieu 'tag', hoac co thuoc tinh chon (select / radio) va khong phai nhan box / vung."""
+def frame_labels(labels, used_names, shape_label_ids=()):
+    """Nhan gan cho ca anh: kieu 'tag', hoac kieu 'any' co thuoc tinh chon (select / radio) ma khong phai nhan vat:
+    khong co shape / track nao dung nhan do trong job (shape_label_ids) va ten khong phai vat (traffic light...)."""
     out = []
     for lb in labels:
-        if lb["name"] in used_names:
+        if lb["name"] in used_names or lb.get("type") in SHAPE_TYPES:
+            continue
+        if lb.get("type") != "tag" and (lb["id"] in set(shape_label_ids) or norm(lb["name"]) in OBJECT_NAMES):
             continue
         sel = [a for a in lb.get("attributes", []) if a.get("input_type") in ("select", "radio") and len(a.get("values") or []) > 1]
         if lb.get("type") == "tag" or sel:
@@ -50,7 +57,9 @@ def check(img, tags, flabels, clf):
         for a in fl["attrs"]:
             if clf is None:
                 continue
-            vals = a["values"]
+            vals = [v for v in a["values"] if norm(v) not in NO_GUESS]
+            if len(vals) < 2:
+                continue
             p = clf.probs(img, [[0, 0, W, H]], [_prompt(a["name"], v) for v in vals], pad=0)[0]
             guess[a["id"]] = (a["name"], vals, p)
         if not mine:

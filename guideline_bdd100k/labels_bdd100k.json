@@ -1,0 +1,313 @@
+[
+ {
+  "name": "pedestrian",
+  "color": "#dc143c",
+  "type": "any",
+  "attributes": [
+   {
+    "name": "occluded",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   },
+   {
+    "name": "truncated",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   }
+  ]
+ },
+ {
+  "name": "rider",
+  "color": "#ff0000",
+  "type": "any",
+  "attributes": [
+   {
+    "name": "occluded",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   },
+   {
+    "name": "truncated",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   }
+  ]
+ },
+ {
+  "name": "car",
+  "color": "#00008e",
+  "type": "any",
+  "attributes": [
+   {
+    "name": "occluded",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   },
+   {
+    "name": "truncated",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   }
+  ]
+ },
+ {
+  "name": "truck",
+  "color": "#000046",
+  "type": "any",
+  "attributes": [
+   {
+    "name": "occluded",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   },
+   {
+    "name": "truncated",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   }
+  ]
+ },
+ {
+  "name": "bus",
+  "color": "#003c64",
+  "type": "any",
+  "attributes": [
+   {
+    "name": "occluded",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   },
+   {
+    "name": "truncated",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   }
+  ]
+ },
+ {
+  "name": "train",
+  "color": "#005064",
+  "type": "any",
+  "attributes": [
+   {
+    "name": "occluded",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   },
+   {
+    "name": "truncated",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   }
+  ]
+ },
+ {
+  "name": "motorcycle",
+  "color": "#0000e6",
+  "type": "any",
+  "attributes": [
+   {
+    "name": "occluded",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   },
+   {
+    "name": "truncated",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   }
+  ]
+ },
+ {
+  "name": "bicycle",
+  "color": "#770b20",
+  "type": "any",
+  "attributes": [
+   {
+    "name": "occluded",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   },
+   {
+    "name": "truncated",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   }
+  ]
+ },
+ {
+  "name": "traffic light",
+  "color": "#faaa1e",
+  "type": "rectangle",
+  "attributes": [
+   {
+    "name": "occluded",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   },
+   {
+    "name": "truncated",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   },
+   {
+    "name": "trafficLightColor",
+    "input_type": "select",
+    "mutable": false,
+    "values": [
+     "none",
+     "red",
+     "yellow",
+     "green"
+    ],
+    "default_value": "none"
+   }
+  ]
+ },
+ {
+  "name": "traffic sign",
+  "color": "#dcdc00",
+  "type": "rectangle",
+  "attributes": [
+   {
+    "name": "occluded",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   },
+   {
+    "name": "truncated",
+    "input_type": "checkbox",
+    "mutable": false,
+    "values": [
+     "false"
+    ],
+    "default_value": "false"
+   }
+  ]
+ },
+ {
+  "name": "image_info",
+  "color": "#000000",
+  "type": "tag",
+  "attributes": [
+   {
+    "name": "weather",
+    "input_type": "select",
+    "mutable": false,
+    "values": [
+     "undefined",
+     "clear",
+     "overcast",
+     "partly cloudy",
+     "rainy",
+     "snowy",
+     "foggy"
+    ],
+    "default_value": "undefined"
+   },
+   {
+    "name": "scene",
+    "input_type": "select",
+    "mutable": false,
+    "values": [
+     "undefined",
+     "city street",
+     "highway",
+     "residential",
+     "parking lot",
+     "gas stations",
+     "tunnel"
+    ],
+    "default_value": "undefined"
+   },
+   {
+    "name": "timeofday",
+    "input_type": "select",
+    "mutable": false,
+    "values": [
+     "undefined",
+     "daytime",
+     "night",
+     "dawn/dusk"
+    ],
+    "default_value": "undefined"
+   }
+  ]
+ }
+]

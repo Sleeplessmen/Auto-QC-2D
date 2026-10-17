@@ -48,6 +48,14 @@ from traffic_light import classify_light_color, find_color_attribute, pick_value
 from drivable_area import build_road_mask, split_drivable, BLOCKING_LABELS, DIRECT, ALTERNATIVE
 from label_mapping import resolve_drivable, resolve_lane
 
+
+def _imwrite(path, img, params=None):
+    """cv2.imwrite khong ghi duoc duong dan co dau (Windows) -> encode roi ghi bang numpy."""
+    ok, buf = cv2.imencode(os.path.splitext(path)[1] or ".jpg", img, params or [])
+    if ok:
+        buf.tofile(path)
+    return ok
+
 # -----------------------------------------------------------------------
 # Cấu hình
 # -----------------------------------------------------------------------
@@ -197,7 +205,7 @@ def save_lane_preview(image: Image.Image, lane_lines: list, path: str, areas: li
         color = LANE_PREVIEW_COLORS.get(name, (200, 200, 200))
         cv2.polylines(vis, [p], False, color, 3)
         cv2.putText(vis, name.split("/", 1)[1], tuple(int(v) for v in p[0]), cv2.FONT_HERSHEY_SIMPLEX, 0.5, color, 1)
-    cv2.imwrite(path, vis)
+    _imwrite(path, vis)
 
 
 # -----------------------------------------------------------------------
