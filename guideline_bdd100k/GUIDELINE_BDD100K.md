@@ -1,6 +1,6 @@
 # Guideline gán nhãn BDD100K: Object Detection + Instance Segmentation 2D
 
-Phiên bản 1.0, 2026-10-16. Dùng cho task CVAT của nhóm, ảnh BDD100K 1280×720. Tool QC tự động (web QC) đọc file này, nên mỗi quy tắc được viết thành một câu rõ ràng.
+Phiên bản 1.1, 2026-10-17 (thêm mục 3.5a: vật dưới 10 px không bắt buộc gán). Dùng cho task CVAT của nhóm, ảnh BDD100K 1280×720. Tool QC tự động (web QC) đọc file này, nên mỗi quy tắc được viết thành một câu rõ ràng.
 
 ## 1. Phạm vi
 
@@ -75,11 +75,11 @@ Giá trị thuộc tính:
 
 ## 7. Quy trình QC
 
-7.1 Annotator gán xong lượt 1 rồi chuyển job sang stage validation. Tool QC tự review, rồi ghi lỗi thành Issue trên CVAT. Tool không sửa nhãn.
+7.1 Annotator gán xong lượt 1 rồi chuyển job sang stage validation. Tool QC tự review trong vòng 60 giây, rồi ghi lỗi thành Issue trên CVAT: mỗi vật một Issue, vật nhiều lỗi thì ghi rõ từng lỗi. Tool không sửa nhãn.
 
-7.2 Reviewer xem các lỗi "không chắc" và đánh dấu "tool nhầm" nếu tool sai. Sau đó trả job về annotator.
+7.2 Còn lỗi chắc chắn thì tool tự trả job về annotation (rejected). Không còn lỗi chắc chắn thì job ở lại validation để reviewer kiểm chéo: reviewer xem các mục "Đang xem xét" và đánh dấu "tool nhầm" nếu tool sai.
 
-7.3 Annotator sửa theo Issue rồi nộp lại. Tool review lại, tự đóng các Issue đã hết lỗi. Mỗi lần job bị trả về được tính là một vòng.
+7.3 Annotator sửa theo Issue rồi nộp lại. Mục "Đang xem xét": nhãn đúng thì giữ nguyên và trả lời dưới Issue, sai thì sửa. Tool review lại, tự đóng các Issue đã hết lỗi. Mỗi lần job bị trả về được tính là một vòng.
 
 ## 8. Việc nhóm cần chốt (chưa có trong BDD100K gốc)
 

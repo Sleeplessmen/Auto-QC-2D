@@ -261,7 +261,7 @@ class Worker:
             for f in f1:
                 by_frame.get(f["frame"], []).append(f)
             rv.findings += f1
-            cb(f"Tầng 1 (luật guideline): {sum(f['sure'] for f in f1)} lỗi, {sum(not f['sure'] for f in f1)} không chắc.")
+            cb(f"Tầng 1 (luật guideline): {sum(f['sure'] for f in f1)} lỗi, {sum(not f['sure'] for f in f1)} đang xem xét.")
         elif rules:
             cb("Tầng 1 (luật guideline) chỉ chạy khi review theo số job (cần nhãn gốc trên CVAT).")
         st = rv.stats

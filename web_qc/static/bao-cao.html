@@ -100,7 +100,7 @@ function frameCard(g, d) {
     <div class="frame-body">
       <div class="frame-img">${g.preview ? `<div class="stage"><img src="/api/public/runs/${RUN}/preview/${encodeURIComponent(g.preview)}?t=${encodeURIComponent(T)}" alt="Frame ${g.frame ?? ""}" data-boxes='${esc(JSON.stringify(g.items.map((it, i) => [it.box, cls(it), i + 1])))}'><svg aria-hidden="true"></svg></div>` : '<span class="meta">Không có ảnh</span>'}</div>
       <ol class="issues">${g.items.map((it, i) => `<li class="${cls(it)}"><span class="n">${i + 1}</span><div>
-        <div class="k">${esc(it.kind_vi)}${it.label ? " · " + esc(it.label) : ""}${it.sure ? "" : ' <span class="meta">(không chắc, kiểm tra lại)</span>'}</div>
+        <div class="k">${esc(it.kind_vi)}${it.label ? " · " + esc(it.label) : ""}${it.sure ? "" : ' <span class="meta">(đang xem xét, kiểm tra lại)</span>'}</div>
         <div class="m">${esc(it.msg)}</div><div class="b">box [${it.box.join(", ")}]</div></div></li>`).join("")}</ol>
     </div></section>`;
 }

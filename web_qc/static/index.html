@@ -8,7 +8,7 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%234f6bff'/%3E%3Crect x='8' y='10' width='16' height='12' rx='1' fill='none' stroke='white' stroke-width='2.4'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
-<link rel="stylesheet" href="style.css?v=14">
+<link rel="stylesheet" href="style.css?v=15">
 </head>
 <body>
 
@@ -133,7 +133,7 @@
         <div class="panel flush span2">
           <div class="panel-head padded"><h2>Theo labeler</h2><span class="meta">Xếp từ % box đúng thấp nhất · lấy từ người được giao job trên CVAT</span></div>
           <div class="tablewrap"><table class="tbl" id="dashAss">
-            <thead><tr><th>Labeler</th><th class="r">Số lần review</th><th class="r">Số job</th><th class="r">% box đúng TB</th><th class="r">Tỉ lệ đạt</th><th class="r">Lỗi / Không chắc</th><th>Gần nhất</th></tr></thead><tbody></tbody></table></div>
+            <thead><tr><th>Labeler</th><th class="r">Số lần review</th><th class="r">Số job</th><th class="r">% box đúng TB</th><th class="r">Tỉ lệ đạt</th><th class="r">Lỗi / Đang xem xét</th><th>Gần nhất</th></tr></thead><tbody></tbody></table></div>
         </div>
       </div>
     </section>
@@ -216,7 +216,7 @@
         <ol class="steps">
           <li><b>Chọn job</b><span>Bấm <b>Chọn</b> để xem danh sách job trên CVAT, hoặc gõ số job. Đổi máy CVAT ở ô Kết nối.</span></li>
           <li><b>Kiểm tra guideline</b><span>Để "Tự chọn theo task" thì web dùng guideline đã gán cho task. Dòng dưới thanh công cụ cho biết sẽ kiểm bao nhiêu luật.</span></li>
-          <li><b>Đánh giá, duyệt, đẩy Issue</b><span>Lỗi chắc chắn được chọn sẵn. Lỗi "không chắc" xem ảnh rồi tự chọn. Lỗi tool báo nhầm thì bấm <b>Tool nhầm</b>.</span></li>
+          <li><b>Đánh giá, duyệt, đẩy Issue</b><span>Lỗi chắc chắn được chọn sẵn. Mục "Đang xem xét" xem ảnh rồi tự chọn. Lỗi tool báo nhầm thì bấm <b>Tool nhầm</b>.</span></li>
         </ol>
         <p class="empty-foot">Kết quả các lần trước nằm ở <a href="#" data-goto="history">Lịch sử</a>.</p>
       </div>
@@ -260,7 +260,7 @@
                 <div class="seg" id="segSure" role="group" aria-label="Lọc theo mức">
                   <button type="button" data-v="" class="on">Tất cả <b id="cAll"></b></button>
                   <button type="button" data-v="1">Lỗi <b id="cSure"></b></button>
-                  <button type="button" data-v="0">Không chắc <b id="cUnsure"></b></button>
+                  <button type="button" data-v="0">Đang xem xét <b id="cUnsure"></b></button>
                   <button type="button" data-v="fp">Tool nhầm <b id="cFp"></b></button>
                   <button type="button" data-v="note">Ghi chú <b id="cNote"></b></button>
                 </div>
@@ -281,7 +281,7 @@
             <div class="wb-view">
               <div class="viewer-bar">
                 <div class="legend" aria-hidden="true">
-                  <span><i class="lg lg-bad"></i>Lỗi</span><span><i class="lg lg-warn"></i>Không chắc</span><span><i class="lg lg-miss"></i>Vật bị thiếu</span><span><i class="lg lg-lab"></i>Box người gán</span><span><i class="lg lg-cur"></i>Đang xem</span><span><i class="lg lg-note"></i>Ghi chú</span>
+                  <span><i class="lg lg-bad"></i>Lỗi</span><span><i class="lg lg-warn"></i>Đang xem xét</span><span><i class="lg lg-miss"></i>Vật bị thiếu</span><span><i class="lg lg-lab"></i>Box người gán</span><span><i class="lg lg-cur"></i>Lỗi đang chọn</span><span><i class="lg lg-note"></i>Ghi chú</span>
                 </div>
                 <button type="button" class="btn sm" id="drawBtn" title="Kéo một khung trên ảnh để ghi chú cho labeler (phím N)"><svg class="ic"><use href="#i-note"/></svg>Ghi chú trên ảnh</button>
               </div>
@@ -332,7 +332,7 @@
           </div>
 
           <div class="actionbar">
-            <label class="chk" for="replaceOld" title="Lỗi vẫn còn: giữ Issue cũ. Lỗi đã hết: xoá Issue cũ, hoặc đóng lại nếu đã có người trả lời."><input type="checkbox" id="replaceOld" checked><span>Đồng bộ với Issue lần trước</span></label>
+            <label class="chk" for="replaceOld" title="Lỗi vẫn còn: giữ Issue cũ, không tạo trùng. Lỗi đã hết: đóng (resolve) Issue cũ, giữ lịch sử để đo % Issue đúng."><input type="checkbox" id="replaceOld" checked><span>Đồng bộ với Issue lần trước</span></label>
             <label class="chk" for="addSummary" title="Thêm 1 Issue tổng kết: % box đúng, đạt hay chưa, kèm link trang lỗi cho labeler"><input type="checkbox" id="addSummary"><span>Kèm Issue tổng kết</span></label>
             <span id="pushRes" class="meta push-res"></span>
             <button id="pushBtn" class="btn primary" type="button"><svg class="ic"><use href="#i-upload"/></svg><span id="pushLabel">Đẩy Issue lên CVAT</span></button>
@@ -352,7 +352,7 @@
       </header>
       <div class="panel flush">
         <div class="tablewrap"><table id="htable" class="tbl">
-          <thead><tr><th>#</th><th>Job</th><th>Task</th><th>Labeler</th><th>Người chạy</th><th>Thời gian</th><th>Kết quả</th><th class="r">Box đúng</th><th class="r">Lỗi / KC</th><th class="r">Tool nhầm</th><th class="r">Issue</th></tr></thead>
+          <thead><tr><th>#</th><th>Job</th><th>Task</th><th>Labeler</th><th>Người chạy</th><th>Thời gian</th><th>Kết quả</th><th class="r">Box đúng</th><th class="r">Lỗi / Xem xét</th><th class="r">Tool nhầm</th><th class="r">Issue</th></tr></thead>
           <tbody></tbody></table></div>
       </div>
     </section>
@@ -608,6 +608,6 @@
   </div>
 </div>
 <div id="modal" class="modal zoom hidden"><img id="modalImg" alt="Ảnh phóng to"></div>
-<script src="app.js?v=18"></script>
+<script src="app.js?v=19"></script>
 </body>
 </html>

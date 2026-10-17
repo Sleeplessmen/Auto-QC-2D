@@ -278,7 +278,7 @@ function showResult(r) {
   $("#stats").innerHTML = `
     <div class="kpi main-k"><div class="v">${pctTxt(pct)}<span class="pill ${pass ? "pass" : "fail"}">${pass ? "Đạt" : "Chưa đạt"}</span></div><div class="k">Box không có lỗi chắc chắn · ngưỡng ${(THR() * 100).toFixed(0)}%</div></div>
     <div class="kpi ${s.sure ? "bad" : ""}"><div class="v">${s.sure ?? 0}</div><div class="k">Lỗi chắc chắn</div></div>
-    <div class="kpi ${s.unsure ? "warn" : ""}"><div class="v">${s.unsure ?? 0}</div><div class="k">Không chắc, cần xem</div></div>
+    <div class="kpi ${s.unsure ? "warn" : ""}"><div class="v">${s.unsure ?? 0}</div><div class="k">Đang xem xét, cần người xem</div></div>
     <div class="kpi"><div class="v">${s.boxes ?? 0}</div><div class="k">Box trong ${s.frames ?? 0} ảnh</div></div>
     <div class="kpi"><div class="v">${sec < 90 ? Math.round(sec) + "s" : (sec / 60).toFixed(1) + "m"}</div><div class="k">Thời gian chạy · ${s.frames ? (sec / s.frames).toFixed(1) : "?"}s/ảnh</div></div>`;
   $("#runStatus").className = "pill " + (pass ? "pass" : "fail");
@@ -412,7 +412,7 @@ function renderDetail(f) {
   const fb = FEEDBACK[f.id], edited = !f.note && EDITS[f.id];
   const tags = f.note
     ? `<span class="tag note">Ghi chú người review</span><span class="tag k">${esc(f.username || "")}</span>`
-    : `<span class="tag s${+f.sure}">${f.sure ? "Lỗi" : "Không chắc"}</span><span class="tag k">${esc(f.kind_vi)}</span><span class="tag k">${esc(f.label)}</span>${f.tang === 1 ? '<span class="tag k">Tầng 1 · luật</span>' : '<span class="tag k">Tầng 2 · model</span>'}${edited ? '<span class="edited-badge">lời nhắn đã sửa</span>' : ""}`;
+    : `<span class="tag s${+f.sure}">${f.sure ? "Lỗi" : "Đang xem xét"}</span><span class="tag k">${esc(f.kind_vi)}</span><span class="tag k">${esc(f.label)}</span>${f.tang === 1 ? '<span class="tag k">Tầng 1 · luật</span>' : '<span class="tag k">Tầng 2 · model</span>'}${edited ? '<span class="edited-badge">lời nhắn đã sửa</span>' : ""}`;
   $("#detail").innerHTML = `
     <div class="zoom-wrap"><canvas id="zoomCv" title="Phóng to vùng ${f.note ? "ghi chú" : "lỗi"}"></canvas>
       <div>
@@ -565,7 +565,7 @@ function renderFrames() {
     const nn = NOTES.filter(n => n.name === fr.name).length, unsure = fr.n - fr.sure;
     return `<button type="button" class="frame-card ${fr.n || nn ? "" : "clean"}" data-name="${esc(fr.name)}">
       <img src="${fr.preview}" alt="Frame ${fr.frame ?? ""}" loading="lazy">
-      <div class="fc-meta">${fr.sure ? `<span class="tag s1">${fr.sure} lỗi</span>` : ""}${unsure ? `<span class="tag s0">${unsure} không chắc</span>` : ""}${nn ? `<span class="tag note">${nn} ghi chú</span>` : ""}${fr.n || nn ? "" : '<span class="tag k">Không lỗi</span>'}<span class="fc-name" title="${esc(fr.name)}">${fr.frame != null ? "F" + fr.frame + " · " : ""}${esc(fr.name)}</span></div>
+      <div class="fc-meta">${fr.sure ? `<span class="tag s1">${fr.sure} lỗi</span>` : ""}${unsure ? `<span class="tag s0">${unsure} đang xem xét</span>` : ""}${nn ? `<span class="tag note">${nn} ghi chú</span>` : ""}${fr.n || nn ? "" : '<span class="tag k">Không lỗi</span>'}<span class="fc-name" title="${esc(fr.name)}">${fr.frame != null ? "F" + fr.frame + " · " : ""}${esc(fr.name)}</span></div>
     </button>`;
   }).join("") || `<p class="empty-note">Không có ảnh.</p>`;
 }
@@ -598,8 +598,8 @@ $("#reloadIssues").onclick = loadIssues;
 function pushedText(p) {
   const parts = [`Tạo <b>${p.created}</b> Issue mới`];
   if (p.kept) parts.push(`giữ ${p.kept} Issue cũ (lỗi vẫn còn)`);
-  if (p.resolved) parts.push(`đóng ${p.resolved} (đã có trả lời)`);
-  if (p.removed) parts.push(`xoá ${p.removed} (lỗi đã hết)`);
+  if (p.resolved) parts.push(`đóng ${p.resolved} Issue cũ (lỗi đã hết)`);
+  if (p.removed) parts.push(`thay ${p.removed} Issue cũ (lỗi còn nhưng lời nhắn đổi)`);
   return parts.join(", ") + ` · ${fmtTime(p.time)} · ` + (p.unchanged ? ok("Nhãn gốc không đổi ✔") : bad("Nhãn trên CVAT đã khác lúc review (có người đang sửa job?)"));
 }
 $("#pushBtn").onclick = async () => {
@@ -607,7 +607,7 @@ $("#pushBtn").onclick = async () => {
   const summary = $("#addSummary").checked;
   if (!ids.length && !noteIds.length && !summary) { $("#pushRes").innerHTML = bad("Chưa chọn mục nào."); return; }
   const nUnsure = RUN_DATA.findings.filter(f => SELECTED.has(String(f.id)) && !f.sure).length;
-  const sure = await askConfirm(`Đẩy lên job ${RUN_DATA.job_id}: ${ids.length} lỗi${nUnsure ? ` (${nUnsure} không chắc)` : ""}, ${noteIds.length} ghi chú của bạn${summary ? ", kèm 1 Issue tổng kết có link trang lỗi cho labeler" : ""}. ` +
+  const sure = await askConfirm(`Đẩy lên job ${RUN_DATA.job_id}: ${ids.length} lỗi${nUnsure ? ` (${nUnsure} đang xem xét)` : ""}, ${noteIds.length} ghi chú của bạn${summary ? ", kèm 1 Issue tổng kết có link trang lỗi cho labeler" : ""}. ` +
     ($("#replaceOld").checked ? "Lỗi đã có Issue từ lần trước sẽ không bị tạo trùng. " : "") + "Mỗi mục thành 1 Issue ghim đúng chỗ trên ảnh. Tool không sửa nhãn.", "Đẩy Issue", "Đẩy Issue lên CVAT?");
   if (!sure) return;
   const b = $("#pushBtn"); b.disabled = true; $("#pushRes").textContent = "Đang đẩy…";
@@ -628,7 +628,7 @@ async function loadDash() {
     k(d.done, `Lần review xong · ${d.days} ngày`) +
     k(d.done ? pctTxt(d.passed / d.done) : "—", `Tỉ lệ đạt (ngưỡng ${(d.threshold * 100).toFixed(0)}%)`, d.done && d.passed / d.done < .8 ? "bad" : "") +
     k(pctTxt(d.avg_pct), "% box đúng trung bình") +
-    k(d.sure, `Lỗi chắc chắn · ${d.unsure} không chắc`, d.sure ? "bad" : "") +
+    k(d.sure, `Lỗi chắc chắn · ${d.unsure} đang xem xét`, d.sure ? "bad" : "") +
     k(d.issues_pushed, "Issue đã đẩy lên CVAT") +
     k(d.fp_rate == null ? "—" : pctTxt(d.fp_rate), `Tỉ lệ tool nhầm · ${d.fp} lỗi`, d.fp_rate > .15 ? "warn" : "");
   const max = Math.max(1, ...d.kinds.map(x => x[1]));

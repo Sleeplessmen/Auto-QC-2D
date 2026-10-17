@@ -8,10 +8,14 @@ Bộ tool cho nhãn 2D trên CVAT:
   - Luật hình học (gộp từ LetmeQC): box / polygon ra ngoài ảnh, polygon xoắn hoặc dưới 3 điểm, polygon tràn ra ngoài box của nó, `pedestrian` ngồi trên xe máy (nên là `rider`).
   - Vùng đường (`drivable_area`, polygon / mask): tô thiếu, tô thừa, vẽ trùng. Tool so với model phân vùng mặt đường.
   - Một vật vừa có mask vừa có box: là lỗi trùng, hoặc là cặp hợp lệ (instance segmentation), tuỳ guideline.
-  - Gán bằng Shape hay Track có đúng guideline không.
+  - Gán bằng Shape hay Track có đúng guideline không. Lỗi của track: tráo ID, đổi vật, 1 vật 2 ID, 2 ID 1 vật, track kết thúc sớm, kích thước không đồng bộ, đứt track, nhảy vị trí.
   - Nhãn cho cả ảnh (tag, ví dụ `image_info` / `weather`): ảnh chưa gán, hoặc giá trị không hợp với ảnh (so bằng CLIP).
   - Tool review **mọi nhãn của task trên mọi ảnh**: ảnh có vật hoặc mặt đường mà labeler chưa gán cũng bị báo thiếu.
-  - Vi phạm guideline.
+  - Vi phạm guideline (thuộc tính bắt buộc, kích thước, tỉ lệ…).
+
+  **Cách ghi Issue:**
+  - **Mỗi vật một Issue**, ghim vào đúng box của vật đó. Vật có nhiều lỗi thì gộp và ghi rõ tên từng lỗi.
+  - Lỗi chưa đủ bằng chứng (lệch ít, vật bị che, vùng quá tối, vật mờ) ghi **"Đang xem xét — có thể …"** kèm lý do, để annotator kiểm chứng. Mục này không làm job bị trả về.
 - **Gán nhãn chất lượng cao** (`label_hq_2d.py`): 4 detector + SAM2 + CLIP.
 - Các tool phụ: `review.bat` (QC bằng dòng lệnh), `review_web.bat` (bản QC Gradio cũ), `menu.bat`.
 
@@ -20,6 +24,24 @@ Bộ tool cho nhãn 2D trên CVAT:
 **Đo hiệu quả trên job thật:** trang Tổng quan → Hiệu quả Issue. Có % Issue đúng (annotator đã sửa theo), % lỗi bắt được trước review chéo, và số vòng bị trả lại / job.
 
 **Tài liệu đầy đủ:** [web_qc/TAI_LIEU_WEB_QC.md](web_qc/TAI_LIEU_WEB_QC.md). Tài liệu gồm cài đặt, hướng dẫn dùng, guideline và file luật, cách tool tìm lỗi, xử lý lỗi, phần kỹ thuật.
+
+## Độ chính xác của tool (đo 2026-10-17)
+
+Cách đo: cố ý cài lỗi đã biết vào nhãn đúng, cho tool review, đếm số lỗi bắt được và số báo nhầm. Ảnh dùng để báo cáo không dùng để chỉnh tool.
+
+| Chỉ số | BDD100K: 335 ảnh giữ riêng, vật từ 10 px | Ảnh Việt Nam: 123 ảnh |
+| --- | --- | --- |
+| Bắt được lỗi (chắc chắn + đang xem xét) | **77,4%** | 70,4% |
+| Issue "chắc chắn" là lỗi thật | **84%** | 93% |
+| Báo nhầm chắc chắn / 100 box đúng | **1,45** | 0,7 |
+
+So với bản trước 2026-10-17, đo trên cùng ảnh: bắt lỗi tăng từ 74,2% lên 77,4%, Issue chắc chắn đúng tăng từ 69% lên 84%, báo nhầm giảm từ 4,0 xuống 1,45.
+
+- **Segmentation (80 ảnh COCO):** bắt 74,9% lỗi polygon.
+- **Test trên CVAT localhost:** 10/10 lỗi, lỗi ID 7/7, job Track 6/6.
+- **Chỗ yếu nhất:** vật 10–20 px và ảnh đêm.
+
+Xem đầy đủ kèm biểu đồ ở trang **Độ tin cậy tool** của web.
 
 ## Cài đặt (máy Windows mới)
 
@@ -68,7 +90,8 @@ cvat_2d\cai_dat.bat
 Vào **Cài đặt → Tự review khi job chuyển sang validation**, tick **Bật**, chọn CVAT rồi bấm **Lưu cài đặt**.
 
 - Labeler gán xong và chuyển stage của job sang **validation**. Trong vòng 60 giây, web tự đọc job, review theo guideline, rồi đẩy lỗi chắc chắn lên CVAT thành Issue.
-- **Còn lỗi chắc chắn** thì web tự trả job về **annotation (rejected)** cho labeler sửa, giống LetmeQC trước đây. **Không còn lỗi chắc chắn** thì job ở lại validation để reviewer kiểm chéo. Lỗi "không chắc" không làm job bị trả về. Tắt việc trả về bằng ô "Có lỗi chắc chắn thì tự trả job về annotation".
+- **Còn lỗi chắc chắn** thì web tự trả job về **annotation (rejected)** cho labeler sửa, giống LetmeQC trước đây. **Không còn lỗi chắc chắn** thì job ở lại validation để reviewer kiểm chéo. Mục "Đang xem xét" không làm job bị trả về. Tắt việc trả về bằng ô "Có lỗi chắc chắn thì tự trả job về annotation".
+- Kết quả từng job theo vòng, và danh sách job chờ reviewer, xem ở trang **Tự review**.
 - Labeler sửa xong, nộp lại validation, thì tool review lại. Issue có lỗi đã hết được đóng, lỗi còn thì giữ Issue cũ (không tạo trùng). Mỗi lần trả về được tính là một vòng ở Tổng quan → Hiệu quả Issue.
 - Web tự hỏi CVAT nên không cần webhook hay cấu hình mạng.
 - Đã thử trên CVAT localhost (2026-10-16): chuyển job sang validation, không bấm gì. Web tự review, giữ 12 Issue cũ còn lỗi, rồi trả job về `annotation / rejected`.
@@ -79,7 +102,8 @@ Tool không cần đáp án (ground truth) để review job thật. Tool tự nh
 
 - **Chưa có guideline:** tool review dựa vào nhãn của task, so nhãn labeler với những gì model thấy.
 - **Có guideline:** tải guideline lên (PDF / DOCX / TXT / MD) ở trang **Guideline**, rồi gán guideline cho task. Tool đọc guideline để lấy yêu cầu:
-  - Kích thước tối thiểu: vật nhỏ hơn thì không đòi gán, box nhỏ hơn thì báo lỗi.
+  - Vật nhỏ hơn N px **không bắt buộc gán** (`khong_bat_buoc_duoi_px`): tool không báo thiếu, box đã gán vẫn hợp lệ. BDD100K chốt 10 px (mục 3.5a).
+  - Kích thước tối thiểu của box (`kich_thuoc_toi_thieu_px`): box nhỏ hơn thì báo lỗi.
   - Vẽ toàn bộ vật hay chỉ phần nhìn thấy: tool ước lượng khung theo đúng cách đó.
   - Người lái xe máy có box riêng không.
   - Thuộc tính bắt buộc.
@@ -96,11 +120,21 @@ Chế độ **Phân tích** trên trang Review job vẽ chồng lên ảnh nhữ
 
 ```
 venv\Scripts\python cvat_2d\review_eval.py --images <thu muc anh> --gt <thu muc dap an json> --meta <dieu_kien.json>
+
+:: Bộ BDD100K của nhóm (735 ảnh): 400 ảnh đầu để chỉnh, 335 ảnh sau để báo cáo
+venv\Scripts\python cvat_2d\review_eval.py --images D:\DATA_EXT\bdd_eval\images --gt D:\DATA_EXT\bdd_eval\gt ^
+    --meta D:\DATA_EXT\bdd_eval\dieu_kien.json --visible --min-px 10 --skip 400 --json ket_qua.json
 ```
 
 - Mỗi file đáp án có dạng `{"image": "ten.jpg", "objects": [{"cls": "car", "box": [x1, y1, x2, y2]}]}`.
 - `--meta` là file `{ten anh: {timeofday, weather}}`, ví dụ trích từ nhãn của BDD100K.
-- `--cond dem` / `--cond mua` giả lập ảnh đêm / mưa từ ảnh ban ngày.
+- `--visible`: guideline chỉ vẽ phần nhìn thấy. `--min-px N`: vật dưới N px không bắt buộc gán.
+- `--limit N` / `--skip N`: chỉ chạy N ảnh / bỏ qua N ảnh đầu.
+- `--rows file`: lưu kết quả từng lỗi kèm cỡ vật. `--dump file`: lưu từng mục báo nhầm.
+- `--cond dem` / `--cond mua` giả lập ảnh đêm / mưa từ ảnh ban ngày. `--no-far` tắt phóng to dải giữa ảnh.
+- Cập nhật trang **Độ tin cậy tool**: `venv\Scripts\python cvat_2d\web_qc\tao_do_tin_cay.py --bdd-new ket_qua.json …`.
+
+**Test đầu cuối trên CVAT** (kết nối số 2 của web, mặc định CVAT localhost): `cvat_2d\kiem_thu\test_e2e_bdd.py`, `test_e2e_id.py`, `test_e2e_track.py`. Test chạy trên bản sao dữ liệu web, kết quả ghi vào `kiem_thu/ket_qua/`.
 
 Đo phần **segmentation** (polygon do người vẽ thật, COCO val2017):
 
@@ -109,7 +143,7 @@ venv\Scripts\python cvat_2d\tao_bo_seg_eval.py --ann <instances_val2017.json> --
 venv\Scripts\python cvat_2d\review_eval.py --seg du_lieu_danh_gia/coco_seg_eval --skip 120
 ```
 
-Bộ 200 ảnh đã có sẵn ở `du_lieu_danh_gia/coco_seg_eval` (cạnh thư mục `cvat_2d`). Kết quả 2026-10-16 trên 80 ảnh không dùng để chỉnh ngưỡng: bắt 74.9% lỗi polygon cài vào. Báo nhầm 1.3 "lỗi" + 9.2 "không chắc" trên 100 polygon đúng.
+Bộ 200 ảnh đã có sẵn ở `du_lieu_danh_gia/coco_seg_eval` (cạnh thư mục `cvat_2d`). Kết quả 2026-10-16 trên 80 ảnh không dùng để chỉnh ngưỡng: bắt 74.9% lỗi polygon cài vào. Báo nhầm 1.3 "lỗi" + 9.2 "đang xem xét" trên 100 polygon đúng.
 
 ## Thử nhanh khi chưa có job thật
 

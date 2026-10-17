@@ -966,7 +966,7 @@ def track_check(ann, id2label, frames, cb=None):
                         f"(cùng nhãn, cùng chỗ) kết thúc ở khung {A[4]}. Nếu là 1 vật thì nối thành 1 track."))
     n = sum(len(v) for v in out.values())
     if n:
-        log(f"  Track: {n} chỗ nghi đứt track / nhảy vị trí (không chắc, cần xem).", cb)
+        log(f"  Track: {n} chỗ nghi đứt track / nhảy vị trí (đang xem xét, cần người xem).", cb)
     return out
 
 
@@ -1355,7 +1355,7 @@ class Review:
             self.frames.append((n, base, len(lab), pv, finds))
             el = time.time() - t0
             log(f"[{idx}/{len(items)}] frame {n if n is not None else '-'} {base[:40]}: {len(lab)} box, "
-                f"{sum(f['sure'] for f in finds)} lỗi, {sum(not f['sure'] for f in finds)} không chắc "
+                f"{sum(f['sure'] for f in finds)} lỗi, {sum(not f['sure'] for f in finds)} đang xem xét "
                 f"(còn ~{el / idx * (len(items) - idx) / 60:.1f} phút)", cb)
         pool.shutdown(wait=False, cancel_futures=True)
         if idc:
@@ -1456,7 +1456,7 @@ class Review:
             w.writerow(["frame", "anh", "so", "loai", "muc", "nhan", "x1", "y1", "x2", "y2", "ghi_chu"])
             for n, base, _, _, finds in self.frames:
                 for k, x in enumerate(finds, 1):
-                    w.writerow([n, base, k, KIND_VI[x["kind"]], "lỗi" if x["sure"] else "không chắc", x["label"],
+                    w.writerow([n, base, k, KIND_VI[x["kind"]], "lỗi" if x["sure"] else "đang xem xét", x["label"],
                                 *[round(v) for v in x["box"]], x["msg"]])
         json.dump(dict(stats=self.stats, skipped_labels=self.skipped_labels,
                        findings=[dict(x, box=[round(v, 1) for v in x["box"]]) for x in self.findings]),
