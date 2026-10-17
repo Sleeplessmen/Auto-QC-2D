@@ -337,7 +337,7 @@ venv\Scripts\python cvat_2d\review_eval.py --min-px 10 --json ket_qua_vn.json
 **Segmentation (polygon):**
 
 ```bat
-venv\Scripts\python cvat_2d\review_eval.py --seg du_lieu_danh_gia\coco_seg_eval --skip 120 --json seg.json
+venv\Scripts\python cvat_2d\review_eval.py --seg cvat_2d\du_lieu_danh_gia\coco_seg_eval --skip 120 --json seg.json
 ```
 
 **Cập nhật trang "Độ tin cậy tool"** sau khi đo:
@@ -364,7 +364,7 @@ Kết quả được ghi vào `cvat_2d/kiem_thu/ket_qua/`.
 | `D:\DATA_EXT\bdd_eval` | 735 ảnh BDD100K kèm đáp án, chia theo ngày/đêm và thời tiết |
 | `D:\DATA_EXT\exdark_eval` | 150 ảnh rất tối |
 | `D:\DATA_EXT\bdd_train` | 9.265 ảnh BDD100K dạng YOLO, dùng để huấn luyện |
-| `tood qc 2d\du_lieu_danh_gia\coco_seg_eval` | 200 ảnh COCO có polygon do người vẽ |
+| `tood qc 2d\cvat_2d\du_lieu_danh_gia\` | Có trong repo: `coco_seg_eval` (200 ảnh COCO có polygon do người vẽ), `bdd_e2e` (4 ảnh BDD100K cho test đầu cuối) |
 
 ---
 
@@ -381,7 +381,6 @@ dự án nhóm/
     ├── sam2/                      # thư viện SAM2
     ├── checkpoints/               # sam2.1_hiera_large.pt
     ├── venv/                      # môi trường Python
-    ├── du_lieu_danh_gia/          # bộ ảnh đo độ chính xác
     └── cvat_2d/                   # repo cvat-2d-qc
         ├── web_qc/                # Web QC
         │   ├── server.py          #   API (FastAPI), đăng nhập, webhook
@@ -403,6 +402,7 @@ dự án nhóm/
         ├── review.py              # review bằng dòng lệnh
         ├── guideline_bdd100k/     # guideline, tập nhãn, file luật BDD100K
         ├── kiem_thu/              # test đầu cuối trên CVAT
+        ├── du_lieu_danh_gia/      # bộ ảnh đo: coco_seg_eval (200 ảnh), bdd_e2e (4 ảnh)
         ├── cache_hq2d/            # cache kết quả detect (không commit)
         ├── review_out/            # kết quả từng lần review (không commit)
         ├── *.bat                  # web_qc, review, cai_dat, menu

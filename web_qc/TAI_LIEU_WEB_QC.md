@@ -642,7 +642,7 @@ Kèm bảng theo loại lỗi (để biết loại nào tool hay đúng, loại 
 
 Để số liệu đúng: khi review lại, Issue có lỗi đã hết được **đóng (resolved)**, không xoá, nên vẫn còn để đo. Issue gộp nhiều lỗi của một vật được tính **từng lỗi** theo đúng loại. Annotator sửa vật đó theo bất kỳ cách nào thì mọi lỗi trong Issue đều được tính là "đã sửa".
 
-Đã thử đầu cuối trên CVAT localhost (2026-10-16, task BDD100K 4 ảnh, 10 lỗi cài vào, chạy lại được bằng `venv\Scripts\python cvat_2d\kiem_thu\test_e2e_bdd.py`, ảnh ở `du_lieu_danh_gia/bdd_e2e`):
+Đã thử đầu cuối trên CVAT localhost (2026-10-16, task BDD100K 4 ảnh, 10 lỗi cài vào, chạy lại được bằng `venv\Scripts\python cvat_2d\kiem_thu\test_e2e_bdd.py`, ảnh trong repo ở `du_lieu_danh_gia/bdd_e2e`):
 - Tool bắt **10/10** lỗi (9 chắc chắn, 1 đang xem xét).
 - Giả lập annotator sửa 5 lỗi (6 Issue), đóng 1 Issue mà không sửa. Reviewer đánh "tool nhầm" 1 ghi chú và tự thêm 1 Issue.
 - Web tính ra: % Issue đúng **75%** (6/8), % lỗi bắt trước review chéo **85.7%** (6/7), số vòng trả lại **2**.

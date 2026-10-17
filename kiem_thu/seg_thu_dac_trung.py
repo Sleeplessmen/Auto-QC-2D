@@ -4,7 +4,9 @@ roi chinh nguong: python seg_chinh_nguong.py feats.json"""
 import json, os, sys, random
 HERE = os.path.dirname(os.path.abspath(__file__))
 D = os.path.dirname(HERE)                                                     # cvat_2d
-SEG = os.path.join(os.path.dirname(D), "du_lieu_danh_gia", "coco_seg_eval")   # anh + gt_seg.json
+SEG = os.path.join(D, "du_lieu_danh_gia", "coco_seg_eval")   # anh + gt_seg.json
+if not os.path.isdir(SEG):
+    SEG = os.path.join(os.path.dirname(D), "du_lieu_danh_gia", "coco_seg_eval")
 sys.path.insert(0, D); os.chdir(D)
 import cv2, numpy as np
 import review_core as R, seg_check as S, label_hq_2d as L, review_eval as E

@@ -11,7 +11,9 @@ Cac track dung con lai: khong duoc bao loi ID.
 import json, os, shutil, sys, tempfile, time
 HERE = os.path.dirname(os.path.abspath(__file__))
 D = os.path.dirname(HERE)
-DATA = os.path.join(os.path.dirname(D), "du_lieu_danh_gia")
+DATA = os.path.join(D, "du_lieu_danh_gia")                         # trong repo (cvat_2d/du_lieu_danh_gia)
+if not os.path.isdir(DATA):
+    DATA = os.path.join(os.path.dirname(D), "du_lieu_danh_gia")
 SP = os.path.join(HERE, "ket_qua")
 os.makedirs(SP, exist_ok=True)
 sys.path.insert(0, D); sys.path.insert(0, os.path.join(D, "web_qc")); os.chdir(D)

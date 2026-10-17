@@ -142,11 +142,11 @@ venv\Scripts\python cvat_2d\review_eval.py --images D:\DATA_EXT\bdd_eval\images 
 Đo phần **segmentation** (polygon do người vẽ thật, COCO val2017):
 
 ```
-venv\Scripts\python cvat_2d\tao_bo_seg_eval.py --ann <instances_val2017.json> --out du_lieu_danh_gia/coco_seg_eval --n 200
-venv\Scripts\python cvat_2d\review_eval.py --seg du_lieu_danh_gia/coco_seg_eval --skip 120
+venv\Scripts\python cvat_2d\tao_bo_seg_eval.py --ann <instances_val2017.json> --out cvat_2d/du_lieu_danh_gia/coco_seg_eval --n 200
+venv\Scripts\python cvat_2d\review_eval.py --seg cvat_2d/du_lieu_danh_gia/coco_seg_eval --skip 120
 ```
 
-Bộ 200 ảnh đã có sẵn ở `du_lieu_danh_gia/coco_seg_eval` (cạnh thư mục `cvat_2d`). Kết quả 2026-10-16 trên 80 ảnh không dùng để chỉnh ngưỡng: bắt 74.9% lỗi polygon cài vào. Báo nhầm 1.3 "lỗi" + 9.2 "đang xem xét" trên 100 polygon đúng.
+Bộ 200 ảnh đã có sẵn **trong repo**, ở `du_lieu_danh_gia/coco_seg_eval` (ảnh COCO val2017 kèm `gt_seg.json`). Bộ 4 ảnh BDD100K cho test đầu cuối nằm ở `du_lieu_danh_gia/bdd_e2e`. Kết quả 2026-10-16 trên 80 ảnh không dùng để chỉnh ngưỡng: bắt 74.9% lỗi polygon cài vào. Báo nhầm 1.3 "lỗi" + 9.2 "đang xem xét" trên 100 polygon đúng.
 
 ## Thử nhanh khi chưa có job thật
 

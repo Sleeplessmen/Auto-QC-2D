@@ -1,0 +1,3677 @@
+{
+"b1d0a191-5490450b.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"b1d10d08-5b108225.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"b1d971b4-ac67ca0d.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "residential"
+},
+"b1da9c53-0f3d4c5d.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"b1dd58c1-8b546ba7.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b1e1a7b8-0aec80e8.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"b1ff4656-ebcfeb35.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"b2036451-aa924fd1.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "residential"
+},
+"b204a5c1-064b0040.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"b2064e61-2beadd45.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"b21c86ac-0dc77d82.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"b22a4d9f-48b2e986.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"b231a630-c4522992.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"b23b2649-1a78948d.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b242f6b2-eaa39345.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b24f03f7-ff66eaca.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b255cd6c-0bdf0ac7.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "highway"
+},
+"b255cd6c-2f889586.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"b255cd6c-f2f28aff.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"b255cd6c-fb594dcb.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"b25fb716-78d8d49b.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"b262f576-b0373824.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "residential"
+},
+"b263f57d-1ccf6e51.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"b266db29-4d22b355.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"b2694461-db4f4470.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"b26ba07a-38f78442.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"b26cfcdc-2e290c42.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"b27098c3-c443b6e3.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b27cde22-56abd0e1.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "highway"
+},
+"b27fdbad-ae939e31.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"b2939bf0-221e1dfb.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"b29511e5-0e7c7013.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"b2a8e8b4-50058f09.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b2aefccb-24d289a9.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"b2bceb54-4d3cc92c.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "residential"
+},
+"b2bee3e1-80c787bd.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"b2c23864-810e4e1d.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"b2cbf6d8-732b47be.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"b2d83b7b-9627ff87.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "residential"
+},
+"b2d90c73-32ae0488.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "highway"
+},
+"b2e54795-349f005b.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"b2e54795-6d4ef5f9.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"b2e54795-db1f3bad.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"b2f4a409-5ddff11a.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"b332df78-6765dddc.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "residential"
+},
+"b334b56d-2ce33cd7.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"b336bdb9-ed5d2cc3.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"b338efff-595690ba.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "highway"
+},
+"b355880f-7cb7ed1e.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"b3565dc3-9d685e22.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"b3674f80-8070d692.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"b36a5c73-64eacfbf.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "highway"
+},
+"b3709948-6e8ef33d.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b376c5c2-07a93591.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "highway"
+},
+"b380ae2f-afd868dc.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"b386d34e-a6a9ea07.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "residential"
+},
+"b38fb69e-99642683.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b3967d1b-2ff5c0ef.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"b3967d1b-5dbec492.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b396e413-6c8191b9.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "undefined"
+},
+"b39fe3cd-f0d534c0.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b3a76bd5-4e7a1ce2.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"b3a84a0f-0fb529e1.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"b3b0f7f7-c97288ca.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"b3bbc110-3ef16a61.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"b3c26aff-417063a0.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"b3c26aff-63a0d7d6.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"b3d0ccae-26380ab5.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b3d6c39a-7bb39a3a.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "highway"
+},
+"b3dd5345-15bbf8ed.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"b3e18480-6c84e030.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"b3ea802a-8830eb32.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "residential"
+},
+"b3f59b98-e7f870e2.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "highway"
+},
+"b415973a-b39bd6de.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"b41ace08-830c808c.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"b41cc383-337e708b.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"b4259d0f-d93d7a19.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"b42913b9-49092dfe.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"b439c4fe-5064fe59.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"b43bcc83-c97d569e.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b454034b-d84dae74.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b462d8a3-a32ccc75.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"b464d209-9e91f389.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "highway"
+},
+"b4823e33-8cabe78b.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"b4860efe-4647e771.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "residential"
+},
+"b48f3f71-eec18320.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"b4901f32-5e356f74.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"b4a99fcc-7870a48b.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"b4a99fcc-d849eaf4.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b4b7133e-f6650d64.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "highway"
+},
+"b4b7133e-fdf86606.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "residential"
+},
+"b4d18d1a-030f0601.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "highway"
+},
+"b4d65110-ac665389.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"b4dff9f4-bcac8fae.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"b4eb79bd-6ab32eb7.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "highway"
+},
+"b5172858-da5e71cc.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"b533db8e-4abfcb54.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"b539383c-e6e6528d.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"b53a0e33-2c56289b.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"b54578dc-5120800c.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "residential"
+},
+"b5465c6e-5b162b85.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "highway"
+},
+"b54735e3-65f77c99.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"b5478d5c-e846649e.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b54a8089-d1989d8f.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"b555790d-111bb9b8.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "highway"
+},
+"b557283b-523d9a0c.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"b557283b-705f9d96.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "residential"
+},
+"b563b270-8df1c342.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"b569f76a-33d451fe.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "highway"
+},
+"b56f1366-4819fdc4.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"b590ba79-1c95c8d9.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"b5a09604-33ffdc75.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b5a407d5-c2abd312.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"b5a4b486-35c3edb4.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "residential"
+},
+"b5b17442-48053f00.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"b5bb11f2-227b8c25.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b5cb11ce-46ac0ae7.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"b5cd3939-a7dffd2d.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "highway"
+},
+"b5dc7a6d-8ef7e8b8.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b5e6efc0-d83e76ab.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"b5f14913-d70897d9.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"b5f7a789-10124031.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "residential"
+},
+"b61a8404-29009d48.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"b61aec41-fe792c56.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"b6250d40-d51c7992.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"b62e6504-1be1ddd7.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"b63f0379-f0b444b5.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"b64e7cbc-d7dba7f9.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "residential"
+},
+"b657d595-e1026272.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b66c8021-7cb6d587.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"b6741a2c-5a933eb6.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"b690e7dd-1a1d38d1.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"b6976dce-0810ee45.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"b69a7e04-1dea4bd1.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b6a6df2d-8f9cc4cf.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b6a936f4-f54cef7f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b6aa41ba-08564ca8.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"b6b047b4-ca577730.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"b6c3cbb0-1c4e006c.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"b6d0b9d1-bfbc7861.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"b6d1c1f6-998f36f3.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "highway"
+},
+"b6decb24-3f0404d4.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"b6decb24-fffc40f7.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b6e4a55e-2e6228cc.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"b6f4b139-744f76c0.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"b700e409-b6515113.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"b701e0ad-0179d536.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"b710d831-df5ce01b.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"b71d7574-c6113b75.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "highway"
+},
+"b71f7e68-578dfb43.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "highway"
+},
+"b7205754-4faa3862.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"b7226661-1ba4dc1a.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"b73a793e-ebf5917d.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"b747a85e-79f375a1.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "residential"
+},
+"b747a85e-9e012bdf.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"b7559b8d-1ca5f88f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"b75bda07-d83a04eb.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"b75f355e-b3f098b9.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b761b4a6-ba62a4ae.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"b78dd814-86a01e2e.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "highway"
+},
+"b792daf1-52513869.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"b792daf1-e95167d2.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"b7a97cb6-1d099495.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b7a9b166-7d9db10e.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "highway"
+},
+"b7ad4512-5b2510d8.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "residential"
+},
+"b7b07700-ba279921.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"b7b09a19-d9ce1598.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b7bfad97-89e3ef28.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"b7bfad97-d095e272.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "gas stations"
+},
+"b7c448a7-d2d6ae03.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "residential"
+},
+"b7d7713a-0ce4c8f1.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b7dbc526-68892204.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"b7e98aaf-df117cd8.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "residential"
+},
+"b7fc87bf-8ac3359e.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"b7fcda2b-05f3fc09.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"b818033e-1407617c.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"b82f7901-6d67cfe8.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "residential"
+},
+"b83d28bd-a9ab3f1d.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"b84a1117-3673ce8a.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"b84d51df-7094c862.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "undefined"
+},
+"b851f39f-b965b196.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"b85420e2-ea146a8a.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"b857eb06-2a0d9098.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "highway"
+},
+"b8685330-d275b328.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b86f9b95-e4651840.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "highway"
+},
+"b886a0b8-cb75e3a6.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"b888e048-80f768fc.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"b8a135c9-434a126d.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "residential"
+},
+"b8a835db-34608613.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b8a9d382-3bd7d3e4.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b8afaffa-5ec67bbb.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"b8b69c99-e0c0b8bb.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"b8b84774-309883b2.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"b8c2c8e8-bfe9cb41.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"b8c3f870-e1c1bd34.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"b8d24edf-3349ee71.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "residential"
+},
+"b8f0b141-c00fd8b4.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"b9094f83-df5b86f1.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "residential"
+},
+"b909df8f-51c5470e.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"b91383d9-1f2454a4.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"b92c4dd3-91991711.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"b931fe93-37b7cffb.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"b931fe93-db7bffaf.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"b93bd867-726d338b.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "residential"
+},
+"b94071ab-d4385c1a.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"b940ba87-435d34a8.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"b9443e30-c9275e4a.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b94781aa-a48a3555.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b94eb13b-6189d792.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"b95bc6e9-34c711c1.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"b95dcb10-5838c763.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"b96c88de-058de530.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"b97b9ee8-8fbf044e.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b981e7e3-958b5ba2.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"b99c5931-2ded1a3c.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"b9a0d48b-05b491ac.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"b9a2146e-1fcf3af6.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"b9b16444-2929cf9e.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"b9c52ee6-7709a9c2.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"b9c9d815-3f9d9a8a.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"b9ca8abd-dc5cd337.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"b9ca94a2-df527b5a.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"b9d34460-2c3b1ab3.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "highway"
+},
+"b9d34460-5d3c8bcf.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "highway"
+},
+"b9d34460-96333c9b.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "residential"
+},
+"b9e4cb3d-98ed4484.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"b9f83545-6c082fdd.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"b9fc97df-9b839325.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"ba112f29-be7a8dfc.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"ba122c97-403fd75d.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"ba1612fa-392883a2.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "highway"
+},
+"ba1ab927-a44a701b.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"ba2e8260-126fca3e.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"ba2e8c76-d7ca505e.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "residential"
+},
+"ba479cb3-a99a833a.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"ba479cb3-b04e9be2.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"ba6c1b09-24293108.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"ba97a966-4d0c78a3.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"ba9aff77-5e161292.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"baa255c5-5c99a79a.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"baa59d18-90fc3158.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"bab09f26-0e237051.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "residential"
+},
+"bab22965-312b92a3.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"bab48a4e-2f184c90.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "residential"
+},
+"bab692c9-a16f15b4.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"babc7a6c-c5941835.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"bac391de-5885bad6.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"bac8fe51-1b610115.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"bac8fe51-6b258bd9.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"bacbfdaa-837ca39c.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"bad4932f-06acec3c.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"bade898f-11350592.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"bae16c60-cf344206.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "highway"
+},
+"bae32983-3c9e09c4.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"baf399e3-e2f279fa.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"bafcc992-dcddfe75.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"bb0475d9-dda53a5a.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "residential"
+},
+"bb204299-557172b1.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"bb3ada23-9d8e8e6e.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"bb3bb8c0-b32626a2.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"bb425c3f-4e35dc9d.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"bb437280-03a2bf81.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "residential"
+},
+"bb43e180-96b21056.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"bb5a3238-ab2ba223.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"bb61c2ee-35ca0081.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"bb6575eb-90478df6.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "highway"
+},
+"bb6b9678-771c7e62.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"bb71ba86-3204e97e.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"bb78fe06-3994d745.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"bb8dba97-90b88fdf.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"bb8dba97-9f4540b7.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"bb8dba97-b6abbfb0.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"bb9071ac-4a15cb23.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"bb919332-5e30df54.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"bb94c68a-4e6236bc.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "residential"
+},
+"bb95526b-7123f6e0.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"bba7999b-5dc320b4.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "residential"
+},
+"bbac8de0-3e6d9391.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"bbac8de0-997098ef.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"bbb25499-f602899d.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"bbc06e30-c51fe677.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "highway"
+},
+"bbc0f7ea-2bceb55e.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "highway"
+},
+"bbc46835-58ccfd96.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"bbd20d96-3f8c363a.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"bbda6802-894aa456.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"bbe91656-17f3e492.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"bbf2bd83-1f5c87da.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"bbf48d08-f32427fa.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"bbff5146-6ab95f34.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"bbff5146-d503a17e.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "highway"
+},
+"bc053dc7-f2d3aa91.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"bc0932fb-f2731c60.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"bc197c3b-fc1e2d41.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"bc223780-c88ddd93.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "undefined"
+},
+"bc24e2f5-b39b7137.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"bc29fd13-8d640e8a.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"bc308aee-322913df.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"bc328c1f-28b41b8d.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"bc35c318-8faf42b4.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"bc5fadac-47398ddc.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"bc67ddf0-874dcf8d.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"bc7325ea-2146b9aa.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "highway"
+},
+"bc79227e-51c8d967.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"bc7cbf85-85f4301c.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "parking lot"
+},
+"bc7e80ed-0011e5a7.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"bc80bb96-eca9a0d6.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "highway"
+},
+"bc80e6a7-6cd79aeb.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"bc9df0ab-6113c685.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"bca36352-0381818e.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"bca3720a-b4a6a4e4.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"bcaa771b-806e4fcd.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"bcaf73c1-838a8ff1.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"bcbb5180-96cfedbe.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"bcbe3164-1af2bcb3.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"bcbf4834-88a0b878.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "residential"
+},
+"bcef3e08-801cf8bd.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"bcf70f06-5bd41cdd.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"bd0380e5-846f84bb.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"bd0829be-0bb0f1cb.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "residential"
+},
+"bd16f675-095a9e20.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "residential"
+},
+"bd1ae0c2-325d1820.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"bd1b8b79-eb8f047f.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"bd204fcd-75ab6967.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"bd34d992-8b08de8e.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "highway"
+},
+"bd4518ef-c38baa13.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "highway"
+},
+"bd4c1d7e-24700e36.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"bd51fb57-1ac69b0a.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "highway"
+},
+"bd57e60e-f3226561.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "residential"
+},
+"bd656105-bfcf9d5c.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"bd70577b-b4dd3097.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"bd8aa347-4a6405a9.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"bd8f4dfa-52cf9375.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "highway"
+},
+"bd92c756-0eee51cd.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"bd92c756-1eafae31.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"bd998983-63d9420a.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"bd9dbebc-30ccb9f3.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"bd9dbebc-fc042836.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"bda149bd-02d7100c.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"bda1cdfa-a4626edd.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"bda20cf9-258f2c93.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"bda73daa-db213864.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"bdaeda37-6b0b9900.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"bdaeda37-dfe74a95.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "highway"
+},
+"bdafde0d-03216895.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"bdb610dc-e64667d9.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"bdc15316-23cfff61.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"bdc3e97b-3ad23042.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"bdc7adfd-ac352f36.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "highway"
+},
+"bdcb68eb-86671b13.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "residential"
+},
+"bdcf5742-bd173465.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"bdd2e58a-f9784bf8.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"bdd6d823-659f71fd.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"bddce207-87f8c60f.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"bde48a59-81b1f93a.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"bde9f2e6-e059e5e3.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"bdf19076-c53d74c5.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"bdfc0f1d-375eba4a.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"be005230-7facbb3e.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"be045ad5-53b75245.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"be0fdf82-972594ce.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"be177534-4a736a9b.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"be1a8e59-2a59e33c.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"be1e235b-e033239e.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"be362fff-99b5dd8b.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"be42e5e6-73d1f920.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"be449d8d-c3a01551.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"be52b29f-0ae76ecf.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "highway"
+},
+"be554fed-b1ed30d1.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"be554fed-d4a627d0.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"be5c5aae-50668a30.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "residential"
+},
+"be651ed5-5e0e949d.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "undefined"
+},
+"be689d93-672d54ff.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"be6fd6ac-35af61fd.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "residential"
+},
+"be724abb-9a2a625c.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"be769e9f-abea5fd9.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"be777044-7db298a4.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"be85292c-a3fbba40.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"be8590fa-52948d8f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"be8b3ab2-26370e88.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"beaa00a7-25aba714.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "residential"
+},
+"beaa0c22-77f57e18.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"beaa8787-b07dfe8e.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"beaae4eb-e874663f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"beb41a39-89ceabe8.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"bebbf02d-dc8f1e04.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"bebc6162-bf494364.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"bec66c97-a8a831f3.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"bec94d5a-e7effd81.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"beced1e4-e2532a6e.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"bedcfa26-e2d45cac.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"bedd1376-f4b27761.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"beea0870-130c4849.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"beea0870-e7fed5d8.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"beebb876-fec7bfc6.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "residential"
+},
+"bef7c739-c71a55d9.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"befd706d-40c8471f.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"bf03faea-d6b6f567.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "highway"
+},
+"bf165ce1-a936b909.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"bf1787f3-3073f6c0.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"bf214d1e-0e86ca1f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"bf24495d-0926df8b.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "residential"
+},
+"bf24495d-c9787981.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "highway"
+},
+"bf2f4d22-2ce6a77f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"bf2fa820-e9e1f3a9.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"bf2fac72-133aa7bd.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "residential"
+},
+"bf4b0c94-a416bc37.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"bf5b7ee3-c2fbdc46.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"bf5d49a3-e2779858.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"bf6250de-7cb7cbea.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "highway"
+},
+"bf6789ed-4089397b.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"bf6fda4e-0a49960f.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"bf7355b8-f5de162f.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "residential"
+},
+"bf7f98e7-026008d3.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"bf8220b9-086e9e29.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"bf86bb70-2699b8b6.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"bfaa6e54-0aeb77a6.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "residential"
+},
+"bfae2833-616084f1.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"bfb37269-2df1685d.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"bfb3cabc-90e4418a.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "residential"
+},
+"bfb41e9f-e4f81437.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"bfb4dfcd-2f987f2b.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"bfc62f16-f88f822c.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"bfc62f16-fabea717.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"bff4b8c8-1713b132.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"c00cc83c-a6a9ce44.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c01eddca-7c14637e.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c02184c3-43f2bd7d.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c022e075-40907eff.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c02eb4ca-1f560719.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c0309dda-23a5c949.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"c0350481-340b9ea4.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"c036f281-a0c90e9a.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"c04eb80c-520a8f79.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"c050ecbc-968adb56.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "residential"
+},
+"c0625a26-8bacfe16.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c0677163-6bffc56f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c0697e71-84867efa.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c06aa107-6d6d0938.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c0750fe1-50a37a79.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "residential"
+},
+"c0771fb7-d03aa33e.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c080d56f-53b1cfaf.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c08d18c6-6d211ae8.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c09af0c6-61c87b58.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c09af0c6-d87bbf00.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c0a7a9dc-d43be893.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c0b7212e-40f23e1e.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c0b98a97-c7609d09.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "highway"
+},
+"c0ba2a86-f44beec8.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "residential"
+},
+"c0be0e03-459a6d3c.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"c0c283d7-06fc47f0.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c0cce290-f5382dbd.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"c0dc5a95-b4bfcb2c.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c0e6d0ec-71f98edb.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"c0edf06a-74008e93.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c100db13-71b423e5.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c10e92bd-f6241f08.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"c111bb7d-c3aa5b7a.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c121b93f-b2ee73d4.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c124e51c-52e077cb.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "residential"
+},
+"c1362f73-6abdd8c2.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "highway"
+},
+"c13829a7-761a16ef.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c13b9590-54527388.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c146d100-4ee36f35.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c150197f-1cf078f2.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"c155b6d9-cfa6c733.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"c159a842-67c83740.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c159a842-b245f317.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "undefined"
+},
+"c168558d-9a3f4c8c.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c16e5581-1b1317e2.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "highway"
+},
+"c1757757-601402ff.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c179d309-bbf612b9.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c17b1192-94d768db.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c17fd4de-d4f40b90.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c189f62f-7cbbe028.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c19aa2da-25679033.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c1a06160-fdbec44f.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c1a07cae-269e1f30.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"c1a5825c-0ea22b59.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c1a5825c-7b895437.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c1a5825c-f4d4e625.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c1af705e-dfb1664f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"c1b16eee-61bd970b.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "highway"
+},
+"c1b16eee-7773662a.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c1b3582d-3eb61cdc.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c1ba5ee6-c2c5967a.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c1bbc01a-cd5108c4.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c1c2aba5-5d0757aa.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c1c865f7-23381910.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c1dc04b3-0279aa42.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c1eec0f9-986b3a7c.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c1f39934-6e74022e.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c1f8d9b3-e7a69cc0.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c1f9740a-41816cad.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c2021f20-46a5823b.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c202c860-fbf85ab9.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"c2054961-03b26a4f.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c213a6ff-1ee61516.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c2148d05-b52ebea0.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"c21f174e-63f35244.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"c21fba09-f4501c68.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c2244286-08a1eebf.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c2341eec-293df47b.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"c239ab3d-61c3912f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c239f9d5-a5ccfdec.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c2437a91-3c23aba9.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c24838fd-e3eae166.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "residential"
+},
+"c24bae34-454a0416.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c25f97e6-6a4c4ca2.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"c26abe13-497f3abf.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c26c1883-9c563aa8.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c29d13ba-ad7aee3f.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"c2a76d08-8d6ecf47.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c2b457e5-36e3ecee.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"c2c32a23-b356a99b.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c2c8b275-6341d9ae.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c2cce0a4-9e2fccd0.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c2d33423-8f1d3d05.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c2d84b6d-36aacbc8.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"c2d921c8-6d91821a.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c2e3fe05-6c12de55.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c2e3fe05-fa312f4d.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c2e64366-81f14610.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c2f2f742-e24a5d3d.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c30be28e-bc8fd997.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c3130621-97d57961.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c31a04de-d4cc31fb.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c31aa969-9a2a8c52.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c31cd426-0a38fe18.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c321b69d-0043bcac.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"c323201c-9bcf7cf8.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "parking lot"
+},
+"c327ace4-9dfe6490.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c3287e28-f6bcc9ef.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"c330c787-1e2b9b50.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"c33251a6-e75f8824.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"c3364b6e-7b10cac7.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c34058b8-2790784b.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c346c42b-748697b5.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "highway"
+},
+"c353f0b4-c62600fa.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c359e7b1-5b68aea4.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "highway"
+},
+"c3686339-5832705e.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"c379f9c4-079ee461.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c37b8378-9c23f3b3.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c37cf84f-18aa50f6.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c38bdba6-2abed256.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c3906a23-5c373f34.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c396e833-890b7ddb.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c3a18207-109c0500.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"c3a18207-504667c7.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"c3ae39d6-f5f25d64.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"c3c2eb65-3af33302.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c3c2eb65-bd875ecb.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c3cd662f-228cba06.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "residential"
+},
+"c3def78d-b3fa5b93.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c3e986e8-47958da8.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "highway"
+},
+"c3ee4b9b-b8786bce.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"c3ee5975-0eb73316.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"c3fdd07a-6a106ecd.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c3fdd07a-70b28379.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c41203a6-e4b059c0.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"c413a89b-fb60c163.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c4171655-424bc10e.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c428e890-674ecc9d.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "residential"
+},
+"c43fe5b8-45b12c52.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"c44b8617-3100c413.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c452e38d-db51883f.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"c456ed56-adbb1839.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c4590261-d7081dfa.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"c45b2e04-5689b375.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c464c963-74458fbb.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"c46c8375-44338121.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c477c67b-89221134.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "highway"
+},
+"c4891df0-24371ae1.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c48f5464-73d132a1.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "residential"
+},
+"c49e96b9-24ec6193.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c4a06183-4a42e1b9.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"c4accb9c-58311122.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c4cb6f64-283904da.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"c4e96efa-cbe1be6a.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c4fb6443-4d900d7f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c50faaad-a8463d3d.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"c517c182-d75f08e3.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "highway"
+},
+"c52a5080-f9be7559.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "highway"
+},
+"c536c7e6-f9b2808f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"c53c9807-1eadf674.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"c54abf2f-cd3f73dc.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c54ec43c-1aa7875b.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c5584f14-7fcc4797.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"c55b474f-f39c51a8.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"c55f5f07-1d069cfd.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "residential"
+},
+"c566026b-36fc6e3c.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"c566a4d9-0504c08b.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "residential"
+},
+"c56ad92a-40a9f774.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c56ad92a-6707dbb4.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c56ad92a-8744e902.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c56ad92a-ef30489c.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c56c7249-f70c6c33.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "highway"
+},
+"c5718931-d5862304.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c5843165-79210a52.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"c59500f0-130d7415.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "residential"
+},
+"c59500f0-1e9d31c1.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c59500f0-64edb242.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c59500f0-f26be735.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "highway"
+},
+"c595de6c-1fe5d3df.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c5a170ce-f820f869.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"c5b166fd-df77bb5d.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "residential"
+},
+"c5c3b858-bc1ffd47.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c5ca1272-3f672c39.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c5ca1272-a926594c.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"c5d864fa-34365f4f.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c5def92b-7c703f2f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c5f4350d-1f7632ea.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "city street"
+},
+"c5f99fea-d9ccc213.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c60144b6-74583c0d.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c6083af3-97345ce2.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c60d6c5c-689d8921.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c630c103-34a53b18.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c6313a48-d945108a.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "highway"
+},
+"c63800c9-ebf059d1.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c6387d9e-26028281.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"c6424a42-1e0e0f7c.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"c644bce5-310a172f.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c6648ad5-91058550.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c665137e-a9471287.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c671fa68-f2ce610d.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"c682e776-650bfd20.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c692ed67-1f8ee968.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c69e5864-06a7595c.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c6a4abc9-e999da65.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"c6cde742-b3cceffb.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c6d7400d-8a08045e.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c6da9a5f-4f00039a.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c6e17725-4e651f0a.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "highway"
+},
+"c6e385cd-2cc5c344.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "highway"
+},
+"c6e52b8f-d719fd87.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c70a8ace-931896fd.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c715680d-cd283438.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c71751ee-07587650.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c717fdbd-9b7ef8e2.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"c71de7ef-6343421b.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c72d9780-b7cdea29.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "residential"
+},
+"c7331983-36418bf8.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "snowy",
+"scene": "residential"
+},
+"c737e602-e8793fdc.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c741a3b6-17ca1b7e.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c7472294-1eb27561.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c748c1a1-2f810acf.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c748c1a1-5fd778ff.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c752e922-ae691e9d.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"c75a249b-f1341238.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c75d7961-49f17231.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c7648772-e661b276.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "highway"
+},
+"c76e4ccc-86973001.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c77bc56d-491f85ad.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"c784941b-8eb5d07c.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "highway"
+},
+"c78f7d9c-783ee02d.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "highway"
+},
+"c7922063-76dde2db.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c7a1b520-811842d8.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c7bc6671-fc3f4552.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c7c03bf5-5188c467.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c7c12eb6-2752525d.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c7c39101-5935025f.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c7c5969b-ff18b44d.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c7d0b0a7-7f2306d8.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "residential"
+},
+"c7d8925a-f469385d.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"c7e6bfe9-38bc4856.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c7f24a49-8c5206a6.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c7ff2c12-cf77c29d.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"c81ff2c0-6243618f.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"c82b8f6c-b7c57473.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"c836f138-aa4d7408.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c838d26c-d5612b4e.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c840c880-ac5241d0.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"c8448732-152cd271.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "residential"
+},
+"c8478dfd-872b0509.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c8573105-4f2e7c11.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c8638ebb-55791b54.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"c8759ab5-f6a3273f.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c876a58b-97c4d16e.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"c889c950-e75d6454.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"c88a29cf-4acca487.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "residential"
+},
+"c897a9ab-4e006e94.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"c8bd76fd-68d847b3.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "highway"
+},
+"c8c40f8e-36103452.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c8c6e143-981c8f06.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c8c97803-ddd12fbf.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "city street"
+},
+"c8d1bc4e-fa045566.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"c8d3c68c-da2089e8.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c8e79c93-00e1d82a.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c8eb77ce-567b1fad.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"c8ef6556-627cdf0b.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"c8ef6dea-8a327e57.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"c8efd5bf-dc61bcfd.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c909f3df-d3ce29f1.jpg": {
+"timeofday": "night",
+"weather": "snowy",
+"scene": "residential"
+},
+"c9283177-7531ef01.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "residential"
+},
+"c936d348-99cf17b9.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c938658b-c232988e.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c93bd9ce-30b0d752.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"c93bd9ce-ea579ed8.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c93e76b7-88954e8f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "highway"
+},
+"c9403737-3743ae01.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c9403737-44485b1f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "residential"
+},
+"c94958a6-b66af171.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c94a5fb6-446b8726.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c95fecc3-4a1dd709.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "residential"
+},
+"c9736046-5b96af10.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "highway"
+},
+"c98232a2-4e9128ce.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c98232a2-66e6e1fb.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c98b35d1-b66b62c2.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c98c1005-1a53d7d2.jpg": {
+"timeofday": "daytime",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c993615f-20359e85.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"c99a4baf-83420a6e.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"c9a653e3-533efdd4.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"c9d89485-18576ffb.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "city street"
+},
+"c9df836e-80c5caa3.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"c9ece337-ff38bdec.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "city street"
+},
+"c9ee0f8e-286c0acb.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "rainy",
+"scene": "city street"
+},
+"c9ee0f8e-3308c0e4.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "city street"
+},
+"c9f5283d-5ef0a1b2.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"ca074e75-7d525ad9.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"ca098890-6ef745ed.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"ca0fd2c4-30e68102.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"ca194104-1aa2aa9a.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"ca21055c-2050513f.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "partly cloudy",
+"scene": "highway"
+},
+"ca2c7c84-5495c318.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "highway"
+},
+"ca2fb80b-9d22e350.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "residential"
+},
+"ca3045ee-ec76b7c9.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"ca3736db-3471ce50.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+},
+"ca3736db-cd087585.jpg": {
+"timeofday": "daytime",
+"weather": "clear",
+"scene": "city street"
+},
+"ca3f4c16-b33f3a0b.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "city street"
+},
+"ca40ddd3-f81f28e9.jpg": {
+"timeofday": "night",
+"weather": "clear",
+"scene": "city street"
+},
+"ca4269e1-db6d731e.jpg": {
+"timeofday": "night",
+"weather": "rainy",
+"scene": "highway"
+},
+"ca455727-92566d05.jpg": {
+"timeofday": "daytime",
+"weather": "snowy",
+"scene": "city street"
+},
+"ca479701-2ab57f9a.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "clear",
+"scene": "city street"
+},
+"ca5fba82-4e60d94e.jpg": {
+"timeofday": "daytime",
+"weather": "overcast",
+"scene": "highway"
+},
+"ca68e8b3-3ecd270a.jpg": {
+"timeofday": "daytime",
+"weather": "rainy",
+"scene": "highway"
+},
+"fe1cc363-a3f36598.jpg": {
+"timeofday": "dawn/dusk",
+"weather": "overcast",
+"scene": "city street"
+}
+}
