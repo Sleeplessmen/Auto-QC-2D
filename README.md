@@ -71,6 +71,7 @@ cvat_2d\cai_dat.bat
   - SAM2.1 large.
   - YOLO11x, RT-DETR-x, YOLOv8x-seg.
   - D-FINE-X, CLIP, SegFormer.
+  - `models/`: MediaPipe face / hand / pose landmarker và YOLOP, dùng cho tool gán điểm (`keypoints.py`) và vạch kẻ đường (`lane_markings.py`). Web QC không cần các file này.
 
 ## Chạy web QC
 
