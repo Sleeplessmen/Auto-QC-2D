@@ -1,0 +1,48 @@
+# =============================================================================
+# LetmeQC - Development Docker Compose Configuration
+# =============================================================================
+# For local development with hot-reload and debugging
+
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: letmeqc-dev
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - CVAT_TOKEN=${CVAT_TOKEN:-test_token}
+      - CVAT_API_URL=${CVAT_API_URL:-https://app.cvat.ai/api}
+      - CVAT_ORG_SLUG=${CVAT_ORG_SLUG}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET:-test_secret}
+      - SERVER_HOST=${SERVER_HOST:-0.0.0.0}
+      - SERVER_PORT=${SERVER_PORT:-8000}
+      - MIN_BOX_AREA=${MIN_BOX_AREA:-100.0}
+      - IOU_THRESHOLD=${IOU_THRESHOLD:-0.95}
+      - DUPLICATE_IOU_THRESHOLD=${DUPLICATE_IOU_THRESHOLD:-0.98}
+      - MIN_POLYGON_POINTS=${MIN_POLYGON_POINTS:-3}
+      - MAX_ASPECT_RATIO=${MAX_ASPECT_RATIO:-10.0}
+      - MIN_ASPECT_RATIO=${MIN_ASPECT_RATIO:-0.1}
+      - LOG_LEVEL=${LOG_LEVEL:-DEBUG}
+      - REPORTS_DIR=${REPORTS_DIR:-reports}
+      - MAX_REPORTS=${MAX_REPORTS:-5}
+    volumes:
+      - .:/app
+      - ./reports:/app/reports
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    tty: true
+    stdin_open: true

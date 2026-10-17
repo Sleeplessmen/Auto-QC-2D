@@ -1,0 +1,235 @@
+# =============================================================================
+# LetmeQC - Project Configuration
+# =============================================================================
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "letmeqc"
+version = "0.2.0-beta"
+description = "Automatic Quality Control system for CVAT annotations"
+authors = [
+    "VinAI Team <team@vinai.ai>"
+]
+license = "MIT"
+readme = "README.md"
+packages = [
+    {include = "letmeqc", from = "src"}
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Framework :: FastAPI",
+    "Topic :: Software Development :: Quality Assurance",
+]
+repository = "https://github.com/vin-ai/LetmeQC"
+homepage = "https://github.com/vin-ai/LetmeQC"
+keywords = ["cvat", "quality-control", "annotation", "computer-vision", "webhook"]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.109.1"
+uvicorn = {extras = ["standard"], version = "^0.27.0"}
+requests = "^2.31.0"
+python-dotenv = "^1.0.0"
+pydantic = "^2.5.3"
+typing-extensions = "^4.10.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.4"
+pytest-cov = "^4.1.0"
+pytest-mock = "^3.12.0"
+flake8 = "^6.1.0"
+black = "^23.12.1"
+isort = "^5.13.2"
+mypy = "^1.8.0"
+radon = "^6.0.1"
+pylint = "^3.0.3"
+bandit = "^1.7.7"
+safety = "^2.3.5"
+pip-audit = "^2.7.0"
+pre-commit = "^3.6.0"
+anyio = "^4.3.0"
+httpx = "^0.26.0"
+
+[tool.poetry.scripts]
+letmeqc = "app:main"
+
+[tool.poetry.extras]
+dev = ["pytest", "pytest-cov", "flake8", "black", "mypy"]
+
+# =============================================================================
+# Tool Configurations
+# =============================================================================
+
+[tool.black]
+line-length = 120
+target-version = ['py39', 'py310', 'py311']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.git
+    | \.hg
+    | \.mypy_cache
+    | \.tox
+    | \.venv
+    | _build
+    | buck-out
+    | build
+    | dist
+)/
+'''
+
+[tool.isort]
+profile = "black"
+line_length = 120
+known_first_party = ["letmeqc", "src"]
+known_third_party = [
+    "fastapi",
+    "uvicorn",
+    "requests",
+    "pydantic",
+    "pytest",
+]
+
+[tool.flake8]
+max-line-length = 120
+max-complexity = 10
+exclude = [
+    ".venv",
+    "__pycache__",
+    ".git",
+    "*.egg-info",
+]
+ignore = [
+    "E203",  # Whitespace before ':'
+    "W503",  # Line break before binary operator
+    "E501",  # Line too long (handled by black)
+    "C0114", # Missing module docstring
+    "C0115", # Missing class docstring
+    "C0116", # Missing function docstring
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+strict_optional = true
+warn_redundant_casts = true
+warn_unnecessary_cast = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["src"]
+Branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\bProtocol\):",
+    "@(abc\.)?abstractmethod",
+]
+ignore_errors = true
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+# =============================================================================
+# Pre-commit Configuration
+# =============================================================================
+[tool.pre-commit]
+fail_fast = false
+show_diff_on_failure = true
+
+[tool.pre-commit.hooks]
+# Formatters
+[tool.pre-commit.hooks.format]
+    [tool.pre-commit.hooks.format.black]
+    id = "black"
+    name = "black"
+    entry = "black"
+    language = "system"
+    types = ["python"]
+    args = ["--check", "--diff"]
+
+    [tool.pre-commit.hooks.format.isort]
+    id = "isort"
+    name = "isort"
+    entry = "isort"
+    language = "system"
+    types = ["python"]
+    args = ["--check-only", "--diff"]
+
+# Linters
+[tool.pre-commit.hooks.lint]
+    [tool.pre-commit.hooks.lint.flake8]
+    id = "flake8"
+    name = "flake8"
+    entry = "flake8"
+    language = "system"
+    types = ["python"]
+    args = ["--max-line-length=120", "--extend-ignore=E203,W503,E501,C0114,C0115,C0116"]
+
+    [tool.pre-commit.hooks.lint.mypy]
+    id = "mypy"
+    name = "mypy"
+    entry = "mypy"
+    language = "system"
+    types = ["python"]
+    args = ["--ignore-missing-imports", "--disallow-untyped-defs", "--disallow-incomplete-defs"]
+
+# Security
+[tool.pre-commit.hooks.security]
+    [tool.pre-commit.hooks.security.bandit]
+    id = "bandit"
+    name = "bandit"
+    entry = "bandit"
+    language = "system"
+    types = ["python"]
+    args = ["-ll", "-ii"]
+
+    [tool.pre-commit.hooks.security.safety]
+    id = "safety"
+    name = "safety"
+    entry = "safety"
+    language = "system"
+    types = ["python"]
+    args = ["check", "--full-report"]
+
+# Tests
+[tool.pre-commit.hooks.test]
+    [tool.pre-commit.hooks.test.pytest]
+    id = "pytest"
+    name = "pytest"
+    entry = "pytest"
+    language = "system"
+    types = ["python"]
+    args = ["tests/", "-v", "--tb=short"]
+    pass_filenames = true

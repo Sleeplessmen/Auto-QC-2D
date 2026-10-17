@@ -25,6 +25,8 @@ Bộ tool cho nhãn 2D trên CVAT:
 
 **Tài liệu đầy đủ:** [web_qc/TAI_LIEU_WEB_QC.md](web_qc/TAI_LIEU_WEB_QC.md). Tài liệu gồm cài đặt, hướng dẫn dùng, guideline và file luật, cách tool tìm lỗi, xử lý lỗi, phần kỹ thuật.
 
+**Tổng quan cả dự án** (bài toán, kết quả, luồng làm việc, cấu trúc, LetmeQC): [TONG_QUAN_DU_AN.md](TONG_QUAN_DU_AN.md). **LetmeQC** (phiên bản đầu, chỉ dùng luật, đã tắt và gộp vào Web QC) nằm trong [letmeqc/](letmeqc/).
+
 ## Độ chính xác của tool (đo 2026-10-17)
 
 Cách đo: cố ý cài lỗi đã biết vào nhãn đúng, cho tool review, đếm số lỗi bắt được và số báo nhầm. Ảnh dùng để báo cáo không dùng để chỉnh tool.

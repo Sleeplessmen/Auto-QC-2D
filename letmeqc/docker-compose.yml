@@ -1,0 +1,81 @@
+# =============================================================================
+# LetmeQC - Production Docker Compose Configuration
+# =============================================================================
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: letmeqc-app
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - CVAT_TOKEN=${CVAT_TOKEN}
+      - CVAT_API_URL=${CVAT_API_URL:-https://app.cvat.ai/api}
+      - CVAT_ORG_SLUG=${CVAT_ORG_SLUG}
+      - WEBHOOK_SECRET=${WEBHOOK_SECRET}
+      - SERVER_HOST=${SERVER_HOST:-0.0.0.0}
+      - SERVER_PORT=${SERVER_PORT:-8000}
+      - MIN_BOX_AREA=${MIN_BOX_AREA:-100.0}
+      - IOU_THRESHOLD=${IOU_THRESHOLD:-0.95}
+      - DUPLICATE_IOU_THRESHOLD=${DUPLICATE_IOU_THRESHOLD:-0.98}
+      - MIN_POLYGON_POINTS=${MIN_POLYGON_POINTS:-3}
+      - MAX_ASPECT_RATIO=${MAX_ASPECT_RATIO:-10.0}
+      - MIN_ASPECT_RATIO=${MIN_ASPECT_RATIO:-0.1}
+      - MASK_TOLERANCE=${MASK_TOLERANCE:-2.0}
+      - BBOX_TOLERANCE=${BBOX_TOLERANCE:-2.0}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - REPORTS_DIR=${REPORTS_DIR:-reports}
+      - MAX_REPORTS=${MAX_REPORTS:-5}
+    volumes:
+      - ./reports:/app/reports
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Nginx reverse proxy for production
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: letmeqc-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx/logs:/var/log/nginx
+    depends_on:
+      - app
+    profiles:
+      - production
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: Redis for caching (future feature)
+  redis:
+    image: redis:7-alpine
+    container_name: letmeqc-redis
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    profiles:
+      - redis
+
+volumes:
+  redis_data:

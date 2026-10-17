@@ -1,0 +1,43 @@
+# =============================================================================
+# LetmeQC - Development Requirements
+# =============================================================================
+# Includes all production dependencies plus development tools
+
+# Production dependencies (from requirements.txt)
+-r requirements.txt
+
+# Testing
+pytest==7.4.4
+pytest-cov==4.1.0
+pytest-mock==3.12.0
+
+# Linting and formatting
+flake8==6.1.0
+black==23.12.1
+isort==5.13.2
+
+# Type checking
+mypy==1.8.0
+
+# Code quality
+radon==6.0.1
+pylint==3.0.3
+bandit==1.7.7
+
+# Security scanning
+safety==2.3.5
+pip-audit==2.7.0
+
+# Test fixtures and mocking
+pytest-fixture-mocker==0.3.0
+
+# Development tools
+pre-commit==3.6.0
+
+# Optional: For better async support
+anyio==4.3.0
+httpx==0.26.0
+
+# =============================================================================
+# Note: Install with: pip install -r requirements-dev.txt
+# =============================================================================

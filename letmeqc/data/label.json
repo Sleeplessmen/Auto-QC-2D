@@ -1,0 +1,86 @@
+[
+  {
+    "name": "car",
+    "id": 8582156,
+    "color": "#fa3253",
+    "type": "any",
+    "attributes": [
+      {
+        "id": 1001,
+        "name": "occluded",
+        "input_type": "checkbox",
+        "mutable": true,
+        "values": ["false"],
+        "default_value": "false"
+      },
+      {
+        "id": 1002,
+        "name": "is_parked",
+        "input_type": "checkbox",
+        "mutable": true,
+        "values": ["false"],
+        "default_value": "false"
+      }
+    ]
+  },
+  {
+    "name": "pedestrian",
+    "id": 8582157,
+    "color": "#32fa53",
+    "type": "any",
+    "attributes": [
+      {
+        "id": 1003,
+        "name": "action",
+        "input_type": "select",
+        "mutable": true,
+        "values": ["walking", "standing", "running"],
+        "default_value": "walking"
+      }
+    ]
+  },
+  {
+    "name": "person",
+    "id": 8582158,
+    "color": "#ffaa00",
+    "type": "any",
+    "attributes": []
+  },
+  {
+    "name": "truck",
+    "id": 8582159,
+    "color": "#00aaff",
+    "type": "any",
+    "attributes": []
+  },
+  {
+    "name": "bus",
+    "id": 8582160,
+    "color": "#aa00ff",
+    "type": "any",
+    "attributes": []
+  },
+  {
+    "name": "drivable_area",
+    "id": 8582161,
+    "color": "#3253fa",
+    "type": "any",
+    "attributes": []
+  },
+  {
+    "name": "image_info",
+    "id": 8582162,
+    "color": "#000000",
+    "type": "any",
+    "attributes": [
+      {
+        "id": 2697595,
+        "name": "weather",
+        "input_type": "select",
+        "mutable": false,
+        "values": ["clear", "overcast", "rainy", "snowy"],
+        "default_value": "clear"
+      }
+    ]
+  }
+]

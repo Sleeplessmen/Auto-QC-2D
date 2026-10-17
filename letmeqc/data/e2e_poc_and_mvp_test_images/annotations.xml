@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<annotations>
+  <version>1.1</version>
+  <meta>
+    <job>
+      <id>4590169</id>
+      <size>3</size>
+      <mode>annotation</mode>
+      <overlap>0</overlap>
+      <bugtracker></bugtracker>
+      <created>2026-10-14 08:54:53.229275+00:00</created>
+      <updated>2026-10-14 09:22:13.114635+00:00</updated>
+      <subset>default</subset>
+      <start_frame>0</start_frame>
+      <stop_frame>2</stop_frame>
+      <frame_filter></frame_filter>
+      <segments>
+        <segment>
+          <id>4587193</id>
+          <start>0</start>
+          <stop>2</stop>
+          <url>https://app.cvat.ai/api/jobs/4590169/dataset/export/api/jobs/4590169</url>
+        </segment>
+      </segments>
+      <owner>
+        <username>khaibk.a.1109</username>
+        <email>khaibk.a.1109@gmail.com</email>
+      </owner>
+      <assignee></assignee>
+      <labels>
+        <label>
+          <name>car</name>
+          <color>#fa3253</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>pedestrian</name>
+          <color>#32fa53</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>drivable_area</name>
+          <color>#3253fa</color>
+          <type>any</type>
+          <attributes>
+          </attributes>
+        </label>
+        <label>
+          <name>image_info</name>
+          <color>#000000</color>
+          <type>any</type>
+          <attributes>
+            <attribute>
+              <name>weather</name>
+              <mutable>False</mutable>
+              <input_type>select</input_type>
+              <default_value>clear</default_value>
+              <values>clear
+overcast
+rainy
+snowy</values>
+            </attribute>
+          </attributes>
+        </label>
+      </labels>
+    </job>
+    <dumped>2026-10-14 09:25:18.216716+00:00</dumped>
+  </meta>
+  <image id="0" name="b1d0091f-75824d0d.jpg" width="1280" height="720">
+    <box label="car" source="manual" occluded="0" xtl="190.03" ytl="401.53" xbr="263.28" ybr="407.47" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="0" xtl="466.03" ytl="381.25" xbr="562.97" ybr="450.99" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="0" xtl="618.42" ytl="392.63" xbr="702.01" ybr="457.92" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="0" xtl="563.96" ytl="379.27" xbr="604.08" ybr="424.78" z_order="0">
+    </box>
+    <polygon label="drivable_area" source="manual" occluded="0" points="237.90,482.90;56.40,502.60;255.71,511.36;405.51,516.67;513.66,461.72;571.28,459.06;593.44,440.44;655.49,493.63;741.48,531.74;987.91,680.67;0.00,700.52" z_order="0">
+    </polygon>
+    <box label="car" source="manual" occluded="0" xtl="255.62" ytl="389.47" xbr="460.39" ybr="497.62" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="0" xtl="0.00" ytl="392.13" xbr="912.47" ybr="406.31" z_order="0">
+    </box>
+  </image>
+  <image id="1" name="b1d0091f-f2c2d2ae.jpg" width="1280" height="720">
+    <box label="car" source="manual" occluded="0" xtl="488.15" ytl="347.00" xbr="836.91" ybr="649.07" z_order="0">
+    </box>
+    <polygon label="drivable_area" source="manual" occluded="0" points="162.74,702.62;477.17,530.99;492.27,629.85;850.64,644.95;849.26,533.74;1173.36,720.00;652.56,720.00" z_order="0">
+    </polygon>
+    <box label="car" source="manual" occluded="0" xtl="1143.21" ytl="418.10" xbr="1280.00" ybr="465.08" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="0" xtl="923.60" ytl="305.40" xbr="1132.40" ybr="499.30" z_order="0">
+    </box>
+    <box label="pedestrian" source="manual" occluded="0" xtl="1004.82" ytl="351.08" xbr="1020.91" ybr="413.90" z_order="0">
+    </box>
+    <box label="pedestrian" source="manual" occluded="0" xtl="1066.88" ytl="354.91" xbr="1089.86" ybr="423.10" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="0" xtl="1132.57" ytl="405.69" xbr="1280.00" ybr="467.74" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="0" xtl="1145.43" ytl="419.47" xbr="1280.00" ybr="461.37" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="0" xtl="830.70" ytl="383.60" xbr="925.80" ybr="461.60" z_order="0">
+    </box>
+  </image>
+  <image id="2" name="b1d0a191-03dcecc2.jpg" width="1280" height="720">
+    <box label="car" source="manual" occluded="0" xtl="662.36" ytl="264.50" xbr="668.33" ybr="278.30" z_order="0">
+    </box>
+    <polygon label="drivable_area" source="manual" occluded="0" points="0.00,471.50;401.98,360.35;591.70,492.10" z_order="0">
+    </polygon>
+    <box label="car" source="manual" occluded="0" xtl="668.00" ytl="265.80" xbr="717.90" ybr="307.10" z_order="0">
+    </box>
+    <box label="pedestrian" source="manual" occluded="0" xtl="1270.50" ytl="282.96" xbr="1280.00" ybr="379.91" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="0" xtl="414.21" ytl="210.41" xbr="557.90" ybr="358.10" z_order="0">
+    </box>
+    <box label="pedestrian" source="manual" occluded="0" xtl="829.84" ytl="270.72" xbr="840.18" ybr="305.08" z_order="0">
+    </box>
+    <box label="pedestrian" source="manual" occluded="0" xtl="876.39" ytl="274.41" xbr="886.00" ybr="315.42" z_order="0">
+    </box>
+    <box label="pedestrian" source="manual" occluded="0" xtl="980.57" ytl="273.56" xbr="1002.33" ybr="324.51" z_order="0">
+    </box>
+    <box label="pedestrian" source="manual" occluded="0" xtl="1087.90" ytl="266.64" xbr="1119.06" ybr="358.64" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="0" xtl="0.00" ytl="264.78" xbr="54.93" ybr="390.42" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="0" xtl="607.62" ytl="274.61" xbr="661.06" ybr="311.37" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="1" xtl="597.90" ytl="266.88" xbr="624.27" ybr="285.58" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="1" xtl="589.09" ytl="260.04" xbr="604.98" ybr="274.82" z_order="0">
+    </box>
+    <box label="car" source="manual" occluded="1" xtl="555.80" ytl="272.10" xbr="593.40" ybr="326.10" z_order="0">
+    </box>
+    <polygon label="drivable_area" source="manual" occluded="0" points="0.00,460.89;343.08,350.51;420.46,349.74;421.99,362.00;552.23,364.30;568.32,351.28;808.89,358.17;962.88,380.39;1055.58,414.10;1280.00,504.91;1280.00,691.75;743.92,652.52;0.00,638.73" z_order="0">
+    </polygon>
+    <mask label="pedestrian" source="manual" occluded="0" rle="9, 6, 18, 5, 19, 5, 19, 5, 19, 5, 19, 5, 19, 5, 19, 5, 19, 6, 18, 6, 17, 7, 17, 8, 16, 8, 15, 10, 13, 12, 11, 14, 9, 17, 5, 19, 4, 21, 3, 21, 3, 21, 3, 22, 2, 22, 2, 22, 1, 23, 1, 23, 1, 23, 1, 23, 1, 23, 1, 119, 1, 23, 1, 23, 1, 23, 1, 23, 1, 22, 2, 22, 2, 3, 1, 18, 2, 3, 2, 17, 3, 2, 2, 16, 4, 2, 3, 14, 6, 1, 4, 12, 12, 12, 12, 11, 13, 11, 13, 11, 13, 11, 13, 11, 13, 11, 13, 5, 1, 5, 13, 5, 1, 5, 13, 5, 1, 5, 13, 5, 1, 5, 13, 5, 1, 5, 13, 5, 1, 5, 13, 6, 1, 4, 13, 6, 1, 4, 13, 6, 1, 4, 13, 6, 1, 4, 13, 6, 1, 4, 13, 6, 1, 4, 13, 6, 1, 4, 13, 6, 1, 4, 13, 6, 1, 4, 13, 6, 1, 4, 13, 6, 11" left="750" top="262" width="24" height="69" z_order="0">
+    </mask>
+    <box label="pedestrian" source="manual" occluded="0" xtl="750.40" ytl="264.50" xbr="772.48" ybr="331.35" z_order="0">
+    </box>
+    <box label="pedestrian" source="manual" occluded="0" xtl="781.90" ytl="275.85" xbr="795.20" ybr="337.43" z_order="0">
+    </box>
+    <box label="pedestrian" source="manual" occluded="0" xtl="1024.90" ytl="273.47" xbr="1047.75" ybr="341.40" z_order="0">
+    </box>
+  </image>
+</annotations>

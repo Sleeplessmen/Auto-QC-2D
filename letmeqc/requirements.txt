@@ -1,0 +1,30 @@
+# =============================================================================
+# LetmeQC - Production Requirements
+# =============================================================================
+# Core dependencies for production deployment
+
+# Web framework
+fastapi==0.109.1
+uvicorn[standard]==0.27.0
+
+# HTTP client
+requests==2.31.0
+
+# Environment variables
+python-dotenv==1.0.0
+
+# Data validation and settings
+pydantic==2.5.3
+
+# Hinh hoc polygon (src/rules.py: polygon xoan, mask tran box)
+shapely>=2.0
+
+# Logging
+# (included in standard library)
+
+# Type hints
+typing-extensions==4.10.0
+
+# =============================================================================
+# Note: For development dependencies, see requirements-dev.txt
+# =============================================================================
