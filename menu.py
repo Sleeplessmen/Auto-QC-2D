@@ -370,6 +370,10 @@ def do_custom_2d(cfg, job, c):
 def do_other(cfg, job):
     jid = str(job["id"])
     print("\n  --- Công cụ khác ---")
+    if job["dim"] == "3d" and not _HAS_3D:
+        print("    Job 3D (lidar): bộ tool 3D (auto_annotate_3d, camera_calib...) nằm ở thư mục cvat_3d, "
+              "không có trong repo cvat_2d. Chép các file đó vào cạnh menu.py để dùng.")
+        return
     if job["dim"] == "3d":
         print(f"    1. Kiểm tra nhãn job {jid} trước khi nộp")
         print(f"    2. Kiểm tra cả task {job['task']}")

@@ -126,7 +126,10 @@ OBJ_MAX_H = {"vehicle": 4.0, "two-wheels": 2.3, "pedestrian": 2.2, "animal": 1.8
 
 
 def camera_objects(job, dets, calib, not_ego, min_pts_scale=1.0):
-    from camera_calib import project
+    try:
+        from camera_calib import project          # bo tool 3D (thu muc cvat_3d), khong co trong repo cvat_2d
+    except ImportError as e:
+        raise RuntimeError("camera_objects can camera_calib.py cua bo tool 3D (thu muc cvat_3d)") from e
     from sklearn.cluster import DBSCAN
     pts, h = job["pts"], job["h"]
     r = np.hypot(pts[:, 0], pts[:, 1])

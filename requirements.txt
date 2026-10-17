@@ -12,6 +12,7 @@ scikit-learn
 scipy
 open3d
 gradio
+mediapipe        # keypoints.py: diem mat, tay, dang nguoi
 pypdf            # web_qc: doc guideline PDF
 pyyaml           # web_qc: file luat guideline
 fastapi          # web_qc: server

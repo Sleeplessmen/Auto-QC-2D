@@ -169,3 +169,4 @@ Script tạo task với đúng các nhãn trong file XML, upload ảnh, import n
 - File model. `cai_dat.bat` sẽ tải về.
 - Dữ liệu ảnh, cache, kết quả review.
 - Cơ sở dữ liệu của web QC (`web_qc/data/`).
+- Bộ tool **3D** (lidar: `auto_annotate_3d.py`, `auto_annotate_seq.py`, `camera_calib.py`) nằm ở thư mục `cvat_3d` riêng. `menu.py` và `label_check.py` báo rõ khi thiếu bộ này; phần 2D và Web QC không cần nó.

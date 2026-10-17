@@ -1,4 +1,4 @@
-"""
+r"""
 smart_label.py — Gán nhãn thông minh cho CVAT với menu tương tác.
 Chạy: venv\Scripts\python.exe smart_label.py --env .env.class
 """

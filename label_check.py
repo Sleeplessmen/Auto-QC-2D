@@ -224,8 +224,12 @@ def main():
     sys.path.insert(0, here)
     from dotenv import load_dotenv
     load_dotenv(args.env, override=True)
-    from auto_annotate_3d import CvatClient3D, _request_with_retry
-    from auto_annotate_seq import load_job, in_footprint
+    try:
+        from auto_annotate_3d import CvatClient3D, _request_with_retry
+        from auto_annotate_seq import load_job, in_footprint
+    except ImportError:
+        sys.exit("label_check.py là công cụ cho job 3D: cần auto_annotate_3d.py và auto_annotate_seq.py của bộ tool 3D "
+                 "(thư mục cvat_3d), chép vào cạnh file này. Repo cvat_2d chỉ có phần 2D.")
 
     client = CvatClient3D(os.environ["CVAT_URL"], os.environ["CVAT_TOKEN"])
     jobs = parse_jobs(client, args.jobs, args.task, _request_with_retry)
