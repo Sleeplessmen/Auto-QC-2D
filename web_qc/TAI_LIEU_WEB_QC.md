@@ -52,7 +52,7 @@ Mục 1–7 là hướng dẫn dùng. Mục 8–14 giải thích cách tool làm
 | Phần | Trạng thái |
 | --- | --- |
 | Web: 8 trang (Tổng quan, **Tự review**, Review job, Lịch sử, **Độ tin cậy tool**, Guideline, Kết nối CVAT, Cài đặt), 3 vai trò, hàng đợi | Đã có. Giao diện mới 2026-10-17, đã chụp thử cả 9 trang (kể cả đăng nhập), không lỗi JavaScript |
-| **Tự review khi job chuyển sang validation**: đẩy lỗi chắc chắn, còn lỗi thì trả job về annotation, không lỗi thì chờ reviewer | Đã có, đã thử trên CVAT localhost (2026-10-16). Trang Tự review xem kết quả từng job theo vòng |
+| **Tự review khi job chuyển sang validation**: đẩy lỗi chắc chắn, còn lỗi thì trả job về annotation, không lỗi thì chờ reviewer | Đã có, đã thử trên CVAT localhost (2026-10-16, thử lại 2026-10-18). Trang Tự review xem kết quả từng job theo vòng |
 | Nhiều kết nối CVAT thêm trên web (URL, token mã hoá, tổ chức), chọn job từ danh sách CVAT | Đã có, đã thử với CVAT 2.77.1 và 2.78.1 |
 | Đánh dấu "Tool nhầm", xem theo khung hình, chế độ Phân tích, theo dõi Issue đã đẩy, Tổng quan theo labeler | Đã có |
 | Chống đẩy trùng: giữ Issue cũ khi lỗi còn, đóng (resolve) khi lỗi hết | Đã có, đã thử trên CVAT localhost |
@@ -66,7 +66,7 @@ Mục 1–7 là hướng dẫn dùng. Mục 8–14 giải thích cách tool làm
 | Tầng luật hình học gộp từ LetmeQC (ra ngoài ảnh, polygon xoắn / < 3 điểm, polygon tràn box, trùng box của nhãn model không chấm, rider / pedestrian...) | Đã có (2026-10-16), LetmeQC `app.py` đã tắt |
 | Kiểm tra track: lỗi ID (tráo ID, đổi vật, 1 vật 2 ID, 2 ID 1 vật, kết thúc sớm, kích thước không đồng bộ), đứt track, nhảy vị trí | Đã có (2026-10-16), thử trên CVAT localhost: 7/7 và 6/6 kịch bản |
 | Shape hay track theo guideline; guideline mặc định cho task chưa gán | Đã có (2026-10-16) |
-| Đo hiệu quả Issue trên job thật: % Issue đúng, % lỗi bắt trước review chéo, số vòng trả lại / job | Đã có, thử đầu cuối trên CVAT localhost (75% Issue đúng trên 1 job giả lập). **Chưa có số đo trên job thật** |
+| Đo hiệu quả Issue trên job thật: % Issue đúng, % lỗi bắt trước review chéo, số vòng trả lại / job | Đã có, thử đầu cuối trên CVAT localhost (75% Issue đúng sau vòng 1, 67% sau vòng 2 trên 1 job giả lập). **Chưa có số đo trên job thật** |
 | Trang lỗi cho labeler (`bao-cao.html`, không cần đăng nhập) | Đã có |
 | Đọc guideline PDF / DOCX / TXT / MD, tra cứu đoạn liên quan theo nhãn | Đã có |
 | Hỏi LLM cho ca khó, huấn luyện thêm detector trên BDD100K | Chưa làm (xem [Lộ trình](#16-lộ-trình)) |
@@ -265,6 +265,7 @@ Cài đặt → **Tự review khi job chuyển sang validation** → tick Bật,
 - Web tự hỏi CVAT nên không cần webhook hay cấu hình mạng. Lần đầu bật, web chỉ ghi nhận các job đang ở validation, không review lại job cũ.
 - Kết quả mỗi lần (trả về annotation / chờ reviewer / không trả về được) được lưu và hiện trên trang **Tự review**. Trang này cũng có nút **Kiểm tra ngay** (admin) để hỏi CVAT luôn, không chờ 60 giây.
 - Đã thử trên CVAT localhost (2026-10-16): chuyển job sang validation, không bấm gì. Web tự review, giữ 12 Issue cũ còn lỗi, rồi trả job về `annotation / rejected`.
+- Thử lại 2026-10-18 trên web đang chạy: chuyển job 39 (52 box) sang validation. Sau 30 giây web nhận job, sau 60 giây review xong (7 lỗi chắc chắn, 17 đang xem xét), đẩy Issue và trả job về `annotation / rejected`. Trang Tự review ghi "trả về annotation".
 
 ### Webhook CVAT (tự review khi job hoàn thành)
 
@@ -642,33 +643,35 @@ Kèm bảng theo loại lỗi (để biết loại nào tool hay đúng, loại 
 
 Để số liệu đúng: khi review lại, Issue có lỗi đã hết được **đóng (resolved)**, không xoá, nên vẫn còn để đo. Issue gộp nhiều lỗi của một vật được tính **từng lỗi** theo đúng loại. Annotator sửa vật đó theo bất kỳ cách nào thì mọi lỗi trong Issue đều được tính là "đã sửa".
 
-Đã thử đầu cuối trên CVAT localhost (2026-10-16, task BDD100K 4 ảnh, 10 lỗi cài vào, chạy lại được bằng `venv\Scripts\python cvat_2d\kiem_thu\test_e2e_bdd.py`, ảnh trong repo ở `du_lieu_danh_gia/bdd_e2e`):
-- Tool bắt **10/10** lỗi (9 chắc chắn, 1 đang xem xét).
+Đã thử đầu cuối trên CVAT localhost (2026-10-16, chạy lại 2026-10-18, task BDD100K 4 ảnh, 10 lỗi cài vào, chạy lại được bằng `venv\Scripts\python cvat_2d\kiem_thu\test_e2e_bdd.py`, ảnh trong repo ở `du_lieu_danh_gia/bdd_e2e`):
+- Tool bắt **10/10** lỗi (8 chắc chắn, 2 đang xem xét: rider gán thành pedestrian, polygon mất phần).
 - Giả lập annotator sửa 5 lỗi (6 Issue), đóng 1 Issue mà không sửa. Reviewer đánh "tool nhầm" 1 ghi chú và tự thêm 1 Issue.
-- Web tính ra: % Issue đúng **75%** (6/8), % lỗi bắt trước review chéo **85.7%** (6/7), số vòng trả lại **2**.
+- Web tính ra: sau vòng 1 % Issue đúng **75%** (6/8), % lỗi bắt trước review chéo **85.7%** (6/7). Sau vòng 2 (annotator vẫn chưa sửa 1 lỗi tool gợi ý) % Issue đúng **66.7%** (6/9), số vòng trả lại **2**.
 - Nhãn gốc không đổi sau khi đẩy Issue.
 
 ---
 
 ## 12. Độ tin cậy, giới hạn và rủi ro
 
-Tool đủ tin để thay phần lớn công kiểm tra thô, nhưng **chưa thay hoàn toàn người review**. Số đo bằng `review_eval.py`, cố ý cài lỗi đã biết vào nhãn đúng, ngày 2026-10-17. Ảnh dùng để báo cáo **không dùng để chỉnh ngưỡng**. Xem kèm biểu đồ ở trang **Độ tin cậy tool**.
+Tool đủ tin để thay phần lớn công kiểm tra thô, nhưng **chưa thay hoàn toàn người review**. Số đo bằng `review_eval.py`, cố ý cài lỗi đã biết vào nhãn đúng, ngày 2026-10-18. Ảnh dùng để báo cáo **không dùng để chỉnh ngưỡng**. Xem kèm biểu đồ ở trang **Độ tin cậy tool**.
+
+Đo lại ngày 2026-10-18 sau khi sửa 2 chỗ trong cách đo: lỗi "trùng box" cài vào giờ chép từ box đang có (trước đó có lúc chép box của vật đã bị xoá, tool không thể bắt); lỗi cài vào vùng đáp án ghi "bỏ qua" (đám đông, vật quá mờ) không tính nữa, vì ghi chú của tool ở vùng đó vốn bị bỏ khi chấm. Ảnh Việt Nam có nhiều vùng như vậy (123/433 lỗi cài vào) nên số Việt Nam tăng từ 70,4% lên 94,5%. Số này **không gồm cảnh đám đông dày đặc**, nơi tool vẫn yếu (xem "Chỗ tool còn yếu" bên dưới).
 
 | Chỉ số | BDD100K: 335 ảnh giữ riêng, vật từ 10 px | Ảnh đường phố Việt Nam: 123 ảnh |
 | --- | --- | --- |
-| **Bắt được lỗi** (chắc chắn + đang xem xét) | **77,4%** (chắc chắn 38%) | 70,4% (chắc chắn 39%) |
-| **Issue chắc chắn là lỗi thật** | **85%** | 93% |
+| **Bắt được lỗi** (chắc chắn + đang xem xét) | **76,7%** (chắc chắn 40%) | 94,5% (chắc chắn 59%) |
+| **Issue chắc chắn là lỗi thật** | **86%** | 94% |
 | **Báo nhầm / 100 box đúng** | **1,45** chắc chắn + 18,7 đang xem xét | 0,7 chắc chắn + 6,2 đang xem xét |
-| Tool nói ảnh "sạch" thì sạch thật | 96% | 89% |
-| Theo loại (BDD100K) | Trùng 98%, thừa 90%, sai kích thước 82%, thiếu 69%, sai nhãn 68% | |
-| Theo điều kiện (BDD100K) | Ban ngày 80%, hoàng hôn 80%, ban đêm 70% | |
+| Tool nói ảnh "sạch" thì sạch thật | 98% | 100% |
+| Theo loại (BDD100K) | Trùng 100%, thừa 88%, sai kích thước 81%, thiếu 73%, sai nhãn 61% | |
+| Theo điều kiện (BDD100K) | Ban ngày 79%, hoàng hôn 79%, ban đêm 71% | |
 
 **So với bản trước cải tiến 2026-10-17** (cùng 335 ảnh BDD100K, cùng lỗi cài vào, vật từ 10 px):
 
 | Chỉ số | Trước | Sau |
 | --- | --- | --- |
-| Bắt được lỗi | 74,2% | 77,4% |
-| Issue chắc chắn đúng | 69% | 85% |
+| Bắt được lỗi | 74,9% | 76,7% |
+| Issue chắc chắn đúng | 72% | 86% |
 | Báo nhầm chắc chắn / 100 box | 4,0 | 1,45 |
 
 **Những thay đổi tạo ra kết quả trên:**
@@ -681,10 +684,12 @@ Tool đủ tin để thay phần lớn công kiểm tra thô, nhưng **chưa tha
 
 Cái giá phải trả là mỗi 100 box có thêm khoảng 7 mục "Đang xem xét" để reviewer xem.
 
+**Đã thử nhưng không dùng (2026-10-18, đo trên 400 ảnh chỉnh):** bỏ mục "có thể thiếu" khi vật tool thấy chồng lên box cùng loại đã gán, và bỏ mục "có thể sai nhãn" giữa các loại xe khi CLIP đồng ý với nhãn labeler. Hai cách giảm được 0,6–2 mục "Đang xem xét" / 100 box nhưng làm tụt bắt lỗi 0,7–2,5 điểm %. Bỏ lọt một lỗi thật tốn hơn vài giây reviewer xem một mục, nên giữ như cũ.
+
 ### Chỗ tool còn yếu
 
 - **Vật nhỏ 10–20 px:** tool chỉ bắt khoảng một nửa số lỗi thiếu vật / sai nhãn ở cỡ này (vật trên 60 px bắt khoảng 90%). Khoảng một phần ba số vật 10–15 px **không model nào thấy**, kể cả khi đã phóng to. Muốn tăng thì phải huấn luyện thêm detector trên BDD100K.
-- **Ban đêm và cảnh xe máy dày đặc:** bắt kém ban ngày khoảng 10 điểm %. Ảnh đám đông ở Hà Nội mới tìm được khoảng 40% số người.
+- **Ban đêm và cảnh xe máy dày đặc:** ban đêm bắt kém ban ngày khoảng 8 điểm %. Ảnh đám đông ở Hà Nội mới tìm được khoảng 40% số người. Số 94,5% của ảnh Việt Nam không gồm các vùng đám đông mà đáp án ghi "bỏ qua".
 - **Mục "Đang xem xét" thừa:** BDD100K có khoảng 19 mục / 100 box đúng. Một phần là vật thật mà đáp án BDD100K không gán, phần còn lại là tool nghi oan. Reviewer xem các mục này.
 - **Box amodal** (vẽ cả phần bị che): bộ đáp án đóng box theo phần nhìn thấy, nên chưa đo được độ đúng kiểu amodal.
 - Chấm box và polygon / mask 2D. Chưa chấm keypoint, polyline. Job 3D bị từ chối.
@@ -912,10 +917,11 @@ Mọi API (trừ đăng nhập) cần cookie phiên. Lỗi trả về dạng `{"
 - Kết nối CVAT thật: đọc được job 70 (task 74). Job này là 3D nên bị từ chối đúng.
 - Bật web thật bằng `web_qc.bat`: trang chủ trả 200, API trả 401 khi chưa đăng nhập.
 
-### Kiểm thử đã làm (2026-10-16 → 2026-10-17)
+### Kiểm thử đã làm (2026-10-16 → 2026-10-18)
 
-- Test đầu cuối trên CVAT localhost (2.78.1): job BDD100K box + polygon 10/10 lỗi, lỗi ID 7/7, job Track 6/6 (`kiem_thu/`).
-- Đo độ chính xác trên 735 ảnh BDD100K (400 chỉnh / 335 giữ riêng), 123 ảnh Việt Nam, 150 ảnh ExDark, 80 ảnh COCO segmentation (mục 12).
+- Test đầu cuối trên CVAT localhost (2.78.1): job BDD100K box + polygon 10/10 lỗi, lỗi ID 7/7, job Track 6/6 (`kiem_thu/`). Chạy lại cả 3 ngày 2026-10-18, đều đạt.
+- Tự review trên web đang chạy (2026-10-18): chuyển job sang validation, web tự review và trả job về annotation sau 60 giây.
+- Đo độ chính xác (đo lại 2026-10-18 sau khi sửa cách đo) trên 735 ảnh BDD100K (400 chỉnh / 335 giữ riêng), 123 ảnh Việt Nam, 150 ảnh ExDark, 80 ảnh COCO segmentation (mục 12).
 - Luật hình học trên nhãn thật của 2 bộ nhóm gán (29 ảnh Việt Nam, 204 ảnh KITTI): bắt 100% lỗi cài vào (ra ngoài ảnh, không có diện tích, polygon xoắn / dưới 3 điểm, trùng box nhãn lạ), 0 báo nhầm; bắt đủ 1123/1123 box bị lặp trong job 4598181.
 - Gộp Issue theo vật: 149/149 Issue trên dữ liệu review thật ghim đúng box của vật; đo hiệu quả với Issue gộp kiểm bằng CVAT giả.
 - Giao diện mới: chạy web trên bản sao dữ liệu, chụp màn hình 9 trang bằng Chrome headless, không có lỗi JavaScript.

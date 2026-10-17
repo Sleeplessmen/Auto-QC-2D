@@ -27,20 +27,22 @@ Bộ tool cho nhãn 2D trên CVAT:
 
 **Tổng quan cả dự án** (bài toán, kết quả, luồng làm việc, cấu trúc, LetmeQC): [TONG_QUAN_DU_AN.md](TONG_QUAN_DU_AN.md). **LetmeQC** (phiên bản đầu, chỉ dùng luật, đã tắt và gộp vào Web QC) nằm trong [letmeqc/](letmeqc/).
 
-## Độ chính xác của tool (đo 2026-10-17)
+## Độ chính xác của tool (đo 2026-10-18)
 
 Cách đo: cố ý cài lỗi đã biết vào nhãn đúng, cho tool review, đếm số lỗi bắt được và số báo nhầm. Ảnh dùng để báo cáo không dùng để chỉnh tool.
 
 | Chỉ số | BDD100K: 335 ảnh giữ riêng, vật từ 10 px | Ảnh Việt Nam: 123 ảnh |
 | --- | --- | --- |
-| Bắt được lỗi (chắc chắn + đang xem xét) | **77,4%** | 70,4% |
-| Issue "chắc chắn" là lỗi thật | **85%** | 93% |
+| Bắt được lỗi (chắc chắn + đang xem xét) | **76,7%** | 94,5% |
+| Issue "chắc chắn" là lỗi thật | **86%** | 94% |
 | Báo nhầm chắc chắn / 100 box đúng | **1,45** | 0,7 |
 
-So với bản trước 2026-10-17, đo trên cùng ảnh: bắt lỗi tăng từ 74,2% lên 77,4%, Issue chắc chắn đúng tăng từ 69% lên 85%, báo nhầm giảm từ 4,0 xuống 1,45.
+So với bản trước 2026-10-17, đo trên cùng ảnh và cùng lỗi cài vào: bắt lỗi tăng từ 74,9% lên 76,7%, Issue chắc chắn đúng tăng từ 72% lên 86%, báo nhầm giảm từ 4,0 xuống 1,45.
+
+Số ảnh Việt Nam không gồm lỗi nằm trong vùng đáp án ghi "bỏ qua" (đám đông, vật quá mờ). Tính cả vùng đó thì còn khoảng 70%. Cảnh đám đông dày đặc vẫn là chỗ tool yếu.
 
 - **Segmentation (80 ảnh COCO):** bắt 74,9% lỗi polygon.
-- **Test trên CVAT localhost:** 10/10 lỗi, lỗi ID 7/7, job Track 6/6.
+- **Test trên CVAT localhost (chạy lại 2026-10-18):** 10/10 lỗi, lỗi ID 7/7, job Track 6/6. Tự review khi job sang validation chạy đúng: review xong sau 60 giây và trả job về annotation.
 - **Chỗ yếu nhất:** vật 10–20 px và ảnh đêm.
 
 Xem đầy đủ kèm biểu đồ ở trang **Độ tin cậy tool** của web.
@@ -98,6 +100,7 @@ Vào **Cài đặt → Tự review khi job chuyển sang validation**, tick **B�
 - Labeler sửa xong, nộp lại validation, thì tool review lại. Issue có lỗi đã hết được đóng, lỗi còn thì giữ Issue cũ (không tạo trùng). Mỗi lần trả về được tính là một vòng ở Tổng quan → Hiệu quả Issue.
 - Web tự hỏi CVAT nên không cần webhook hay cấu hình mạng.
 - Đã thử trên CVAT localhost (2026-10-16): chuyển job sang validation, không bấm gì. Web tự review, giữ 12 Issue cũ còn lỗi, rồi trả job về `annotation / rejected`.
+- Thử lại 2026-10-18 trên web đang chạy: chuyển job 39 (52 box) sang validation. Sau 30 giây web nhận job, sau 60 giây review xong (7 lỗi chắc chắn, 17 đang xem xét), đẩy Issue và trả job về `annotation / rejected`. Trang Tự review ghi "trả về annotation".
 
 Tool không cần đáp án (ground truth) để review job thật. Tool tự nhìn ảnh bằng model, rồi so với nhãn labeler. Đáp án chỉ dùng để đo độ chính xác của tool (xem dưới).
 

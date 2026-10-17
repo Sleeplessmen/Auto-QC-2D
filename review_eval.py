@@ -78,8 +78,10 @@ def perturb(objs, W, H, rng):
             errs.append(("sai_nhan", bid, b, cls))
         out.append(dict(id=bid, label=cls, box=b, occluded=False))
     # box trung: chep 1 box co san, lech nhe
-    if objs and rng.random() < 0.25:
-        o = rng.choice(objs)
+    kept = [x for x in out if x["id"].startswith("g")]      # vat con lai (khong bi xoa): annotator chep doi box co san
+    if kept and rng.random() < 0.25:
+        x = rng.choice(kept)
+        o = dict(box=x["box"], cls=x["label"])
         b = o["box"]
         w, h = b[2] - b[0], b[3] - b[1]
         if min(w, h) >= 20:
@@ -203,6 +205,7 @@ def main():
         # 2) cai loi gia
         plab, errs = perturb(g["objects"], W, H, rng)
         errs = [e for e in errs if not (e[0] in ("thieu", "sai_nhan") and tiny(e[2]))]    # loi tren vat guideline bo qua
+        errs = [e for e in errs if not _ignored(dict(box=e[2]), ign)]    # loi cai vao vung dap an bo qua: ghi chu o do bi bo -> khong tinh
         pf = [f for f in R.compare(plab, tool, rej, W, H, tool2job, job_group, img=img, runner=runner) if not _ignored(f, ign)]
         used, res = set(), []
         for e in errs:

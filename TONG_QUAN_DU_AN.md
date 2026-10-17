@@ -33,14 +33,16 @@ Mục tiêu: giảm thời gian và công sức của reviewer, và đo được
 
 Cách đo: lấy ảnh có đáp án (nhãn đúng), **cố ý cài lỗi đã biết** vào nhãn, cho tool review như một job thật, rồi đếm số lỗi tool bắt được, bỏ lọt và báo nhầm. Ảnh dùng để báo cáo **không dùng để chỉnh tool**.
 
-Các số dưới đây là độ chính xác **của tool**, không phải của annotator. Đo ngày 2026-10-17.
+Các số dưới đây là độ chính xác **của tool**, không phải của annotator. Đo ngày 2026-10-18.
+
+Đo lại ngày 2026-10-18 sau khi sửa 2 chỗ trong cách đo: lỗi "trùng box" cài vào giờ chép từ box đang có (trước đó có lúc chép box của vật đã bị xoá, tool không thể bắt); lỗi cài vào vùng đáp án ghi "bỏ qua" (đám đông, vật quá mờ) không tính nữa, vì ghi chú của tool ở vùng đó vốn bị bỏ khi chấm. Ảnh Việt Nam có nhiều vùng như vậy (123/433 lỗi cài vào) nên số Việt Nam tăng từ 70,4% lên 94,5%. Số này **không gồm cảnh đám đông dày đặc**, nơi tool vẫn yếu (xem mục 13).
 
 | Chỉ số | BDD100K (335 ảnh, vật từ 10 px) | Ảnh đường phố Việt Nam (123 ảnh) |
 |---|---|---|
-| **Bắt được lỗi** (gồm cả lỗi ghi "Đang xem xét") | **77,4%** | 70,4% |
-| **Issue "chắc chắn" là lỗi thật** | **85%** | 93% |
+| **Bắt được lỗi** (gồm cả lỗi ghi "Đang xem xét") | **76,7%** | 94,5% |
+| **Issue "chắc chắn" là lỗi thật** | **86%** | 94% |
 | **Báo nhầm chắc chắn / 100 box đúng** | **1,45** | 0,7 |
-| Tool nói ảnh "sạch" thì ảnh sạch thật | 96% | 89% |
+| Tool nói ảnh "sạch" thì ảnh sạch thật | 98% | 100% |
 
 Cách đọc các chỉ số:
 - **Bắt được lỗi:** annotator mắc 100 lỗi thì tool tìm ra bao nhiêu.
@@ -51,26 +53,27 @@ Cách đọc các chỉ số:
 
 | Loại lỗi | Bắt được |
 |---|---|
-| Trùng box | 98% |
-| Box thừa | 90% |
-| Sai kích thước | 82% |
-| Thiếu vật | 69% |
-| Sai nhãn | 68% |
+| Trùng box | 100% |
+| Box thừa | 88% |
+| Sai kích thước | 81% |
+| Thiếu vật | 73% |
+| Sai nhãn | 61% |
 
-**Theo điều kiện ảnh:** ban ngày và hoàng hôn khoảng 80%, ban đêm khoảng 70%.
+**Theo điều kiện ảnh:** ban ngày và hoàng hôn khoảng 79%, ban đêm khoảng 71%.
 
 **So với bản trước cải tiến**, cùng ảnh và cùng lỗi cài vào:
 
 | Chỉ số | Trước | Sau |
 |---|---|---|
-| Bắt được lỗi | 74,2% | 77,4% |
-| Issue chắc chắn đúng | 69% | 85% |
+| Bắt được lỗi | 74,9% | 76,7% |
+| Issue chắc chắn đúng | 72% | 86% |
 | Báo nhầm chắc chắn / 100 box | 4,0 | 1,45 |
 
 **Instance segmentation (polygon), 80 ảnh COCO:** bắt 74,9% lỗi polygon cài vào. Báo nhầm 1,3 lỗi chắc chắn trên 100 polygon đúng.
 
-**Test đầu cuối trên CVAT** (2026-10-16): tạo job, cài lỗi, tool tự review, đẩy Issue, annotator sửa, review vòng 2.
-- Job BDD100K có box + polygon: bắt **10/10** lỗi cài vào.
+**Test đầu cuối trên CVAT** (2026-10-16, chạy lại 2026-10-18): tạo job, cài lỗi, tool tự review, đẩy Issue, annotator sửa, review vòng 2.
+- Job BDD100K có box + polygon: bắt **10/10** lỗi cài vào (8 chắc chắn, 2 đang xem xét).
+- Tự review khi chuyển job sang validation (2026-10-18, job 52 box): web nhận job sau 30 giây, review xong sau 60 giây, đẩy Issue và trả job về annotation.
 - Lỗi ID của track: **7/7** kịch bản đạt.
 - Job video gán bằng Track: **6/6** kịch bản đạt.
 
@@ -484,8 +487,9 @@ Cấu hình qua `.env` (xem `.env.example`): `CVAT_API_URL`, `CVAT_TOKEN`, `WEBH
 
 **Giới hạn hiện tại:**
 - **Vật nhỏ 10–20 px** là chỗ yếu nhất: tool chỉ bắt khoảng một nửa số lỗi ở cỡ này, trong khi vật trên 60 px bắt khoảng 90%. Khoảng một phần ba số vật 10–15 px không model nào thấy, kể cả khi đã phóng to.
-- **Ảnh đêm** bắt kém hơn ban ngày khoảng 10 điểm % (70% so với 80%).
-- Các số ở mục 1 đo bằng **lỗi cài vào**. Số "% Issue đúng" trên **job thật** chỉ có sau khi annotator sửa theo Issue (Tổng quan → Hiệu quả Issue). Hiện mới đo trên 1 job giả lập (75%).
+- **Ảnh đêm** bắt kém hơn ban ngày khoảng 8 điểm % (71% so với 79%).
+- **Cảnh đám đông dày đặc** (người, xe máy ở Hà Nội): tool mới tìm được khoảng 40% số người. Số 94,5% của ảnh Việt Nam không gồm các vùng này.
+- Các số ở mục 1 đo bằng **lỗi cài vào**. Số "% Issue đúng" trên **job thật** chỉ có sau khi annotator sửa theo Issue (Tổng quan → Hiệu quả Issue). Hiện mới đo trên 1 job giả lập (75% sau vòng 1, 67% sau vòng 2).
 - Tool là **trợ lý của reviewer**. Reviewer vẫn cần kiểm chéo job tool cho qua, ít nhất là xem ngẫu nhiên một phần.
 
 **Việc tiếp theo:**
