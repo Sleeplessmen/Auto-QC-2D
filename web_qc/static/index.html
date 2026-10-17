@@ -544,7 +544,7 @@
           <div class="stack">
             <label class="chk" for="sAuto"><input type="checkbox" id="sAuto"><span>Bật: labeler gán xong, chuyển stage sang <b>validation</b> thì tự review</span></label>
             <label class="fld" for="sAutoConn"><span>CVAT theo dõi</span><select id="sAutoConn"></select></label>
-            <label class="chk" for="sAutoPush"><input type="checkbox" id="sAutoPush" checked><span>Review xong tự đẩy lỗi chắc chắn lên CVAT (lỗi "chưa chắc" chờ người xem)</span></label>
+            <label class="chk" for="sAutoPush"><input type="checkbox" id="sAutoPush" checked><span>Review xong tự đẩy lỗi chắc chắn lên CVAT (mục "Đang xem xét" chờ người xem)</span></label>
             <label class="chk" for="sAutoReturn"><input type="checkbox" id="sAutoReturn" checked><span>Có lỗi chắc chắn thì tự <b>trả job về annotation</b> (rejected) cho annotator sửa; không lỗi thì job ở lại validation cho reviewer kiểm chéo</span></label>
             <div class="hook-box" id="autoBox"></div>
           </div>
@@ -608,6 +608,6 @@
   </div>
 </div>
 <div id="modal" class="modal zoom hidden"><img id="modalImg" alt="Ảnh phóng to"></div>
-<script src="app.js?v=19"></script>
+<script src="app.js?v=20"></script>
 </body>
 </html>

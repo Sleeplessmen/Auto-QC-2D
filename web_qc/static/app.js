@@ -1077,7 +1077,7 @@ function renderAnSide() {
     const toolCell = it.type === "lab" ? (it.tool ? `${esc(it.tool.label)} <span class="sub">tin cậy ${Math.round(it.tool.score * 100)}%</span>` : `<span class="meta">Không thấy</span>`)
       : it.type === "area" ? (it.road ? "so với mặt đường" : it.ref_iou != null ? `mask SAM2 <span class="sub">viền nét đứt</span>` : "—")
       : it.type === "tool" ? `${esc(it.label)} <span class="sub">tin cậy ${Math.round(it.score * 100)}%${it.sure ? "" : " · thấp"}</span>`
-      : `${esc(it.label)}<span class="sub">${it.sure ? "chắc chắn" : "chưa chắc"}</span>`;
+      : `${esc(it.label)}<span class="sub">${it.sure ? "chắc chắn" : "đang xem xét"}</span>`;
     const iou = it.type === "lab" && it.tool ? Math.round(it.iou * 100) + "%" : it.type === "area" && it.ref_iou != null ? Math.round(it.ref_iou * 100) + "%" : "—";
     return `<tr data-key="${it.key}"><td>${n + 1}</td><td><span class="st ${st}"></span>${esc(it.label)}</td><td>${labCell}</td><td>${toolCell}</td><td class="r">${iou}</td></tr>`;
   }).join("") || `<tr><td colspan="5" class="empty-row">Ảnh này không có nhãn nào.</td></tr>`;
@@ -1087,7 +1087,7 @@ function anDesc(it) {
   if (!it) return "";
   const head = it.type === "lab" ? `Box <b>${esc(it.label)}</b> của labeler — <b>${ST_VI[it.status]}</b>`
     : it.type === "area" ? `${it.kind === "mask" ? "Mask" : "Polygon"} <b>${esc(it.label)}</b> của labeler — <b>${ST_VI[it.status]}</b>`
-    : it.type === "miss" ? `<b>Thiếu ${esc(it.label)}</b>${it.sure ? "" : " (chưa chắc)"}`
+    : it.type === "miss" ? `<b>Thiếu ${esc(it.label)}</b>${it.sure ? "" : " (đang xem xét)"}`
     : `Tool thấy <b>${esc(it.label)}</b> (tin cậy ${Math.round(it.score * 100)}%), labeler không có box. Tool chưa đủ chắc để báo thiếu, nên xem bằng mắt.`;
   let body = "";
   if (it.type === "area" && it.ref_iou != null) body = `<br>Viền nét đứt xanh = mask SAM2 tự tìm cho vật này, trùng ${Math.round(it.ref_iou * 100)}% với polygon của labeler. Chỗ lệch giữa 2 viền là chỗ vẽ lẹm / tô thừa.`;
