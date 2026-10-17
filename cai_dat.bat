@@ -27,10 +27,10 @@ if not exist "%PY%" (
 "%PY%" -m pip install -U pip
 where nvidia-smi >nul 2>nul && (
     echo == Co GPU NVIDIA: cai torch ban CUDA
-    "%PY%" -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu126 || exit /b 1
+    "%PY%" -m pip install torch==2.14.1 torchvision==0.29.1 --index-url https://download.pytorch.org/whl/cu126 || exit /b 1
 ) || echo == Khong thay GPU NVIDIA: dung torch ban CPU ^(chay rat cham^)
 echo == Cai thu vien
-"%PY%" -m pip install -r "%HERE%requirements.txt" || exit /b 1
+"%PY%" -m pip install -r "%HERE%requirements.txt" -c "%HERE%rang_buoc_phien_ban.txt" || exit /b 1
 echo == Tai model ^(lan dau khoang 3 GB, can Internet^)
 set PYTHONIOENCODING=utf-8
 "%PY%" "%HERE%tai_model.py" || exit /b 1

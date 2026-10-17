@@ -107,9 +107,9 @@ Chỉ cần cài trên **một máy chủ**. Người dùng chỉ mở trình du
 
 ### Các bước cài
 
-1. **Cài thư viện và tải model** (chỉ làm một lần): chạy `cvat_2d\cai_dat.bat`. Script tạo `venv`, cài torch bản CUDA (nếu có GPU NVIDIA) và `requirements.txt`, rồi tải toàn bộ model (khoảng 3 GB, cần Internet). Nếu đã có `venv` thì chỉ cần:
+1. **Cài thư viện và tải model** (chỉ làm một lần): chạy `cvat_2d\cai_dat.bat`. Script tạo `venv`, cài torch bản CUDA (nếu có GPU NVIDIA) và `requirements.txt` theo đúng phiên bản đã chạy thử (`rang_buoc_phien_ban.txt`), rồi tải toàn bộ model (khoảng 3 GB, cần Internet). Nếu đã có `venv` thì chỉ cần:
    ```
-   venv\Scripts\pip install -r cvat_2d\requirements.txt
+   venv\Scripts\pip install -r cvat_2d\requirements.txt -c cvat_2d\rang_buoc_phien_ban.txt
    venv\Scripts\python cvat_2d\tai_model.py
    ```
 2. **Kết nối CVAT:** sau khi đăng nhập, vào trang **Kết nối CVAT** → **Thêm kết nối**, nhập địa chỉ, token và tổ chức (nếu có), bấm **Thử kết nối** rồi **Lưu** (xem [mục 4](#4-kết-nối-cvat)).
@@ -656,8 +656,8 @@ Tool đủ tin để thay phần lớn công kiểm tra thô, nhưng **chưa tha
 
 | Chỉ số | BDD100K: 335 ảnh giữ riêng, vật từ 10 px | Ảnh đường phố Việt Nam: 123 ảnh |
 | --- | --- | --- |
-| **Bắt được lỗi** (chắc chắn + đang xem xét) | **77,4%** (chắc chắn 36%) | 70,4% (chắc chắn 39%) |
-| **Issue chắc chắn là lỗi thật** | **84%** | 93% |
+| **Bắt được lỗi** (chắc chắn + đang xem xét) | **77,4%** (chắc chắn 38%) | 70,4% (chắc chắn 39%) |
+| **Issue chắc chắn là lỗi thật** | **85%** | 93% |
 | **Báo nhầm / 100 box đúng** | **1,45** chắc chắn + 18,7 đang xem xét | 0,7 chắc chắn + 6,2 đang xem xét |
 | Tool nói ảnh "sạch" thì sạch thật | 96% | 89% |
 | Theo loại (BDD100K) | Trùng 98%, thừa 90%, sai kích thước 82%, thiếu 69%, sai nhãn 68% | |
@@ -668,7 +668,7 @@ Tool đủ tin để thay phần lớn công kiểm tra thô, nhưng **chưa tha
 | Chỉ số | Trước | Sau |
 | --- | --- | --- |
 | Bắt được lỗi | 74,2% | 77,4% |
-| Issue chắc chắn đúng | 69% | 84% |
+| Issue chắc chắn đúng | 69% | 85% |
 | Báo nhầm chắc chắn / 100 box | 4,0 | 1,45 |
 
 **Những thay đổi tạo ra kết quả trên:**

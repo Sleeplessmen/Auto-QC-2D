@@ -72,6 +72,7 @@ SIZE_IOU = 0.85          # IoU >= muc nay coi nhu khit, khong bao
 SIZE_SURE_REL = 0.20
 OCCLUDED_FRAC = 0.15     # >= 15% box nam trong box khac -> coi nhu bi che (guideline ve phan nhin thay: mep kho uoc luong)
 DARK_MEAN = 30           # do sang trung binh vung box < muc nay -> anh qua toi, mep kho thay
+EXTREME_SHAPE = 15       # box rong/cao >= 15 (hoac nguoc lai): khong ha xuong "dang xem xet" vi bi che (dai noc xe ~10:1 thi van ha)
 # Nham giua cac loai xe (car / truck / bus): chi chac khi CLIP cung chac la loai tool noi (xe ban tai, van... de nham)
 VEH_PROMPTS = {"car": ["a photo of a car", "a photo of a sedan", "a photo of an SUV"],
                "truck": ["a photo of a truck", "a photo of a lorry", "a photo of a delivery truck"],
@@ -581,6 +582,9 @@ def compare(lab, tool, rejected, W, H, tool2job, job_group, img=None, runner=Non
         l = byid.get(f.get("ref"))
         if f["kind"] != "sai_kich_thuoc" or not f["sure"] or l is None or min(l["box"][2] - l["box"][0], l["box"][3] - l["box"][1]) < 3:
             continue
+        w_, h_ = l["box"][2] - l["box"][0], l["box"][3] - l["box"][1]
+        if f.get("off") is None and max(w_ / h_, h_ / w_) >= EXTREME_SHAPE:
+            continue          # box det / manh cuc do (vd 912x14) chac chan sai, du co cham box khac
         why = _shaky(l, lab, img, f.get("off"))
         if why:
             f["sure"] = False

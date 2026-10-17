@@ -38,7 +38,7 @@ Các số dưới đây là độ chính xác **của tool**, không phải củ
 | Chỉ số | BDD100K (335 ảnh, vật từ 10 px) | Ảnh đường phố Việt Nam (123 ảnh) |
 |---|---|---|
 | **Bắt được lỗi** (gồm cả lỗi ghi "Đang xem xét") | **77,4%** | 70,4% |
-| **Issue "chắc chắn" là lỗi thật** | **84%** | 93% |
+| **Issue "chắc chắn" là lỗi thật** | **85%** | 93% |
 | **Báo nhầm chắc chắn / 100 box đúng** | **1,45** | 0,7 |
 | Tool nói ảnh "sạch" thì ảnh sạch thật | 96% | 89% |
 
@@ -64,7 +64,7 @@ Cách đọc các chỉ số:
 | Chỉ số | Trước | Sau |
 |---|---|---|
 | Bắt được lỗi | 74,2% | 77,4% |
-| Issue chắc chắn đúng | 69% | 84% |
+| Issue chắc chắn đúng | 69% | 85% |
 | Báo nhầm chắc chắn / 100 box | 4,0 | 1,45 |
 
 **Instance segmentation (polygon), 80 ảnh COCO:** bắt 74,9% lỗi polygon cài vào. Báo nhầm 1,3 lỗi chắc chắn trên 100 polygon đúng.
@@ -225,7 +225,7 @@ cvat_2d\cai_dat.bat
 
 `cai_dat.bat` làm hết các bước sau. Lần đầu mất khoảng 15–30 phút và cần Internet:
 - Tạo `venv`.
-- Cài torch bản CUDA (nếu máy có GPU NVIDIA) và các thư viện trong `requirements.txt`.
+- Cài torch bản CUDA (nếu máy có GPU NVIDIA) và các thư viện trong `requirements.txt`, **đúng phiên bản đã chạy thử** ghi trong `rang_buoc_phien_ban.txt`.
 - Tải model: SAM2.1 large, YOLO11x, RT-DETR-x, YOLOv8x-seg, D-FINE-X, CLIP ViT-L/14, SegFormer-b5.
 
 Trên máy hiện tại, mọi thứ đã có sẵn trong `tood qc 2d/`: thư mục `sam2/` là thư viện SAM2, `cvat_2d/` là tool, `venv/` là môi trường Python, `checkpoints/` chứa SAM2.1.

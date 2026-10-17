@@ -34,10 +34,10 @@ Cách đo: cố ý cài lỗi đã biết vào nhãn đúng, cho tool review, đ
 | Chỉ số | BDD100K: 335 ảnh giữ riêng, vật từ 10 px | Ảnh Việt Nam: 123 ảnh |
 | --- | --- | --- |
 | Bắt được lỗi (chắc chắn + đang xem xét) | **77,4%** | 70,4% |
-| Issue "chắc chắn" là lỗi thật | **84%** | 93% |
+| Issue "chắc chắn" là lỗi thật | **85%** | 93% |
 | Báo nhầm chắc chắn / 100 box đúng | **1,45** | 0,7 |
 
-So với bản trước 2026-10-17, đo trên cùng ảnh: bắt lỗi tăng từ 74,2% lên 77,4%, Issue chắc chắn đúng tăng từ 69% lên 84%, báo nhầm giảm từ 4,0 xuống 1,45.
+So với bản trước 2026-10-17, đo trên cùng ảnh: bắt lỗi tăng từ 74,2% lên 77,4%, Issue chắc chắn đúng tăng từ 69% lên 85%, báo nhầm giảm từ 4,0 xuống 1,45.
 
 - **Segmentation (80 ảnh COCO):** bắt 74,9% lỗi polygon.
 - **Test trên CVAT localhost:** 10/10 lỗi, lỗi ID 7/7, job Track 6/6.
@@ -66,7 +66,7 @@ cvat_2d\cai_dat.bat
 `cai_dat.bat` làm hết các bước. Lần đầu mất khoảng 15–30 phút, cần Internet:
 
 - Tạo môi trường `venv`.
-- Cài torch bản GPU và các thư viện.
+- Cài torch bản GPU và các thư viện, **đúng phiên bản đã chạy thử** (ghi trong `rang_buoc_phien_ban.txt`), để máy mới không bị thư viện ra bản mới làm hỏng.
 - Tải model, khoảng 3 GB:
   - SAM2.1 large.
   - YOLO11x, RT-DETR-x, YOLOv8x-seg.
