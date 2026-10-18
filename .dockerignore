@@ -1,0 +1,12 @@
+.git
+.venv
+venv
+__pycache__
+*.pyc
+web_qc/data
+artifacts
+models
+cache_hq2d
+review_out
+tests/fixtures/evaluation
+archive/legacy

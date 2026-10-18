@@ -3,6 +3,7 @@ rem Web QC nhan 2D (ban day du):  web_qc        -> http://localhost:8000
 rem                                web_qc --lan  -> may khac cung mang vao http://<ip may nay>:8000
 setlocal
 set "HERE=%~dp0"
+set "PYTHONPATH=%HERE%;%HERE%packages;%PYTHONPATH%"
 set "PY="
 for %%V in ("%HERE%venv" "%HERE%..\venv") do if not defined PY if exist "%%~V\Scripts\python.exe" set "PY=%%~V\Scripts\python.exe"
 set PYTHONIOENCODING=utf-8

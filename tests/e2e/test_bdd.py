@@ -1,14 +1,12 @@
 """Test dau cuoi tren CVAT (ket noi so 2 cua web QC, mac dinh CVAT localhost): tao task BDD100K (box + polygon), cai 10 loi,
 web QC review (ban sao du lieu web, khong dung toi lich su that), day Issue, gia lap annotator sua 1 phan + reviewer them
 Issue, do hieu qua, review vong 2.
-    venv\\Scripts\\python cvat_2d\\kiem_thu\\test_e2e_bdd.py      (ket qua: kiem_thu/ket_qua/e2e_result.json)"""
+    python tests\\e2e\\test_bdd.py      (ket qua: artifacts/e2e/e2e_result.json)"""
 import json, os, shutil, sys, time
 HERE = os.path.dirname(os.path.abspath(__file__))
-D = os.path.dirname(HERE)                                         # cvat_2d
-DATA = os.path.join(D, "du_lieu_danh_gia")                         # trong repo (cvat_2d/du_lieu_danh_gia)
-if not os.path.isdir(DATA):
-    DATA = os.path.join(os.path.dirname(D), "du_lieu_danh_gia")        # tood qc 2d/du_lieu_danh_gia
-SP = os.path.join(HERE, "ket_qua")
+D = os.path.dirname(os.path.dirname(HERE))                         # repository root
+DATA = os.path.join(D, "tests", "fixtures", "evaluation")
+SP = os.path.join(D, "artifacts", "e2e")
 os.makedirs(SP, exist_ok=True)
 sys.path.insert(0, D); sys.path.insert(0, os.path.join(D, "web_qc")); os.chdir(D)
 for f in (sys.stdout, sys.stderr):
@@ -33,7 +31,7 @@ url = conn["url"].rstrip("/")
 s = cv.s
 IM = os.path.join(DATA, "bdd_e2e")
 names = ["b27098c3-c443b6e3.jpg", "b7ad4512-5b2510d8.jpg", "c323201c-9bcf7cf8.jpg", "c752e922-ae691e9d.jpg"]
-labels_def = json.load(open(os.path.join(D, "guideline_bdd100k", "labels_bdd100k.json"), encoding="utf-8"))
+labels_def = json.load(open(os.path.join(D, "config", "guidelines", "bdd100k", "labels_bdd100k.json"), encoding="utf-8"))
 
 # ---- 1. tao task
 r = s.post(f"{url}/api/tasks", json=dict(name=f"e2e BDD100K det+insseg {time.strftime('%H%M%S')}", labels=labels_def))
@@ -183,9 +181,9 @@ def ids_of(key):
 
 
 # ---- 3. guideline BDD100K + file luat, dat lam guideline mac dinh -> review qua worker (giong web)
-gtext = G.extract_text(os.path.join(D, "guideline_bdd100k", "GUIDELINE_BDD100K.md"))
+gtext = G.extract_text(os.path.join(D, "config", "guidelines", "bdd100k", "GUIDELINE_BDD100K.md"))
 gid = store.add_guideline("BDD100K det + ins-seg", "GUIDELINE_BDD100K.md", "", gtext,
-                          open(os.path.join(D, "guideline_bdd100k", "luat_bdd100k.yaml"), encoding="utf-8").read(), "e2e")
+                          open(os.path.join(D, "config", "guidelines", "bdd100k", "luat_bdd100k.yaml"), encoding="utf-8").read(), "e2e")
 store.set_settings(default_guideline_id=gid)
 w = Wm.Worker()
 

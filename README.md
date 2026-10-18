@@ -1,5 +1,34 @@
 # CVAT 2D — gán nhãn tự động và QC nhãn
 
+## Cấu trúc production
+
+Repo dùng cấu trúc monorepo có boundary rõ ràng:
+
+- `apps/api/`: entrypoint FastAPI ổn định (`apps.api.main:app`).
+- `web_qc/`: implementation Web QC hiện tại, đang được di chuyển dần sau
+  boundary của `apps/api`.
+- `packages/`: package dùng chung và runtime path/config.
+- `config/`: guideline và rule có version.
+- `tests/unit`, `tests/e2e`, `tests/fixtures`: test và fixture nhỏ; kết quả
+  chạy sinh vào `artifacts/`.
+- `deploy/`: Dockerfile và Compose production.
+- `archive/legacy/letmeqc/`: bản LetmeQC đã tắt, không được build/deploy.
+
+Chạy production bằng Compose:
+
+```powershell
+Copy-Item .env.production.example .env.production
+docker compose -f deploy/compose/docker-compose.production.yml up -d --build
+```
+
+Không đưa token, database, model, cache hoặc kết quả chạy vào image/Git.
+
+**Hướng dẫn setup production đầy đủ** (Vercel + VPS/cloud GPU + CVAT Cloud +
+domain/HTTPS + backup/monitoring/CI/CD/rollback): [docs/operations/PRODUCTION_SETUP.md](docs/operations/PRODUCTION_SETUP.md).
+
+**Hướng dẫn tạo link public từ số 0** (mua domain, chọn VPS, cấu hình DNS,
+HTTPS, Vercel và kiểm tra user flow): [docs/operations/GET_PUBLIC_LINK.md](docs/operations/GET_PUBLIC_LINK.md).
+
 Bộ tool cho nhãn 2D trên CVAT:
 
 - **Web QC** (`web_qc/`, chạy `web_qc.bat`): review nhãn của labeler thay người review, rồi ghi chú lên CVAT bằng **Issue**. Tool không sửa nhãn. Tool tìm các lỗi:
@@ -19,13 +48,13 @@ Bộ tool cho nhãn 2D trên CVAT:
 - **Gán nhãn chất lượng cao** (`label_hq_2d.py`): 4 detector + SAM2 + CLIP.
 - Các tool phụ: `review.bat` (QC bằng dòng lệnh), `review_web.bat` (bản QC Gradio cũ), `menu.bat`.
 
-**BDD100K (object detection + instance segmentation):** guideline, tập nhãn CVAT và file luật nằm trong [guideline_bdd100k/](guideline_bdd100k/). QC luôn đọc guideline: task chưa gán guideline thì dùng guideline mặc định trong Cài đặt.
+**BDD100K (object detection + instance segmentation):** guideline, tập nhãn CVAT và file luật nằm trong [config/guidelines/bdd100k/](config/guidelines/bdd100k/). QC luôn đọc guideline: task chưa gán guideline thì dùng guideline mặc định trong Cài đặt.
 
 **Đo hiệu quả trên job thật:** trang Tổng quan → Hiệu quả Issue. Có % Issue đúng (annotator đã sửa theo), % lỗi bắt được trước review chéo, và số vòng bị trả lại / job.
 
 **Tài liệu đầy đủ:** [web_qc/TAI_LIEU_WEB_QC.md](web_qc/TAI_LIEU_WEB_QC.md). Tài liệu gồm cài đặt, hướng dẫn dùng, guideline và file luật, cách tool tìm lỗi, xử lý lỗi, phần kỹ thuật.
 
-**Tổng quan cả dự án** (bài toán, kết quả, luồng làm việc, cấu trúc, LetmeQC): [TONG_QUAN_DU_AN.md](TONG_QUAN_DU_AN.md). **LetmeQC** (phiên bản đầu, chỉ dùng luật, đã tắt và gộp vào Web QC) nằm trong [letmeqc/](letmeqc/).
+**Tổng quan cả dự án** (bài toán, kết quả, luồng làm việc, cấu trúc, LetmeQC): [TONG_QUAN_DU_AN.md](TONG_QUAN_DU_AN.md). **LetmeQC** (phiên bản đầu, chỉ dùng luật, đã tắt và gộp vào Web QC) nằm trong [archive/legacy/letmeqc/](archive/legacy/letmeqc/).
 
 ## Độ chính xác của tool (đo 2026-10-18)
 
@@ -86,7 +115,7 @@ cvat_2d\cai_dat.bat
 ## Các trang của web (giao diện 2026-10-17)
 
 - **Tự review** (trang mở đầu): sơ đồ luồng nộp validation → tool review → trả về annotation / chờ reviewer → nộp lại, kèm số liệu sống. Bảng mỗi job một dòng, % box đúng qua từng vòng. Danh sách job chờ reviewer kiểm chéo.
-- **Độ tin cậy tool**: số đo độ chính xác của tool (bắt được lỗi, Issue chắc chắn đúng, báo nhầm), theo loại lỗi, theo điều kiện ảnh, trước / sau cải tiến, segmentation, test trên CVAT. Dữ liệu ở `web_qc/static/do_tin_cay.json`, tạo lại bằng `web_qc/tao_do_tin_cay.py` sau khi chạy `review_eval.py --json`.
+- **Độ tin cậy tool**: số đo độ chính xác của tool (bắt được lỗi, Issue chắc chắn đúng, báo nhầm), theo loại lỗi, theo điều kiện ảnh, trước / sau cải tiến, segmentation, test trên CVAT. Dữ liệu ở `apps/web/static/do_tin_cay.json`, tạo lại bằng `web_qc/tao_do_tin_cay.py` sau khi chạy `review_eval.py --json`.
 - Tổng quan, Review job, Lịch sử, Guideline, Kết nối CVAT, Cài đặt: như cũ.
 - Mở thẳng một trang bằng link `http://<máy>:8000/#tab=trust` (auto, dash, history, guide, conn, settings).
 
@@ -140,16 +169,16 @@ venv\Scripts\python cvat_2d\review_eval.py --images D:\DATA_EXT\bdd_eval\images 
 - `--cond dem` / `--cond mua` giả lập ảnh đêm / mưa từ ảnh ban ngày. `--no-far` tắt phóng to dải giữa ảnh.
 - Cập nhật trang **Độ tin cậy tool**: `venv\Scripts\python cvat_2d\web_qc\tao_do_tin_cay.py --bdd-new ket_qua.json …`.
 
-**Test đầu cuối trên CVAT** (kết nối số 2 của web, mặc định CVAT localhost): `cvat_2d\kiem_thu\test_e2e_bdd.py`, `test_e2e_id.py`, `test_e2e_track.py`. Test chạy trên bản sao dữ liệu web, kết quả ghi vào `kiem_thu/ket_qua/`.
+**Test đầu cuối trên CVAT** (kết nối số 2 của web, mặc định CVAT localhost): `tests\e2e\test_bdd.py`, `test_id.py`, `test_track.py`. Test chạy trên bản sao dữ liệu web, kết quả ghi vào `artifacts/e2e/`.
 
 Đo phần **segmentation** (polygon do người vẽ thật, COCO val2017):
 
 ```
-venv\Scripts\python cvat_2d\tao_bo_seg_eval.py --ann <instances_val2017.json> --out cvat_2d/du_lieu_danh_gia/coco_seg_eval --n 200
-venv\Scripts\python cvat_2d\review_eval.py --seg cvat_2d/du_lieu_danh_gia/coco_seg_eval --skip 120
+venv\Scripts\python cvat_2d\tao_bo_seg_eval.py --ann <instances_val2017.json> --out cvat_2d/tests/fixtures/evaluation/coco_seg_eval --n 200
+venv\Scripts\python cvat_2d\review_eval.py --seg cvat_2d/tests/fixtures/evaluation/coco_seg_eval --skip 120
 ```
 
-Bộ 200 ảnh đã có sẵn **trong repo**, ở `du_lieu_danh_gia/coco_seg_eval` (ảnh COCO val2017 kèm `gt_seg.json`). Bộ 4 ảnh BDD100K cho test đầu cuối nằm ở `du_lieu_danh_gia/bdd_e2e`. Kết quả 2026-10-16 trên 80 ảnh không dùng để chỉnh ngưỡng: bắt 74.9% lỗi polygon cài vào. Báo nhầm 1.3 "lỗi" + 9.2 "đang xem xét" trên 100 polygon đúng.
+Bộ 200 ảnh đã có sẵn **trong repo**, ở `tests/fixtures/evaluation/coco_seg_eval` (ảnh COCO val2017 kèm `gt_seg.json`). Bộ 4 ảnh BDD100K cho test đầu cuối nằm ở `tests/fixtures/evaluation/bdd_e2e`. Kết quả 2026-10-16 trên 80 ảnh không dùng để chỉnh ngưỡng: bắt 74.9% lỗi polygon cài vào. Báo nhầm 1.3 "lỗi" + 9.2 "đang xem xét" trên 100 polygon đúng.
 
 ## Thử nhanh khi chưa có job thật
 

@@ -3,14 +3,12 @@
   T1 polygon track ve lem o keyframe 3 (khung noi suy 1, 2, 4 khong duoc bao oan)
   T2 1 xe bi tach thanh 2 track noi tiep (dut track)
   T3 track nhay sang xe khac o khung 1
-    venv\\Scripts\\python cvat_2d\\kiem_thu\\test_e2e_track.py      (ket qua: kiem_thu/ket_qua/e2e_track.json)"""
+    python tests\\e2e\\test_track.py      (ket qua: artifacts/e2e/e2e_track.json)"""
 import json, os, shutil, sys, tempfile, time
 HERE = os.path.dirname(os.path.abspath(__file__))
-D = os.path.dirname(HERE)
-DATA = os.path.join(D, "du_lieu_danh_gia")                         # trong repo (cvat_2d/du_lieu_danh_gia)
-if not os.path.isdir(DATA):
-    DATA = os.path.join(os.path.dirname(D), "du_lieu_danh_gia")
-SP = os.path.join(HERE, "ket_qua")
+D = os.path.dirname(os.path.dirname(HERE))
+DATA = os.path.join(D, "tests", "fixtures", "evaluation")
+SP = os.path.join(D, "artifacts", "e2e")
 os.makedirs(SP, exist_ok=True)
 sys.path.insert(0, D); sys.path.insert(0, os.path.join(D, "web_qc")); os.chdir(D)
 for f in (sys.stdout, sys.stderr):
@@ -35,7 +33,7 @@ s = cv.s
 IM = os.path.join(DATA, "bdd_e2e")
 NAME = "b27098c3-c443b6e3"
 NF = 6
-labels_def = json.load(open(os.path.join(D, "guideline_bdd100k", "labels_bdd100k.json"), encoding="utf-8"))
+labels_def = json.load(open(os.path.join(D, "config", "guidelines", "bdd100k", "labels_bdd100k.json"), encoding="utf-8"))
 
 # ---- task 6 khung (anh lap lai = canh dung yen)
 tmp = tempfile.mkdtemp()
@@ -120,7 +118,7 @@ tB2 = next(t for t in ann["tracks"] if t["frame"] == 3 if t["shapes"][0]["frame"
 tC = next(t for t in ann["tracks"] if len(t["shapes"]) == 3 and t["shapes"][0]["type"] == "rectangle")["id"]
 
 # ---- guideline video: dung Track (gan rieng cho task nay)
-rules = open(os.path.join(D, "guideline_bdd100k", "luat_bdd100k.yaml"), encoding="utf-8").read().replace("kieu_nhan: shape", "kieu_nhan: track")
+rules = open(os.path.join(D, "config", "guidelines", "bdd100k", "luat_bdd100k.yaml"), encoding="utf-8").read().replace("kieu_nhan: shape", "kieu_nhan: track")
 gid = store.add_guideline("Video test (Track)", "video.md", "", "2. Video: gán bằng Track, nối vật qua các khung.", rules, "e2e")
 store.set_task_guideline(tid, gid)
 w = Wm.Worker()

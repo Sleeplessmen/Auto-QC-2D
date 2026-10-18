@@ -358,7 +358,7 @@ quy_tac:
   muc_chung: "2"
 ```
 
-File luật thật của BDD100K: `guideline_bdd100k/luat_bdd100k.yaml`.
+File luật thật của BDD100K: `config/guidelines/bdd100k/luat_bdd100k.yaml`.
 
 Ví dụ một Issue tầng 1 trên CVAT:
 
@@ -491,16 +491,16 @@ Nếu file luật để trống mục này, tool đọc guideline: câu có "ins
   | **Kích thước nhảy** (khi detector không thấy vật) | Đoạn 1–3 keyframe liền nhau cao hoặc rộng khác > 30% so với keyframe hai bên, trong khi hai bên gần bằng nhau | Đang xem xét |
 
   - Ghi chú "thiếu" lặp trên cùng một vật qua nhiều khung được gộp thành 1 ("thiếu ở 4 khung: 0–3, cùng 1 vật: gán 1 track cho cả đoạn"). Đoạn đã có ghi chú "track kết thúc sớm" thì không báo "thiếu" nữa.
-  - Đã thử trên CVAT localhost (2026-10-16, video 8 khung có vật chuyển động, 13 track, `kiem_thu/test_e2e_id.py`). Đạt 7/7: bắt đủ 5 kiểu lỗi ID và lỗi kích thước không đồng bộ, không báo nhầm track đúng nào.
+  - Đã thử trên CVAT localhost (2026-10-16, video 8 khung có vật chuyển động, 13 track, `tests/e2e/test_e2e_id.py`). Đạt 7/7: bắt đủ 5 kiểu lỗi ID và lỗi kích thước không đồng bộ, không báo nhầm track đúng nào.
   - Giới hạn: vật mà detector gần như không thấy (bị che nhiều, quá nhỏ) thì tool không có bằng chứng, nên lỗi ID trên vật đó có thể bị bỏ sót. Video mới thử trên cảnh dựng (camera lia ngang), chưa thử trên video thật có vật đi cắt nhau. Nên đo thêm khi nhóm có video thật.
 - **Cùng một lỗi trên cùng một track lặp ở nhiều khung** (thường là khung nội suy) được gộp thành **1 Issue** ở khung đầu, kèm "lặp ở N khung: a–b". Annotator sửa một lần là hết.
-- Đã thử trên CVAT localhost (2026-10-16, job video 6 khung, 16 track, `kiem_thu/test_e2e_track.py`). Đạt 6/6: bắt lỗi lẹm ở keyframe, không báo oan ở khung nội suy, không báo "thiếu" oan, bắt đứt track, bắt nhảy vị trí, không báo "cần Shape".
+- Đã thử trên CVAT localhost (2026-10-16, job video 6 khung, 16 track, `tests/e2e/test_e2e_track.py`). Đạt 6/6: bắt lỗi lẹm ở keyframe, không báo oan ở khung nội suy, không báo "thiếu" oan, bắt đứt track, bắt nhảy vị trí, không báo "cần Shape".
 
 ### QC luôn đọc guideline
 
 - Task chưa gán guideline thì dùng **guideline mặc định** (Cài đặt → Đánh giá → Guideline mặc định).
 - Có file luật thì file luật được ưu tiên. Mục nào file luật để trống thì tool **đọc thêm từ chữ trong guideline** và ghi vào log ("+ theo guideline: ...").
-- Bộ guideline + tập nhãn + file luật cho BDD100K nằm trong `guideline_bdd100k/` (xem [mục 7](#7-guideline-và-file-luật)).
+- Bộ guideline + tập nhãn + file luật cho BDD100K nằm trong `config/guidelines/bdd100k/` (xem [mục 7](#7-guideline-và-file-luật)).
 
 **Nhãn tool hiểu và không hiểu:**
 
@@ -578,7 +578,7 @@ Mỗi Issue tool tạo có một "dấu vân tay" ở cuối nội dung, dạng 
 | Lỗi mới | Tạo Issue mới |
 | Issue đã resolved, hoặc do người review thật / tài khoản khác tạo | Không đụng tới |
 
-Issue gộp nhiều lỗi của một vật mang nhiều mã nối bằng `;`. Issue được giữ khi đúng bộ mã đó vẫn còn. Đã kiểm trên CVAT localhost qua các lần review liên tiếp (`kiem_thu/test_e2e_bdd.py`).
+Issue gộp nhiều lỗi của một vật mang nhiều mã nối bằng `;`. Issue được giữ khi đúng bộ mã đó vẫn còn. Đã kiểm trên CVAT localhost qua các lần review liên tiếp (`tests/e2e/test_e2e_bdd.py`).
 
 ### Chứng minh không sửa nhãn
 
@@ -643,7 +643,7 @@ Kèm bảng theo loại lỗi (để biết loại nào tool hay đúng, loại 
 
 Để số liệu đúng: khi review lại, Issue có lỗi đã hết được **đóng (resolved)**, không xoá, nên vẫn còn để đo. Issue gộp nhiều lỗi của một vật được tính **từng lỗi** theo đúng loại. Annotator sửa vật đó theo bất kỳ cách nào thì mọi lỗi trong Issue đều được tính là "đã sửa".
 
-Đã thử đầu cuối trên CVAT localhost (2026-10-16, chạy lại 2026-10-18, task BDD100K 4 ảnh, 10 lỗi cài vào, chạy lại được bằng `venv\Scripts\python cvat_2d\kiem_thu\test_e2e_bdd.py`, ảnh trong repo ở `du_lieu_danh_gia/bdd_e2e`):
+Đã thử đầu cuối trên CVAT localhost (2026-10-16, chạy lại 2026-10-18, task BDD100K 4 ảnh, 10 lỗi cài vào, chạy lại được bằng `python tests\e2e\test_bdd.py`, ảnh trong repo ở `tests/fixtures/evaluation/bdd_e2e`):
 - Tool bắt **10/10** lỗi (8 chắc chắn, 2 đang xem xét: rider gán thành pedestrian, polygon mất phần).
 - Giả lập annotator sửa 5 lỗi (6 Issue), đóng 1 Issue mà không sửa. Reviewer đánh "tool nhầm" 1 ghi chú và tự thêm 1 Issue.
 - Web tính ra: sau vòng 1 % Issue đúng **75%** (6/8), % lỗi bắt trước review chéo **85.7%** (6/7). Sau vòng 2 (annotator vẫn chưa sửa 1 lỗi tool gợi ý) % Issue đúng **66.7%** (6/9), số vòng trả lại **2**.
@@ -834,7 +834,7 @@ Bộ đẩy Issue (và bước trả job về khi tự review) là nơi duy nh�
 | `web_qc/worker.py` | Hàng đợi một luồng. Đọc `.env` khi cần (`env_config()`), lấy kết nối và client CVAT (`connection_for()`, `cvat_client()`). Giữ `ToolRunner` để không phải nạp lại model. Chạy tầng 2 rồi tầng 1, lưu kết quả, đẩy Issue. Luồng thứ hai hỏi CVAT mỗi 60 giây (`poll_validation`) để tự review job mới vào validation; `return_job` trả job về annotation và lưu kết quả vào `runs.returned`. Sau khi tắt rồi bật web, dựng lại kết quả cũ từ `review_out/` |
 | `web_qc/store.py` | SQLite `data/web_qc.db`: bảng `users`, `runs`, `guidelines`, `task_guideline`, `connections`, `feedback`, `settings`, `notes`, `edits`. Tự thêm cột mới khi nâng cấp. Mã hoá token. Tạo admin đầu tiên |
 | `web_qc/guideline.py` | Đọc PDF (pypdf) / DOCX / TXT / MD, chia mục, tìm đoạn liên quan (bỏ dấu tiếng Việt), đọc và kiểm tra file luật, tạo mẫu từ nhãn task, `rule_check` (tầng 1), `apply_to_core` (đưa tên nhãn trong file luật vào bảng đồng nghĩa của tầng 2 trong lúc review) |
-| `web_qc/static/` | `index.html`, `app.js`, `style.css` (giao diện), `bao-cao.html` (trang lỗi cho labeler), `do_tin_cay.json` (số liệu trang Độ tin cậy). JS thuần, không cần build, tự đổi theo chế độ sáng/tối |
+| `apps/web/static/` | `index.html`, `app.js`, `style.css` (giao diện), `bao-cao.html` (trang lỗi cho labeler), `do_tin_cay.json` (số liệu trang Độ tin cậy). JS thuần, không cần build, tự đổi theo chế độ sáng/tối |
 | `web_qc/tao_do_tin_cay.py` | Gom kết quả `review_eval.py --json` và test đầu cuối thành `static/do_tin_cay.json` |
 | `cvat_2d/review_core.py` | Bộ chấm dùng chung với bản Gradio và dòng lệnh: kết nối CVAT, đọc file export, so sánh (`compare`), phóng to dải giữa ảnh (`detect_far`), khớp tên nhãn (`build_label_map`, nhãn đi kèm, gõ sai), vẽ ảnh, lưu báo cáo, gộp Issue theo vật (`issue_groups`) và đẩy Issue |
 | `cvat_2d/label_hq_2d.py` | Bộ model tìm vật (4 detector + SAM2 + CLIP + amodal) |
@@ -843,10 +843,10 @@ Bộ đẩy Issue (và bước trả job về khi tự review) là nơi duy nh�
 | `cvat_2d/seg_check.py` | Segmentation từng vật: so polygon / mask với mask SAM2 (2 prompt, dải mép, lệch đều cả vòng) |
 | `cvat_2d/rule_tier.py` | Tầng luật hình học gộp từ LetmeQC, chạy trước model (gồm trùng box của nhãn model không chấm) |
 | `cvat_2d/area_check.py`, `frame_check.py` | Vùng đường `drivable_area` (so với SegFormer) và tag cho cả ảnh (so bằng CLIP) |
-| `cvat_2d/kiem_thu/` | Test đầu cuối trên CVAT (`test_e2e_bdd.py`, `test_e2e_id.py`, `test_e2e_track.py`), dùng kết nối số 2 và bản sao dữ liệu web |
+| `cvat_2d/tests/e2e/` | Test đầu cuối trên CVAT (`test_e2e_bdd.py`, `test_e2e_id.py`, `test_e2e_track.py`), dùng kết nối số 2 và bản sao dữ liệu web |
 | `cvat_2d/tao_bo_seg_eval.py` | Tạo bộ đo segmentation từ COCO val2017 (ảnh đường phố, polygon người vẽ) |
 | `cvat_2d/web_qc/hieu_qua.py` | Đo hiệu quả Issue trên job thật (% Issue đúng, % lỗi bắt trước review chéo, số vòng trả lại) |
-| `cvat_2d/guideline_bdd100k/` | Guideline BDD100K (det + ins-seg), tập nhãn CVAT `labels_bdd100k.json`, file luật `luat_bdd100k.yaml` |
+| `cvat_2d/config/guidelines/bdd100k/` | Guideline BDD100K (det + ins-seg), tập nhãn CVAT `labels_bdd100k.json`, file luật `luat_bdd100k.yaml` |
 
 ### API
 
@@ -919,7 +919,7 @@ Mọi API (trừ đăng nhập) cần cookie phiên. Lỗi trả về dạng `{"
 
 ### Kiểm thử đã làm (2026-10-16 → 2026-10-18)
 
-- Test đầu cuối trên CVAT localhost (2.78.1): job BDD100K box + polygon 10/10 lỗi, lỗi ID 7/7, job Track 6/6 (`kiem_thu/`). Chạy lại cả 3 ngày 2026-10-18, đều đạt.
+- Test đầu cuối trên CVAT localhost (2.78.1): job BDD100K box + polygon 10/10 lỗi, lỗi ID 7/7, job Track 6/6 (`tests/e2e/`). Chạy lại cả 3 ngày 2026-10-18, đều đạt.
 - Tự review trên web đang chạy (2026-10-18): chuyển job sang validation, web tự review và trả job về annotation sau 60 giây.
 - Đo độ chính xác (đo lại 2026-10-18 sau khi sửa cách đo) trên 735 ảnh BDD100K (400 chỉnh / 335 giữ riêng), 123 ảnh Việt Nam, 150 ảnh ExDark, 80 ảnh COCO segmentation (mục 12).
 - Luật hình học trên nhãn thật của 2 bộ nhóm gán (29 ảnh Việt Nam, 204 ảnh KITTI): bắt 100% lỗi cài vào (ra ngoài ảnh, không có diện tích, polygon xoắn / dưới 3 điểm, trùng box nhãn lạ), 0 báo nhầm; bắt đủ 1123/1123 box bị lặp trong job 4598181.

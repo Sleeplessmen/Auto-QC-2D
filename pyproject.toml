@@ -1,0 +1,28 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "auto-qc-2d"
+version = "0.1.0"
+description = "Production-oriented CVAT 2D annotation quality control tools"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi",
+  "numpy",
+  "opencv-python",
+  "python-dotenv",
+  "uvicorn",
+]
+
+[tool.setuptools]
+package-dir = {"" = "packages"}
+
+[tool.setuptools.packages.find]
+where = ["packages"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests/unit", "tests/integration"]
+pythonpath = ["packages", "."]
+addopts = "-ra"
+norecursedirs = ["e2e", "fixtures"]

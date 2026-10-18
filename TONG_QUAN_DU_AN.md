@@ -1,6 +1,6 @@
 # QC nhãn 2D cho CVAT: review tự động bằng model và luật
 
-> **Đọc trên GitHub (repo `cvat-2d-qc`):** nội dung thư mục `tood qc 2d/cvat_2d/` nằm ở **gốc repo**; LetmeQC (`app.py`, `src/`, `docs/`…) nằm trong thư mục [`letmeqc/`](letmeqc/). Các đường dẫn `tood qc 2d/…` trong tài liệu này là cấu trúc trên máy của nhóm.
+> **Đọc trên GitHub (repo `cvat-2d-qc`):** nội dung thư mục `tood qc 2d/cvat_2d/` nằm ở **gốc repo**; LetmeQC (`app.py`, `src/`, `docs/`…) nằm trong thư mục [`archive/legacy/letmeqc/`](archive/legacy/letmeqc/). Các đường dẫn `tood qc 2d/…` trong tài liệu này là cấu trúc trên máy của nhóm.
 
 Công cụ kiểm tra chất lượng nhãn **object detection + instance segmentation** trên **BDD100K**, gán trên CVAT.
 
@@ -87,7 +87,7 @@ Xem đầy đủ kèm biểu đồ trên Web QC, trang **Độ tin cậy tool** 
 |---|---|---|
 | **Web QC**: web review, tự review khi job sang validation, ghi Issue, báo cáo | `tood qc 2d/cvat_2d/web_qc/` | **Đang dùng** |
 | **Bộ máy review**: luật hình học, so với model, segmentation, lỗi ID | `tood qc 2d/cvat_2d/*.py` | Đang dùng |
-| **Guideline BDD100K**: guideline, tập nhãn CVAT, file luật | `tood qc 2d/cvat_2d/guideline_bdd100k/` | Đang dùng |
+| **Guideline BDD100K**: guideline, tập nhãn CVAT, file luật | `tood qc 2d/cvat_2d/config/guidelines/bdd100k/` | Đang dùng |
 | **Thư viện SAM2** và checkpoint | `tood qc 2d/sam2/`, `tood qc 2d/checkpoints/` | Bắt buộc |
 | **LetmeQC**: webhook server chỉ dùng luật | `app.py`, `src/` | **Đã tắt** (luật đã gộp vào Web QC) |
 
@@ -250,7 +250,7 @@ Thêm `--port 8080` nếu muốn dùng cổng khác.
 
 1. **Đăng nhập** bằng tài khoản `admin`. Mật khẩu lần đầu nằm trong `cvat_2d\web_qc\data\MAT_KHAU_ADMIN.txt`. Đăng nhập xong thì vào **Cài đặt** đổi mật khẩu rồi xoá file đó.
 2. **Kết nối CVAT:** bấm **Thêm kết nối**, nhập địa chỉ CVAT và token, bấm **Thử kết nối** rồi **Lưu**. Token được mã hoá khi lưu.
-3. **Guideline:** tải lên `guideline_bdd100k/GUIDELINE_BDD100K.md`, bấm **Đọc guideline + lấy nhãn từ task**, kiểm lại bảng luật rồi bấm **Lưu luật**. Sau đó **gán guideline cho task**, hoặc đặt làm guideline mặc định trong Cài đặt.
+3. **Guideline:** tải lên `config/guidelines/bdd100k/GUIDELINE_BDD100K.md`, bấm **Đọc guideline + lấy nhãn từ task**, kiểm lại bảng luật rồi bấm **Lưu luật**. Sau đó **gán guideline cho task**, hoặc đặt làm guideline mặc định trong Cài đặt.
 4. **Bật tự review:** vào **Cài đặt → Tự review khi job chuyển sang validation**, tick **Bật**, chọn kết nối CVAT, rồi **Lưu cài đặt**.
 
 ### Các trang của web
@@ -282,7 +282,7 @@ Các tuỳ chọn khác: `--nhanh` (máy yếu), `--khong-nguoi-lai` (job không
 
 ## 7. Guideline và file luật
 
-Guideline cho bài toán nằm ở `tood qc 2d/cvat_2d/guideline_bdd100k/`:
+Guideline cho bài toán nằm ở `tood qc 2d/cvat_2d/config/guidelines/bdd100k/`:
 
 | File | Nội dung |
 |---|---|
@@ -340,7 +340,7 @@ venv\Scripts\python cvat_2d\review_eval.py --min-px 10 --json ket_qua_vn.json
 **Segmentation (polygon):**
 
 ```bat
-venv\Scripts\python cvat_2d\review_eval.py --seg cvat_2d\du_lieu_danh_gia\coco_seg_eval --skip 120 --json seg.json
+venv\Scripts\python cvat_2d\review_eval.py --seg tests\fixtures\evaluation\coco_seg_eval --skip 120 --json seg.json
 ```
 
 **Cập nhật trang "Độ tin cậy tool"** sau khi đo:
@@ -352,12 +352,12 @@ venv\Scripts\python cvat_2d\web_qc\tao_do_tin_cay.py --bdd-new ket_qua.json --vn
 **Test đầu cuối trên CVAT:** dùng kết nối số 2 của Web QC (mặc định là CVAT localhost chạy bằng Docker). Test chạy trên bản sao dữ liệu web, không động tới lịch sử thật.
 
 ```bat
-venv\Scripts\python cvat_2d\kiem_thu\test_e2e_bdd.py     :: box + polygon, 10 lỗi cài, đẩy Issue, review vòng 2, đo hiệu quả
-venv\Scripts\python cvat_2d\kiem_thu\test_e2e_id.py      :: lỗi ID của track
-venv\Scripts\python cvat_2d\kiem_thu\test_e2e_track.py   :: job video gán bằng Track
+venv\Scripts\python tests\e2e\test_bdd.py     :: box + polygon, 10 lỗi cài, đẩy Issue, review vòng 2, đo hiệu quả
+venv\Scripts\python tests\e2e\test_id.py      :: lỗi ID của track
+venv\Scripts\python tests\e2e\test_track.py   :: job video gán bằng Track
 ```
 
-Kết quả được ghi vào `cvat_2d/kiem_thu/ket_qua/`.
+Kết quả được ghi vào `cvat_2d/artifacts/e2e/`.
 
 **Dữ liệu đánh giá trên máy:**
 
@@ -367,7 +367,7 @@ Kết quả được ghi vào `cvat_2d/kiem_thu/ket_qua/`.
 | `D:\DATA_EXT\bdd_eval` | 735 ảnh BDD100K kèm đáp án, chia theo ngày/đêm và thời tiết |
 | `D:\DATA_EXT\exdark_eval` | 150 ảnh rất tối |
 | `D:\DATA_EXT\bdd_train` | 9.265 ảnh BDD100K dạng YOLO, dùng để huấn luyện |
-| `tood qc 2d\cvat_2d\du_lieu_danh_gia\` | Có trong repo: `coco_seg_eval` (200 ảnh COCO có polygon do người vẽ), `bdd_e2e` (4 ảnh BDD100K cho test đầu cuối) |
+| `repo\tests\fixtures\evaluation\` | Có trong repo: `coco_seg_eval` (200 ảnh COCO có polygon do người vẽ), `bdd_e2e` (4 ảnh BDD100K cho test đầu cuối) |
 
 ---
 
@@ -403,9 +403,9 @@ dự án nhóm/
         ├── label_hq_2d.py         # 4 detector + SAM2 + CLIP (cũng dùng để gán nhãn tự động)
         ├── review_eval.py         # đo độ chính xác của tool
         ├── review.py              # review bằng dòng lệnh
-        ├── guideline_bdd100k/     # guideline, tập nhãn, file luật BDD100K
-        ├── kiem_thu/              # test đầu cuối trên CVAT
-        ├── du_lieu_danh_gia/      # bộ ảnh đo: coco_seg_eval (200 ảnh), bdd_e2e (4 ảnh)
+        ├── config/guidelines/bdd100k/     # guideline, tập nhãn, file luật BDD100K
+        ├── tests/e2e/              # test đầu cuối trên CVAT
+        ├── tests/fixtures/evaluation/      # bộ ảnh đo: coco_seg_eval (200 ảnh), bdd_e2e (4 ảnh)
         ├── cache_hq2d/            # cache kết quả detect (không commit)
         ├── review_out/            # kết quả từng lần review (không commit)
         ├── *.bat                  # web_qc, review, cai_dat, menu
@@ -445,7 +445,7 @@ python src/main.py <file_coco.json> --min-area 100 --iou-threshold 0.95 --output
 
 Thư mục `tests/` hiện chưa có test nào. (2026-10-17 đã sửa 3 lỗi làm LetmeQC không chạy được: thiếu `import List` trong `src/error_templates.py`; bản dòng lệnh gọi `parse_coco_json` đã bị xoá ở commit `743930d` (đã khôi phục); lỗi thiếu thuộc tính chưa có mẫu lời nhắn. Thêm `shapely` vào `requirements.txt`.)
 
-Cấu hình qua `.env` (xem `.env.example`): `CVAT_API_URL`, `CVAT_TOKEN`, `WEBHOOK_SECRET`, `MIN_BOX_AREA`, `IOU_THRESHOLD`, `SERVER_HOST`, `SERVER_PORT`. Chi tiết webhook xem [CVAT_WEBHOOK_GUIDE.md](letmeqc/CVAT_WEBHOOK_GUIDE.md).
+Cấu hình qua `.env` (xem `.env.example`): `CVAT_API_URL`, `CVAT_TOKEN`, `WEBHOOK_SECRET`, `MIN_BOX_AREA`, `IOU_THRESHOLD`, `SERVER_HOST`, `SERVER_PORT`. Chi tiết webhook xem [CVAT_WEBHOOK_GUIDE.md](archive/legacy/letmeqc/CVAT_WEBHOOK_GUIDE.md).
 
 ---
 
@@ -504,8 +504,8 @@ Cấu hình qua `.env` (xem `.env.example`): `CVAT_API_URL`, `CVAT_TOKEN`, `WEBH
 
 - [Tài liệu đầy đủ của Web QC](web_qc/TAI_LIEU_WEB_QC.md): cách tool tìm lỗi, nội dung Issue, đồng bộ Issue, đo hiệu quả, bảo mật, xử lý lỗi.
 - [README của repo](README.md): cài đặt trên máy mới, chạy web, đo độ chính xác.
-- [Guideline BDD100K](guideline_bdd100k/GUIDELINE_BDD100K.md) và [file luật](guideline_bdd100k/luat_bdd100k.yaml).
-- [CVAT_WEBHOOK_GUIDE.md](letmeqc/CVAT_WEBHOOK_GUIDE.md), [docs/](letmeqc/docs/): tài liệu của LetmeQC.
+- [Guideline BDD100K](config/guidelines/bdd100k/GUIDELINE_BDD100K.md) và [file luật](config/guidelines/bdd100k/luat_bdd100k.yaml).
+- [CVAT_WEBHOOK_GUIDE.md](archive/legacy/letmeqc/CVAT_WEBHOOK_GUIDE.md), [docs/](archive/legacy/letmeqc/docs/): tài liệu của LetmeQC.
 - [CVAT](https://docs.cvat.ai/) · [BDD100K](https://doc.bdd100k.com/) · [SAM2](https://github.com/facebookresearch/sam2)
 
 ---

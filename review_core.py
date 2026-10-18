@@ -43,8 +43,8 @@ def _imwrite(path, img, params=None):
     return ok
 
 HERE = L.HERE
-CACHE = os.path.join(HERE, "cache_hq2d")
-OUT_ROOT = os.path.join(HERE, "review_out")
+CACHE = os.getenv("QC_MODEL_CACHE_DIR", os.path.join(HERE, "cache_hq2d"))
+OUT_ROOT = os.getenv("QC_REVIEW_OUTPUT_DIR", os.path.join(HERE, "review_out"))
 PREFIX = "[Review tự động]"     # Issue kieu cu bat dau bang chu nay; Issue moi chi co ma [qc:...] o cuoi
 QC_TAG = re.compile(r"\[qc:([^\]]+)\]\s*$")
 

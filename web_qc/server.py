@@ -19,12 +19,15 @@ import time
 from collections import defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
+REPO_ROOT = os.path.dirname(HERE)
+WEB_STATIC_DIR = os.path.join(REPO_ROOT, "apps", "web", "static")
 sys.path.insert(0, HERE)
 sys.path.insert(0, os.path.dirname(HERE))          # cvat_2d: review_core, label_hq_2d, label_mapping
 
 from fastapi import Depends, FastAPI, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 
 import store
@@ -44,10 +47,31 @@ _e = env_config()
 store.import_env_connection(_e["url"], _e["token"], _e["org"])
 
 app = FastAPI(title="Web QC nhãn 2D", docs_url=None, redoc_url=None)
-app.add_middleware(SessionMiddleware, secret_key=store.secret_key(), max_age=14 * 24 * 3600, same_site="lax")
+_cors_origins = [x.strip() for x in os.getenv("QC_CORS_ORIGINS", "").split(",") if x.strip()]
+if _cors_origins:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=_cors_origins,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=store.secret_key(),
+    max_age=14 * 24 * 3600,
+    same_site=os.getenv("QC_SESSION_SAME_SITE", "lax"),
+    https_only=os.getenv("QC_SESSION_SECURE", "0").lower() in {"1", "true", "yes"},
+)
 worker = Worker()
 ROLES = {"labeler": 0, "qc": 1, "admin": 2}
 _task_names = {}                                     # (connection id, task id) -> ten task
+
+
+@app.get("/health")
+def health():
+    """Liveness endpoint for local process managers and container probes."""
+    return {"status": "ok"}
 
 
 @app.exception_handler(ValueError)
@@ -87,7 +111,8 @@ def report_token(run_id):
 
 
 def report_url(request, run_id):
-    return str(request.base_url).rstrip("/") + f"/bao-cao.html?run={run_id}&t={report_token(run_id)}"
+    base = os.getenv("QC_PUBLIC_BASE_URL", "").strip().rstrip("/") or str(request.base_url).rstrip("/")
+    return base + f"/bao-cao.html?run={run_id}&t={report_token(run_id)}"
 
 
 def _findings_of(run):
@@ -163,7 +188,8 @@ def config(u=Depends(user)):
 @app.get("/api/settings")
 def get_settings(request: Request, u=Depends(need("admin"))):
     s = store.get_settings()
-    s["webhook_url"] = str(request.base_url).rstrip("/") + "/api/webhook/cvat"
+    public_base = os.getenv("QC_PUBLIC_BASE_URL", "").strip().rstrip("/") or str(request.base_url).rstrip("/")
+    s["webhook_url"] = public_base + "/api/webhook/cvat"
     s.pop("auto_seen", None)
     s["auto_error"] = worker.poll_error
     return s
@@ -896,7 +922,7 @@ class NoCacheStatic(StaticFiles):
         return resp
 
 
-app.mount("/", NoCacheStatic(directory=os.path.join(HERE, "static"), html=True), name="static")
+app.mount("/", NoCacheStatic(directory=WEB_STATIC_DIR, html=True), name="static")
 
 
 def main():

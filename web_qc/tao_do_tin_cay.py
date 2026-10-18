@@ -3,7 +3,7 @@
     venv\\Scripts\\python cvat_2d\\web_qc\\tao_do_tin_cay.py --bdd-new test_new.json --bdd-old test_old.json \\
         --vn-new data_new.json --vn-old box_eval.json --seg seg_eval.json
 
-Moi file la ket qua `review_eval.py --json`. Thieu file nao thi bo qua phan do. Test e2e lay tu kiem_thu/ket_qua/.
+Moi file la ket qua `review_eval.py --json`. Thieu file nao thi bo qua phan do. Test e2e lay tu artifacts/e2e.
 """
 import argparse
 import json
@@ -11,7 +11,8 @@ import os
 import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-E2E = os.path.join(os.path.dirname(HERE), "kiem_thu", "ket_qua")
+STATIC_DIR = os.path.join(os.path.dirname(HERE), "apps", "web", "static")
+E2E = os.path.join(os.path.dirname(HERE), "artifacts", "e2e")
 
 
 def load(p):
@@ -42,7 +43,7 @@ def main():
     ap.add_argument("--bdd-new"); ap.add_argument("--bdd-old")
     ap.add_argument("--vn-new"); ap.add_argument("--vn-old")
     ap.add_argument("--seg")
-    ap.add_argument("--out", default=os.path.join(HERE, "static", "do_tin_cay.json"))
+    ap.add_argument("--out", default=os.path.join(STATIC_DIR, "do_tin_cay.json"))
     a = ap.parse_args()
     bn, bo, vn, vo, sg = map(load, (a.bdd_new, a.bdd_old, a.vn_new, a.vn_old, a.seg))
     out = dict(ngay=time.strftime("%Y-%m-%d"), bo_du_lieu={}, dieu_kien={}, e2e={})

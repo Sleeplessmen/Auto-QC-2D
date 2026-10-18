@@ -13,8 +13,14 @@ import sqlite3
 import threading
 import time
 
+try:
+    from auto_qc_2d.paths import runtime_paths
+except ImportError:  # Direct execution via web_qc.bat before editable installation.
+    runtime_paths = None
+
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA = os.path.join(HERE, "data")
+_runtime = runtime_paths() if runtime_paths else None
+DATA = str(_runtime.data_dir) if _runtime else os.getenv("QC_DATA_DIR", os.path.join(HERE, "data"))
 DB_PATH = os.path.join(DATA, "web_qc.db")
 _lock = threading.Lock()
 

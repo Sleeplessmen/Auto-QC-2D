@@ -15,11 +15,13 @@ let FEEDBACK = {}, VIEW = "list", FRAME_FILTER = null, GUIDES = [], JP = { page:
 const SELECTED = new Set();
 const THR = () => CFG?.pass_threshold ?? 0.97;
 const canQc = () => ME && ME.role !== "labeler";
+const API_BASE = (window.QC_API_BASE_URL || "").replace(/\/+$/, "");
+const apiUrl = path => `${API_BASE}${path}`;
 
 async function api(path, opt = {}) {
-  const o = { credentials: "same-origin", ...opt };
+  const o = { credentials: API_BASE ? "include" : "same-origin", ...opt };
   if (o.json !== undefined) { o.body = JSON.stringify(o.json); o.headers = { "Content-Type": "application/json" }; delete o.json; }
-  const r = await fetch(path, o);
+  const r = await fetch(apiUrl(path), o);
   if (r.status === 401 && path !== "/api/login") { showLogin(); throw new Error("Chưa đăng nhập."); }
   const data = r.headers.get("content-type")?.includes("json") ? await r.json() : null;
   if (!r.ok) throw new Error(data?.detail || `Lỗi ${r.status}`);
@@ -29,7 +31,7 @@ async function api(path, opt = {}) {
 // ============================================================ dang nhap
 function showLogin() {
   $("#login").classList.remove("hidden"); $("#app").classList.add("hidden");
-  fetch("/api/setup").then(r => r.json()).then(s => {
+  fetch(apiUrl("/api/setup"), { credentials: API_BASE ? "include" : "same-origin" }).then(r => r.json()).then(s => {
     const h = $("#loginHint");
     if (s.first_run) {
       h.innerHTML = `<b>Lần đầu dùng?</b> Tài khoản <code>admin</code>, mật khẩu nằm trong file <code>${esc(s.admin_file)}</code> trên máy chủ. Đăng nhập xong vào Cài đặt đổi mật khẩu rồi xoá file đó.`;
@@ -293,7 +295,7 @@ function showResult(r) {
   SELECTED.clear();
   r.findings.forEach(f => { if (f.sure && !isFp(String(f.id))) SELECTED.add(String(f.id)); });   // mac dinh: chon loi chac (tru tool nham)
   NOTES.forEach(n => SELECTED.add("n" + n.id));
-  $("#csv").href = `/api/runs/${r.id}/report.csv`;
+  $("#csv").href = apiUrl(`/api/runs/${r.id}/report.csv`);
   $("#pushBtn").disabled = !r.job_id;
   $("#drawBtn").disabled = !r.frames.length;
   $("#pushRes").innerHTML = r.pushed ? pushedText(r.pushed) : r.job_id ? "" : "Review từ file nên không đẩy Issue được. Chạy lại theo số job để đẩy.";
@@ -357,7 +359,7 @@ function select(id) {
 let CUR_NAME = null;
 function showFinding(f) {
   setDraw(false);
-  const src = f.preview ? `/api/runs/${RUN}/preview/${encodeURIComponent(f.preview)}` : null;
+  const src = f.preview ? apiUrl(`/api/runs/${RUN}/preview/${encodeURIComponent(f.preview)}`) : null;
   if (!src) $("#pvBox").innerHTML = `<div class="viewer-empty">Không có ảnh xem trước cho mục này.</div>`;
   else if (CUR_NAME !== f.name || !$("#pvImg")) {
     $("#pvBox").innerHTML = `<div class="stage" id="stage"><img id="pvImg" src="${src}" alt="Ảnh frame ${f.frame ?? ""} có vẽ lỗi" title="Bấm để phóng to"><svg id="pvSvg" aria-hidden="true"></svg></div>`;
@@ -725,7 +727,7 @@ async function openGuide(id, scroll = true) {
   CUR_G = g; if (!same) RULE_ATTRS = {};
   $("#gDetail").classList.remove("hidden");
   $("#gName").textContent = g.name;
-  $("#gFile").href = `/api/guidelines/${id}/file`;
+  $("#gFile").href = apiUrl(`/api/guidelines/${id}/file`);
   $("#gTasks").textContent = g.tasks.length ? `Đang gán cho task ${g.tasks.join(", ")}: review các task này sẽ tự dùng guideline này.` : "Chưa gán cho task nào: nhập số task ở dưới rồi bấm Gán.";
   $("#gTask").value = $("#gTask").value || $("#fTask").value || CFG.env_task_id || "";
   $("#gRules").value = g.rules;
